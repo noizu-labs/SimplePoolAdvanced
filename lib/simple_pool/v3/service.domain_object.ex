@@ -2,9 +2,9 @@ defmodule Noizu.SimplePool.V3.Service.DomainObject do
 
   defmacro __using__(options \\ nil) do
     options = Macro.expand(options, __ENV__)
-      quote do
-          use Noizu.DomainObject, unquote(options)
-      end
+    quote do
+      use Noizu.DomainObject, unquote(options)
+    end
   end
 
   #--------------------------------------------
@@ -12,7 +12,7 @@ defmodule Noizu.SimplePool.V3.Service.DomainObject do
   #--------------------------------------------
   defmacro service_worker_entity(options \\ [], [do: block]) do
     options = Macro.expand(options, __ENV__)
-    q =  endNoizu.ElixirScaffolding.V3.Meta.DomainObject.Entity.__noizu_entity__(__CALLER__, options, block)
+    q =  Noizu.ElixirScaffolding.V3.Meta.DomainObject.Entity.__noizu_entity__(__CALLER__, options, block)
     quote do
       unquote(q)
 
