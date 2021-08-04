@@ -22,3 +22,7 @@ config :noizu_mnesia_versioning,
 config :logger, :console,
        format: "$time $metadata[$level] $message\n",
        metadata: [:context_token]
+
+config :logger,
+       truncate: :infinity,
+       log_level: :warn

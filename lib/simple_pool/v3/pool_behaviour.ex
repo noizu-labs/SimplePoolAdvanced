@@ -41,8 +41,8 @@ defmodule Noizu.SimplePool.V3.PoolBehaviour do
           default_modules: %OptionList{option: :default_modules, default: Application.get_env(:noizu_simple_pool, :default_modules, @default_modules), valid_members: @modules, membership_set: true},
           verbose: %OptionValue{option: :verbose, default: Application.get_env(:noizu_simple_pool, :verbose, false)},
 
-          service_manager: %OptionValue{option: :service_manager, default: Noizu.SimplePool.V2.ClusterManagementFramework.Cluster.ServiceManager},
-          node_manager: %OptionValue{option: :node_manager, default: Noizu.SimplePool.V2.ClusterManagementFramework.Cluster.NodeManager},
+          service_manager: %OptionValue{option: :service_manager, default: Noizu.SimplePool.V3.ClusterManagementFramework.Cluster.ServiceManager},
+          node_manager: %OptionValue{option: :node_manager, default: Noizu.SimplePool.V3.ClusterManagementFramework.Cluster.NodeManager},
 
           dispatch_table: %OptionValue{option: :dispatch_table, default: :auto},
           #dispatch_monitor_table: %OptionValue{option: :dispatch_monitor_table, default: :auto},
@@ -81,7 +81,7 @@ defmodule Noizu.SimplePool.V3.PoolBehaviour do
     default_modules = options.default_modules
     max_supervisors = options.max_supervisors
 
-    message_processing_provider = Noizu.SimplePool.V2.MessageProcessingBehaviour.DefaultProvider
+    message_processing_provider = Noizu.SimplePool.V3.MessageProcessingBehaviour.DefaultProvider
 
     quote do
       require Logger
@@ -92,7 +92,7 @@ defmodule Noizu.SimplePool.V3.PoolBehaviour do
       @module __MODULE__
       @max_supervisors unquote(max_supervisors)
 
-      use Noizu.SimplePool.V2.SettingsBehaviour.Base, unquote([option_settings: option_settings])
+      use Noizu.SimplePool.V3.SettingsBehaviour.Base, unquote([option_settings: option_settings])
       use unquote(message_processing_provider), unquote(option_settings)
 
       #--------------------------
@@ -183,13 +183,13 @@ defmodule Noizu.SimplePool.V3.PoolBehaviour do
       #--------------------------
       if (unquote(default_modules.worker)) do
         defmodule Worker do
-          use Noizu.SimplePool.V2.WorkerBehaviour, unquote(options.worker_options)
+          use Noizu.SimplePool.V3.WorkerBehaviour, unquote(options.worker_options)
         end
       end
 
       if (unquote(default_modules.server)) do
         defmodule Server do
-          use Noizu.SimplePool.V2.ServerBehaviour, unquote(options.server_options)
+          use Noizu.SimplePool.V3.ServerBehaviour, unquote(options.server_options)
           def lazy_load(state), do: state
         end
       end
@@ -208,13 +208,13 @@ defmodule Noizu.SimplePool.V3.PoolBehaviour do
 
       if (unquote(default_modules.monitor)) do
         defmodule Monitor do
-          use Noizu.SimplePool.V2.MonitorBehaviour, unquote(options.monitor_options)
+          use Noizu.SimplePool.V3.MonitorBehaviour, unquote(options.monitor_options)
         end
       end
 
       if (unquote(default_modules.record_keeper)) do
         defmodule RecordKeeper do
-          use Noizu.SimplePool.V2.RecordKeeperBehaviour, unquote(options.record_keeper_options)
+          use Noizu.SimplePool.V3.RecordKeeperBehaviour, unquote(options.record_keeper_options)
         end
       end
 

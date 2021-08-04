@@ -27,7 +27,7 @@ defmodule Noizu.SimplePool.Mixfile do
   end # end package
 
   def application do
-    [ applications: [:logger] ]
+    [ applications: [:logger, :poison] ]
   end # end application
 
   defp deps do
@@ -40,6 +40,7 @@ defmodule Noizu.SimplePool.Mixfile do
       {:noizu_scaffolding, git: "git@github.com:noizu-labs/ElixirScaffoldingAdvanced.git", branch: "master", override: true},
       {:noizu_mnesia_versioning, github: "noizu/MnesiaVersioning", tag: "0.1.9"},
 
+      {:poison, "~> 3.1.0", override: true},
       {:fastglobal, "~> 1.0"}, # https://github.com/discordapp/fastglobal
       {:semaphore, "~> 1.0"}, # https://github.com/discordapp/semaphore
     ]

@@ -25,55 +25,45 @@ Application.ensure_all_started(:semaphore)
 #-----------------------------------------------
 Amnesia.start
 
-
-
 #-------------------------
-# V1 Core Tables
+# V3 Core Tables
 #-------------------------
-if !Amnesia.Table.exists?(Noizu.SimplePool.Database.DispatchTable) do
-  :ok = Noizu.SimplePool.Database.DispatchTable.create()
-  :ok = Noizu.SimplePool.Database.Dispatch.MonitorTable.create()
-  :ok = Noizu.SimplePool.Database.MonitoringFramework.SettingTable.create()
-  :ok = Noizu.SimplePool.Database.MonitoringFramework.NodeTable.create()
-  :ok = Noizu.SimplePool.Database.MonitoringFramework.ServiceTable.create()
-  :ok = Noizu.SimplePool.Database.MonitoringFramework.Service.HintTable.create()
+if !Amnesia.Table.exists?(Noizu.SimplePool.V3.Database.MonitoringFramework.SettingTable) do
+  :ok = Noizu.SimplePool.V3.Database.MonitoringFramework.SettingTable.create()
+  :ok = Noizu.SimplePool.V3.Database.MonitoringFramework.ConfigurationTable.create()
+  :ok = Noizu.SimplePool.V3.Database.MonitoringFramework.NodeTable.create()
+  :ok = Noizu.SimplePool.V3.Database.MonitoringFramework.ServiceTable.create()
 
-  :ok = Noizu.SimplePool.Database.MonitoringFramework.Node.EventTable.create()
-  :ok = Noizu.SimplePool.Database.MonitoringFramework.Service.EventTable.create()
+
+  :ok = Noizu.SimplePool.V3.Database.MonitoringFramework.ServiceEventTable.create()
+  :ok = Noizu.SimplePool.V3.Database.MonitoringFramework.ServerEventTable.create()
+  :ok = Noizu.SimplePool.V3.Database.MonitoringFramework.ClusterEventTable.create()
 end
 
+  Noizu.SimplePool.V3.Database.MonitoringFramework.DetailedServiceEventTable.create()
+  Noizu.SimplePool.V3.Database.MonitoringFramework.DetailedServerEventTable.create()
+
+  Noizu.SimplePool.V3.Database.MonitoringFramework.DetailedServiceEventTable.add_copy(node(), :memory)
+  Noizu.SimplePool.V3.Database.MonitoringFramework.DetailedServerEventTable.add_copy(node(), :memory)
 
 #-------------------------
-# V2 Core Tables
+# V3.B Core Tables
 #-------------------------
-if !Amnesia.Table.exists?(Noizu.SimplePool.V2.Database.MonitoringFramework.SettingTable) do
-  :ok = Noizu.SimplePool.V2.Database.MonitoringFramework.SettingTable.create()
-  :ok = Noizu.SimplePool.V2.Database.MonitoringFramework.ConfigurationTable.create()
-  :ok = Noizu.SimplePool.V2.Database.MonitoringFramework.NodeTable.create()
-  :ok = Noizu.SimplePool.V2.Database.MonitoringFramework.ServiceTable.create()
+if !Amnesia.Table.exists?(Noizu.SimplePool.V3.Database.Cluster.Service.Instance.StateTable) do
+  IO.puts "SETUP V3.B Tables"
+  if (node() == :"first@127.0.0.1") do
+    :ok = Noizu.SimplePool.V3.Database.Cluster.SettingTable.create(memory: [:"first@127.0.0.1"])
+    :ok = Noizu.SimplePool.V3.Database.Cluster.StateTable.create(memory: [:"first@127.0.0.1"])
+    :ok = Noizu.SimplePool.V3.Database.Cluster.TaskTable.create(memory: [:"first@127.0.0.1"])
+    :ok = Noizu.SimplePool.V3.Database.Cluster.Service.StateTable.create(memory: [:"first@127.0.0.1"])
+    :ok = Noizu.SimplePool.V3.Database.Cluster.Service.WorkerTable.create(memory: [:"first@127.0.0.1"])
+    :ok = Noizu.SimplePool.V3.Database.Cluster.Service.TaskTable.create(memory: [:"first@127.0.0.1"])
+    :ok = Noizu.SimplePool.V3.Database.Cluster.Service.Instance.StateTable.create(memory: [:"first@127.0.0.1"])
+    :ok = Noizu.SimplePool.V3.Database.Cluster.Node.StateTable.create(memory: [:"first@127.0.0.1"])
+    :ok = Noizu.SimplePool.V3.Database.Cluster.Node.WorkerTable.create(memory: [:"first@127.0.0.1"])
+    :ok = Noizu.SimplePool.V3.Database.Cluster.Node.TaskTable.create(memory: [:"first@127.0.0.1"])
+  end
 
-  :ok = Noizu.SimplePool.V2.Database.MonitoringFramework.DetailedServiceEventTable.create()
-  :ok = Noizu.SimplePool.V2.Database.MonitoringFramework.ServiceEventTable.create()
-  :ok = Noizu.SimplePool.V2.Database.MonitoringFramework.DetailedServerEventTable.create()
-  :ok = Noizu.SimplePool.V2.Database.MonitoringFramework.ServerEventTable.create()
-  :ok = Noizu.SimplePool.V2.Database.MonitoringFramework.ClusterEventTable.create()
-end
-
-#-------------------------
-# V2.B Core Tables
-#-------------------------
-if !Amnesia.Table.exists?(Noizu.SimplePool.V2.Database.Cluster.Service.Instance.StateTable) do
-  IO.puts "SETUP V2.B Tables"
-  :ok = Noizu.SimplePool.V2.Database.Cluster.SettingTable.create(memory: [:"first@127.0.0.1"])
-  :ok = Noizu.SimplePool.V2.Database.Cluster.StateTable.create(memory: [:"first@127.0.0.1"])
-  :ok = Noizu.SimplePool.V2.Database.Cluster.TaskTable.create(memory: [:"first@127.0.0.1"])
-  :ok = Noizu.SimplePool.V2.Database.Cluster.Service.StateTable.create(memory: [:"first@127.0.0.1"])
-  :ok = Noizu.SimplePool.V2.Database.Cluster.Service.WorkerTable.create(memory: [:"first@127.0.0.1"])
-  :ok = Noizu.SimplePool.V2.Database.Cluster.Service.TaskTable.create(memory: [:"first@127.0.0.1"])
-  :ok = Noizu.SimplePool.V2.Database.Cluster.Service.Instance.StateTable.create(memory: [:"first@127.0.0.1"])
-  :ok = Noizu.SimplePool.V2.Database.Cluster.Node.StateTable.create(memory: [:"first@127.0.0.1"])
-  :ok = Noizu.SimplePool.V2.Database.Cluster.Node.WorkerTable.create(memory: [:"first@127.0.0.1"])
-  :ok = Noizu.SimplePool.V2.Database.Cluster.Node.TaskTable.create(memory: [:"first@127.0.0.1"])
 end
 
 
@@ -82,18 +72,18 @@ end
 #---------------------
 # Test Pool: Dispatch Tables
 #---------------------
-if !Amnesia.Table.exists?(Noizu.SimplePool.TestDatabase.TestV2Pool.DispatchTable) do
-  :ok = Noizu.SimplePool.TestDatabase.TestV2Pool.DispatchTable.create()
+if !Amnesia.Table.exists?(Noizu.SimplePool.TestDatabase.TestV3Pool.DispatchTable) do
+  :ok = Noizu.SimplePool.TestDatabase.TestV3Pool.DispatchTable.create()
 end
-if !Amnesia.Table.exists?(Noizu.SimplePool.TestDatabase.TestV2TwoPool.DispatchTable) do
-  :ok = Noizu.SimplePool.TestDatabase.TestV2TwoPool.DispatchTable.create()
+if !Amnesia.Table.exists?(Noizu.SimplePool.TestDatabase.TestV3TwoPool.DispatchTable) do
+  :ok = Noizu.SimplePool.TestDatabase.TestV3TwoPool.DispatchTable.create()
 end
-if !Amnesia.Table.exists?(Noizu.SimplePool.TestDatabase.TestV2ThreePool.DispatchTable) do
-  :ok = Noizu.SimplePool.TestDatabase.TestV2ThreePool.DispatchTable.create()
+if !Amnesia.Table.exists?(Noizu.SimplePool.TestDatabase.TestV3ThreePool.DispatchTable) do
+  :ok = Noizu.SimplePool.TestDatabase.TestV3ThreePool.DispatchTable.create()
 end
 
 
-:ok = Amnesia.Table.wait(Noizu.SimplePool.Database.tables(), 5_000)
+:ok = Amnesia.Table.wait(Noizu.SimplePool.V3.Database.tables(), 5_000)
 :ok = Amnesia.Table.wait(Noizu.SimplePool.TestDatabase.tables(), 5_000)
 
 # Wait for second node
@@ -134,35 +124,27 @@ spawn_second = if !Enum.member?(Amnesia.info(:db_nodes),:"second@127.0.0.1") do
 #-----------------------------------------------
 context = Noizu.ElixirCore.CallingContext.system(%{})
 Noizu.SimplePool.TestHelpers.setup_first()
-:ok = Noizu.SimplePool.TestHelpers.unique_ref(:one)
-      |> Noizu.SimplePool.TestHelpers.wait_hint_release(TestPool.Server, context)
 
 if spawn_second do
   IO.puts "Provision Second Node for Test"
   {:pid, _second_pid} = :rpc.call(:"second@127.0.0.1", Noizu.SimplePool.TestHelpers, :setup_second, [])
 else
   IO.puts "Checking second node state"
-  case :rpc.call(:"second@127.0.0.1", Noizu.MonitoringFramework.EnvironmentPool.Server, :node_health_check!, [context, %{}]) do
+  case :rpc.call(:"second@127.0.0.1", Noizu.SimplePool.V3.ClusterManagementFramework.ClusterManager, :node_health_check!, [context, %{}]) do
     {:badrpc, _} ->
       {:pid, _second_pid} = :rpc.call(:"second@127.0.0.1", Noizu.SimplePool.TestHelpers, :setup_second, [])
     v -> IO.puts "Checking second node state #{inspect v}"
   end
 end
 
-IO.puts "Wait For Hint Release"
-:ok = Noizu.SimplePool.TestHelpers.unique_ref(:two)
-      |> Noizu.SimplePool.TestHelpers.wait_hint_release(TestTwoPool.Server, context)
-
-IO.puts "Wait For Hint Release . . . [PROCEED]"
-
 if (node() == :"first@127.0.0.1") do
   IO.puts "//////////////////////////////////////////////////////"
-  IO.puts "waiting for TestV2Two to come online"
+  IO.puts "waiting for TestV3Two to come online"
   IO.puts "//////////////////////////////////////////////////////"
   # Wait for connectivity / compile
   Noizu.SimplePool.TestHelpers.wait_for_condition(
     fn() ->
-      :rpc.call(:"second@127.0.0.1", Noizu.SimplePool.Support.TestV2TwoPool.Server, :server_online?, []) == true
+      :rpc.call(:"second@127.0.0.1", Noizu.SimplePool.Support.TestV3TwoPool.Server, :server_online?, []) == true
     end,
     60 * 5
   )
@@ -173,11 +155,11 @@ if (node() == :"first@127.0.0.1") do
 
   :ok = Noizu.SimplePool.TestHelpers.wait_for_condition(
     fn() ->
-      :rpc.call(:"second@127.0.0.1", Registry, :lookup, [Noizu.SimplePool.Support.TestV2TwoPool.Registry, {:worker, :aple}]) == []
+      :rpc.call(:"second@127.0.0.1", Registry, :lookup, [Noizu.SimplePool.Support.TestV3TwoPool.Registry, {:worker, :aple}]) == []
     end,
     60 * 5
   )
-  [] = :rpc.call(:"second@127.0.0.1", Registry, :lookup, [Noizu.SimplePool.Support.TestV2TwoPool.Registry, {:worker, :aple}])
+  [] = :rpc.call(:"second@127.0.0.1", Registry, :lookup, [Noizu.SimplePool.Support.TestV3TwoPool.Registry, {:worker, :aple}])
 
 
 

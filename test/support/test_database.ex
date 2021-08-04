@@ -10,16 +10,16 @@ defdatabase Noizu.SimplePool.TestDatabase do
   #--------------------------------------
   # Dispatch
   #--------------------------------------
-  deftable TestV2Pool.DispatchTable, [:identifier, :server, :entity], type: :set, index: [] do
-    @type t :: %TestV2Pool.DispatchTable{identifier: tuple, server: atom, entity: Noizu.SimplePool.V2.DispatchEntity.t}
+  deftable TestV3Pool.DispatchTable, [:identifier, :server, :entity], type: :set, index: [] do
+    @type t :: %TestV3Pool.DispatchTable{identifier: tuple, server: atom, entity: Noizu.SimplePool.V3.DispatchEntity.t}
   end
 
-  deftable TestV2TwoPool.DispatchTable, [:identifier, :server, :entity], type: :set, index: [] do
-    @type t :: %TestV2TwoPool.DispatchTable{identifier: tuple, server: atom, entity: Noizu.SimplePool.V2.DispatchEntity.t}
+  deftable TestV3TwoPool.DispatchTable, [:identifier, :server, :entity], type: :set, index: [] do
+    @type t :: %TestV3TwoPool.DispatchTable{identifier: tuple, server: atom, entity: Noizu.SimplePool.V3.DispatchEntity.t}
   end
 
-  deftable TestV2ThreePool.DispatchTable, [:identifier, :server, :entity], type: :set, index: [] do
-    @type t :: %TestV2ThreePool.DispatchTable{identifier: tuple, server: atom, entity: Noizu.SimplePool.V2.DispatchEntity.t}
+  deftable TestV3ThreePool.DispatchTable, [:identifier, :server, :entity], type: :set, index: [] do
+    @type t :: %TestV3ThreePool.DispatchTable{identifier: tuple, server: atom, entity: Noizu.SimplePool.V3.DispatchEntity.t}
   end
 
 end

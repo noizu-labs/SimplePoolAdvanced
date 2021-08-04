@@ -105,7 +105,7 @@ defmodule Noizu.SimplePool.V3.WorkerSupervisorBehaviour do
         supervisor_by_index: supervisor_by_index,
         dynamic_supervisor: dynamic_supervisor,
       }
-      parent_settings = Noizu.SimplePool.V2.SettingsBehaviour.Default.meta_init(module, %{})
+      parent_settings = Noizu.SimplePool.V3.SettingsBehaviour.Default.meta_init(module, %{})
       Map.merge(parent_settings, settings)
     end
 
@@ -256,7 +256,7 @@ defmodule Noizu.SimplePool.V3.WorkerSupervisorBehaviour do
     max_supervisors = options.max_supervisors
     layer2_provider = options.layer2_provider
 
-    message_processing_provider = Noizu.SimplePool.V2.MessageProcessingBehaviour.DefaultProvider
+    message_processing_provider = Noizu.SimplePool.V3.MessageProcessingBehaviour.DefaultProvider
     quote do
       @behaviour Noizu.SimplePool.V3.WorkerSupervisorBehaviour
       use Supervisor
@@ -267,7 +267,7 @@ defmodule Noizu.SimplePool.V3.WorkerSupervisorBehaviour do
       @option_settings :override
       @max_supervisors unquote(max_supervisors)
 
-      use Noizu.SimplePool.V2.SettingsBehaviour.Inherited, unquote([option_settings: option_settings])
+      use Noizu.SimplePool.V3.SettingsBehaviour.Inherited, unquote([option_settings: option_settings])
       use unquote(message_processing_provider), unquote(option_settings)
 
       def worker_start(ref, transfer_state, context), do: Noizu.SimplePool.V3.WorkerSupervisorBehaviour.Default.worker_start(__MODULE__, ref, transfer_state, context)

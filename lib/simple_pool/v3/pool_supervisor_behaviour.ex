@@ -305,7 +305,7 @@ defmodule Noizu.SimplePool.V3.PoolSupervisorBehaviour do
     option_settings = implementation.prepare_options(options)
     #options = option_settings.effective_options
     #features = MapSet.new(options.features)
-    message_processing_provider = Noizu.SimplePool.V2.MessageProcessingBehaviour.DefaultProvider
+    message_processing_provider = Noizu.SimplePool.V3.MessageProcessingBehaviour.DefaultProvider
 
     quote do
       @behaviour Noizu.SimplePool.V3.PoolSupervisorBehaviour
@@ -317,7 +317,7 @@ defmodule Noizu.SimplePool.V3.PoolSupervisorBehaviour do
       @module __MODULE__
 
       #----------------------------
-      use Noizu.SimplePool.V2.SettingsBehaviour.Inherited, unquote([option_settings: option_settings])
+      use Noizu.SimplePool.V3.SettingsBehaviour.Inherited, unquote([option_settings: option_settings])
       use unquote(message_processing_provider), unquote(option_settings)
       #--------------------------------
 
@@ -353,7 +353,7 @@ defmodule Noizu.SimplePool.V3.PoolSupervisorBehaviour do
           id: options[:id] || definition,
           start: {definition, :start_link, arguments},
           restart: options[:restart] || :permanent,
-          shutdown: options[:shutdown] || :infinity,
+          shutdown: options[:shutdown] || :infinity
         }
       end
   #, do: supervisor(definition, arguments, options)

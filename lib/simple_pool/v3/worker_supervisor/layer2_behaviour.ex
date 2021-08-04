@@ -55,7 +55,7 @@ defmodule Noizu.SimplePool.V3.WorkerSupervisor.Layer2Behaviour do
     option_settings = implementation.prepare_options(options)
     _options = option_settings.effective_options
     #@TODO - use real options.
-    message_processing_provider = Noizu.SimplePool.V2.MessageProcessingBehaviour.DefaultProvider
+    message_processing_provider = Noizu.SimplePool.V3.MessageProcessingBehaviour.DefaultProvider
 
     quote do
       @behaviour Noizu.SimplePool.V3.WorkerSupervisor.Layer2Behaviour
@@ -67,7 +67,7 @@ defmodule Noizu.SimplePool.V3.WorkerSupervisor.Layer2Behaviour do
       #----------------------------------------
       @options :override
       @option_settings :override
-      use Noizu.SimplePool.V2.SettingsBehaviour.Inherited, unquote([option_settings: option_settings, depth: 2])
+      use Noizu.SimplePool.V3.SettingsBehaviour.Inherited, unquote([option_settings: option_settings, depth: 2])
       use unquote(message_processing_provider), unquote(option_settings)
       #----------------------------------------
 
@@ -80,10 +80,9 @@ defmodule Noizu.SimplePool.V3.WorkerSupervisor.Layer2Behaviour do
       def child(ref, context) do
         %{
           id: ref,
-          start: {pool_worker(), :start_link, [[ref, context]]},
-          restart: @options.restart_type
+          start: {pool_worker(), :start_link, [ref, context]},
+          restart: @options.restart_type,
         }
-        #worker(pool_worker() , [ref, context], [id: ref, restart: @options.restart_type])
       end
 
       @doc """
@@ -92,10 +91,9 @@ defmodule Noizu.SimplePool.V3.WorkerSupervisor.Layer2Behaviour do
       def child(ref, params, context) do
         %{
           id: ref,
-          start: {pool_worker(), :start_link, [[ref, params, context]]},
-          restart: @options.restart_type
+          start: {pool_worker(), :start_link, [ref, params, context]},
+          restart: @options.restart_type,
         }
-        #worker(pool_worker(), [ref, params, context], [id: ref, restart: @options.restart_type])
       end
 
       @doc """
@@ -104,11 +102,9 @@ defmodule Noizu.SimplePool.V3.WorkerSupervisor.Layer2Behaviour do
       def child(ref, params, context, options) do
         %{
           id: ref,
-          start: {pool_worker(), :start_link, [[ref, params, context]]},
-          restart: (options[:restart] || @options.restart_type)
+          start: {pool_worker(), :start_link, [ref, params, context]},
+          restart: (options[:restart] || @options.restart_type),
         }
-        #restart = options[:restart] || @options.restart_type
-        #worker(pool_worker(), [ref, params, context], [id: ref, restart: restart])
       end
 
       #-----------

@@ -17,7 +17,7 @@ defmodule Noizu.SimplePool.V3.Service.DomainObject do
       unquote(q)
 
       pool = Module.get_attribute(__MODULE__, :pool) || Module.get_attribute(@__nzdo__base, :pool) || throw "#{__MODULE__} requires @pool attribute"
-      use Noizu.SimplePool.V2.InnerStateBehaviour,
+      use Noizu.SimplePool.V3.InnerStateBehaviour,
           pool: pool
 
     end
