@@ -78,6 +78,8 @@ defmodule Noizu.SimplePool.InnerStateBehaviour do
     pool = options.pool
 
     quote do
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       import unquote(__MODULE__)
       @behaviour Noizu.SimplePool.InnerStateBehaviour
       @base (unquote(Macro.expand(pool, __CALLER__)))
@@ -90,6 +92,7 @@ defmodule Noizu.SimplePool.InnerStateBehaviour do
       alias Noizu.SimplePool.Worker.Link
 
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.supervisor_hint) do
         def supervisor_hint(ref) do
           case id(ref) do
@@ -99,18 +102,22 @@ defmodule Noizu.SimplePool.InnerStateBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.get_direct_link!)) do
         def get_direct_link!(ref, context), do: @server.get_direct_link!(ref, context)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.fetch)) do
         def fetch(%__MODULE__{} = this, _fetch_options, _context), do: {:reply, this, this}
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.ping!)) do
         def ping!(%__MODULE__{} = this, context), do: {:reply, :pong, this}
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.reload!)) do
         def reload!(%Noizu.SimplePool.Worker.State{} = state, context, options) do
           case load(state.worker_ref, context, options) do
@@ -121,10 +128,12 @@ defmodule Noizu.SimplePool.InnerStateBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.kill!)) do
         def kill!(%__MODULE__{} = this, context), do: {:stop, {:user_requested, context}, this}
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.crash!)) do
         def crash!(%__MODULE__{} = this, context, options) do
            throw "#{__MODULE__} - Crash Forced: #{inspect context}, #{inspect options}"
@@ -132,6 +141,7 @@ defmodule Noizu.SimplePool.InnerStateBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.save!)) do
         def save!(outer_state, _context, _options) do
           Logger.warn("#{__MODULE__}.save method not implemented.")
@@ -139,6 +149,7 @@ defmodule Noizu.SimplePool.InnerStateBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.health_check!)) do
         def health_check!(%__MODULE__{} = this, context, options) do
           #TODO accept a health check strategy option
@@ -159,6 +170,7 @@ defmodule Noizu.SimplePool.InnerStateBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.call_forwarding_catchall)) do
 
         # Default Call Forwarding Catch All
@@ -182,31 +194,38 @@ defmodule Noizu.SimplePool.InnerStateBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.shutdown)) do
         def shutdown(%Noizu.SimplePool.Worker.State{} = state, _context \\ nil, options \\ nil, _from \\ nil), do: {:ok, state}
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.migrate_shutdown)) do
         def migrate_shutdown(%Noizu.SimplePool.Worker.State{} = state, _context \\ nil), do: {:ok, state}
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.on_migrate)) do
         def on_migrate(_rebase, %Noizu.SimplePool.Worker.State{} = state, _context \\ nil, _options \\ nil), do: {:ok, state}
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.terminate_hook)) do
         def terminate_hook(reason, state), do: default_terminate_hook(@server, reason, state)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.worker_refs)) do
         def worker_refs(_context, _options, _state), do: nil
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.transfer)) do
         def transfer(ref, transfer_state, _context \\ nil), do: {true, transfer_state}
       end
 
       @before_compile unquote(__MODULE__)
+      @file __ENV__.file
     end # end quote
   end #end defmacro __using__(options)
 
@@ -216,6 +235,7 @@ defmodule Noizu.SimplePool.InnerStateBehaviour do
       # call_forwarding - call
       #-----------------------------------------------------------------------------
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def call_forwarding({:load, options}, context, _from, %__MODULE__{} = this) do
         {:reply, :loaded, load(this, context, options)}
       end
@@ -233,6 +253,8 @@ defmodule Noizu.SimplePool.InnerStateBehaviour do
       #-----------------------------------------------------------------------------
       # call_forwarding - cast|info
       #-----------------------------------------------------------------------------
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def call_forwarding({:load, options}, context, %__MODULE__{} = this) do
         {:noreply, load(this, context, options)}
       end
@@ -246,6 +268,9 @@ defmodule Noizu.SimplePool.InnerStateBehaviour do
         end
         {:noreply, this}
       end
+
+
+      @file __ENV__.file
     end # end quote
   end # end defmacro __before_compile__(_env)
 end # end module

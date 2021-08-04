@@ -62,6 +62,8 @@ defmodule Noizu.SimplePool.WorkerSupervisorBehaviour do
     verbose = options.verbose
 
     quote do
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       #@behaviour Noizu.SimplePool.WorkerSupervisorBehaviour
       #@before_compile unquote(__MODULE__)
       @base Module.split(__MODULE__) |> Enum.slice(0..-2) |> Module.concat
@@ -70,6 +72,8 @@ defmodule Noizu.SimplePool.WorkerSupervisorBehaviour do
       import unquote(__MODULE__)
       require Logger
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       @strategy unquote(strategy)
       @restart_type unquote(restart_type)
       @max_restarts unquote(max_restarts)
@@ -79,19 +83,24 @@ defmodule Noizu.SimplePool.WorkerSupervisorBehaviour do
       @option_settings unquote(Macro.escape(option_settings))
       @options unquote(Macro.escape(options))
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.verbose)) do
         def verbose(), do: default_verbose(@base_verbose, @base)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.option_settings)) do
         def option_settings(), do: @option_settings
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.options)) do
         def options(), do: @options
       end
 
       # @start_link
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.start_link)) do
         def start_link(definition, context) do
           if verbose() do
@@ -103,6 +112,7 @@ defmodule Noizu.SimplePool.WorkerSupervisorBehaviour do
       end # end start_link
 
       # @child
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.child)) do
         def child(ref, context) do
           worker(@worker, [ref, context], [id: ref, restart: @restart_type])
@@ -119,6 +129,7 @@ defmodule Noizu.SimplePool.WorkerSupervisorBehaviour do
       end # end child
 
       # @init
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.init)) do
         def init([definition, context]) do
           if verbose() do
@@ -129,21 +140,26 @@ defmodule Noizu.SimplePool.WorkerSupervisorBehaviour do
       end # end init
 
       @before_compile unquote(__MODULE__)
+      @file __ENV__.file
     end # end quote
   end #end __using__
 
   defmacro __before_compile__(_env) do
     quote do
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_call(uncaught, _from, state) do
         Logger.info(fn -> "Uncaught handle_call to #{__MODULE__} . . . #{inspect uncaught}"  end)
         {:noreply, state}
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_cast(uncaught, state) do
         Logger.info(fn -> "Uncaught handle_cast to #{__MODULE__} . . . #{inspect uncaught}"  end)
         {:noreply, state}
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_info(uncaught, state) do
         Logger.info(fn -> "Uncaught handle_info to #{__MODULE__} . . . #{inspect uncaught}"  end)
         {:noreply, state}

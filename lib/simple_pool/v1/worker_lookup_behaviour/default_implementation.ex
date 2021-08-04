@@ -35,6 +35,8 @@ defmodule Noizu.SimplePool.WorkerLookupBehaviour.DefaultImplementation do
     required = options.required
 
     quote do
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       import unquote(__MODULE__)
       @behaviour Noizu.SimplePool.WorkerLookupBehaviour
       @dispatch unquote(dispatch)
@@ -43,56 +45,68 @@ defmodule Noizu.SimplePool.WorkerLookupBehaviour.DefaultImplementation do
       @registry unquote(registry)
       @pass_thru {__MODULE__, @dispatch, @dispatch_monitor, @server_monitor, @registry}
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.workers!) do
         def workers!(host, service_entity, context), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.workers!(@pass_thru, host, service_entity, context)
         def workers!(host, service_entity, context, options), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.workers!(@pass_thru, host, service_entity, context, options)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.host!) do
         def host!(ref, server, context), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.host!(@pass_thru, ref, server.base(), server, context)
         def host!(ref, server, context, options), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.host!(@pass_thru, ref, server.base(), server, context, options)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.record_event!) do
         def record_event!(ref, event, details, context), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.record_event!(@pass_thru, ref, event, details, context)
         def record_event!(ref, event, details, context, options), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.record_event!(@pass_thru, ref, event, details, context, options)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.events!) do
         def events!(ref, context), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.events!(@pass_thru, ref, context)
         def events!(ref, context, options), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.events!(@pass_thru, ref, context, options)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.set_node!) do
         def set_node!(ref, context), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.set_node!(@pass_thru, ref, context)
         def set_node!(ref, context, options), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.set_node!(@pass_thru, ref, context, options)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.register!) do
         def register!(ref, context), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.register!(@pass_thru, ref, context)
         def register!(ref, context, options), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.register!(@pass_thru, ref, context, options)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.unregister!) do
         def unregister!(ref, context), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.unregister!(@pass_thru, ref, context)
         def unregister!(ref, context, options), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.unregister!(@pass_thru, ref, context, options)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.obtain_lock!) do
         def obtain_lock!(ref, context), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.obtain_lock!(@pass_thru, ref, context)
         def obtain_lock!(ref, context, options), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.obtain_lock!(@pass_thru, ref, context, options)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.release_lock!) do
         def release_lock!(ref, context), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.release_lock!(@pass_thru, ref, context)
         def release_lock!(ref, context, options), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.release_lock!(@pass_thru, ref, context, options)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.process!) do
         def process!(ref, base, server, context), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.process!(@pass_thru, ref, base, server, context)
         def process!(ref, base, server, context, options), do: Noizu.SimplePool.WorkerLookupBehaviourDefault.process!(@pass_thru, ref, base, server, context, options)
       end
 
+      @file __ENV__.file
     end
   end
 

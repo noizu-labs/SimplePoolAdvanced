@@ -89,30 +89,36 @@ defmodule Noizu.SimplePool.ServerBehaviour do
 
     features = MapSet.new(options.features)
     quote do
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       require Logger
       import unquote(__MODULE__)
       alias Noizu.SimplePool.Worker.Link
       @behaviour Noizu.SimplePool.ServerBehaviour
       use GenServer
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       @base (Module.split(__MODULE__) |> Enum.slice(0..-2) |> Module.concat)
       @worker (Module.concat([@base, "Worker"]))
       @worker_supervisor (Module.concat([@base, "WorkerSupervisor_S1"]))
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       @max_supervisors (unquote(max_supervisors))
       @worker_supervisors Enum.map(1..@max_supervisors, fn(x) -> {x, Module.concat([@base, "WorkerSupervisor_S#{x}"])} end) |> Map.new()
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       @server (__MODULE__)
       @active_key Module.concat(Enabled, @server)
       @pool_supervisor (Module.concat([@base, "PoolSupervisor"]))
       @pool_async_load (unquote(Map.get(options, :async_load, false)))
       @simple_pool_group ({@base, @worker, @worker_supervisor, __MODULE__, @pool_supervisor})
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       @worker_state_entity (Noizu.SimplePool.Behaviour.expand_worker_state_entity(@base, unquote(options.worker_state_entity)))
       @server_provider (unquote(options.server_provider))
       @worker_lookup_handler (unquote(worker_lookup_handler))
       @module_and_lookup_handler ({__MODULE__, @worker_lookup_handler})
 
-
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       @timeout (unquote(default_timeout))
       @shutdown_timeout (unquote(shutdown_timeout))
 
@@ -133,22 +139,27 @@ defmodule Noizu.SimplePool.ServerBehaviour do
       @dynamic_supervisors unquote(MapSet.member?(features, :dynamic_supervisor))
       @simple_supervisors unquote(MapSet.member?(features, :simple_supervisor)) || !@dynamic_supervisors
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.verbose)) do
         def verbose(), do: Noizu.SimplePool.ServerBehaviourDefault.verbose(@base_verbose, @base)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.option_settings)) do
         def option_settings(), do: @option_settings
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.options)) do
         def options(), do: @options
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.worker_state_entity)) do
         def worker_state_entity, do: @worker_state_entity
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_call({:m, {:status, options}, context}, _from, state) do
         {:reply, {:ack, state.environment_details.status}, state}
       end
@@ -156,7 +167,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
       #=========================================================================
       # Multiple Supervisor Updated
       #=========================================================================
-
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.count_supervisor_children) do
         def count_supervisor_children() do
           Enum.reduce(available_supervisors(), %{active: 0, specs: 0, supervisors: 0, workers: 0}, fn(s, acc) ->
@@ -166,6 +177,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.group_supervisor_children) do
         def group_supervisor_children(group_fun) do
           Task.async_stream(available_supervisors(), fn(s) ->
@@ -193,6 +205,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.active_supervisors) do
         def active_supervisors() do
           e =  Application.get_env(:noizu_simple_pool, :num_supervisors, %{})
@@ -200,18 +213,21 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.supervisor_by_index) do
         def supervisor_by_index(index) do
           @worker_supervisors[index]
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.available_supervisors) do
         def available_supervisors() do
           Map.values(@worker_supervisors)
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.current_supervisor) do
         if @dynamic_supervisors do
           def current_supervisor(ref) do
@@ -224,6 +240,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def current_supervisor_simple(ref) do
         num_supervisors = active_supervisors()
         if num_supervisors == 1 do
@@ -235,6 +252,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def current_supervisor_dynamic(ref) do
         num_supervisors = active_supervisors()
         if num_supervisors == 1 do
@@ -254,6 +272,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
       #=========================================================================
       # Genserver Lifecycle
       #=========================================================================
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.start_link) do
         def start_link(sup, definition, context) do
           definition = if definition == :default do
@@ -272,6 +291,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end # end start_link
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.init)) do
         def init([_sup, definition, context] = args) do
           if verbose() do
@@ -281,22 +301,27 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end # end init
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.terminate)) do
         def terminate(reason, state), do: @server_provider.terminate(__MODULE__, reason, state, nil, %{})
       end # end terminate
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def enable_server!(elixir_node \\ nil) do
         Noizu.SimplePool.ServerBehaviourDefault.enable_server!(__MODULE__, @active_key, elixir_node)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def server_online?(elixir_node \\ nil) do
         Noizu.SimplePool.ServerBehaviourDefault.server_online?(__MODULE__, @active_key, elixir_node)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def disable_server!(elixir_node \\ nil) do
         Noizu.SimplePool.ServerBehaviourDefault.disable_server!(__MODULE__, @active_key, elixir_node)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.worker_sup_start)) do
         def worker_sup_start(ref, transfer_state, context) do
 
@@ -346,6 +371,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end # endstart/3
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.worker_sup_terminate)) do
         def worker_sup_terminate(ref, sup, context, options \\ %{}) do
           worker_sup = current_supervisor(ref)
@@ -354,6 +380,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end # end remove/3
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.worker_sup_remove)) do
         def worker_sup_remove(ref, _sup, context, options \\ %{}) do
           g = if Map.has_key?(options, :graceful_stop), do: options[:graceful_stop], else: @graceful_stop
@@ -369,14 +396,17 @@ defmodule Noizu.SimplePool.ServerBehaviour do
       #=========================================================================
       #
       #=========================================================================
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.worker_lookup_handler)) do
         def worker_lookup_handler(), do: @worker_lookup_handler
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.base)) do
         def base(), do: @base
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.pool_supervisor)) do
         def pool_supervisor(), do: @pool_supervisor
       end
@@ -384,18 +414,23 @@ defmodule Noizu.SimplePool.ServerBehaviour do
       #-------------------------------------------------------------------------------
       # Startup: Lazy Loading/Async Load/Immediate Load strategies. Blocking/Lazy Initialization, Loading Strategy.
       #-------------------------------------------------------------------------------
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.status) do
         def status(context \\ Noizu.ElixirCore.CallingContext.system(%{})), do: @server_provider.status(__MODULE__, context)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.load) do
         def load(context \\ Noizu.ElixirCore.CallingContext.system(%{}), settings \\ %{}), do: @server_provider.load(__MODULE__, context, settings)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.load_complete) do
         def load_complete(this, process, context), do: @server_provider.load_complete(this, process, context)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.ref) do
         def ref(identifier), do: @worker_state_entity.ref(identifier)
       end
@@ -403,6 +438,8 @@ defmodule Noizu.SimplePool.ServerBehaviour do
       #-------------------------------------------------------------------------------
       # Worker Process Management
       #-------------------------------------------------------------------------------
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.worker_add!) do
         def worker_add!(ref, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}) do
           options_b = put_in(options, [:spawn], true)
@@ -412,18 +449,21 @@ defmodule Noizu.SimplePool.ServerBehaviour do
       end
 
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.run_on_host)) do
         def run_on_host(ref, {m,f,a}, context, options \\ %{}, timeout \\ 30_000) do
           Noizu.SimplePool.ServerBehaviourDefault.run_on_host(__MODULE__, @base, @worker_lookup_handler, ref, {m,f,a}, context, options, timeout)
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.cast_to_host)) do
         def cast_to_host(ref, {m,f,a}, context, options \\ %{}) do
           Noizu.SimplePool.ServerBehaviourDefault.cast_to_host(__MODULE__, @base, @worker_lookup_handler, ref, {m,f,a}, context, options)
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.remove!) do
         def remove!(ref, context, options) do
           run_on_host(ref, {__MODULE__, :r_remove!, [ref, context, options]}, context, options)
@@ -438,6 +478,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.terminate!) do
         def terminate!(ref, context, options) do
           run_on_host(ref, {__MODULE__, :r_terminate!, [ref, context, options]}, context, options)
@@ -452,12 +493,14 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.bulk_migrate!) do
         def bulk_migrate!(transfer_server, context, options) do
           Noizu.SimplePool.ServerBehaviourDefault.bulk_migrate!(__MODULE__, transfer_server, context, options)
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.worker_migrate!) do
         def worker_migrate!(ref, rebase, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}) do
           if options[:sync] do
@@ -468,20 +511,24 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.worker_load!) do
         def worker_load!(ref, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}), do: s_cast!(ref, {:load, options}, context)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.worker_ref!) do
         def worker_ref!(identifier, _context \\ Noizu.ElixirCore.CallingContext.system(%{})), do: @worker_state_entity.ref(identifier)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.worker_pid!) do
         def worker_pid!(ref, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}) do
           @worker_lookup_handler.process!(ref, @base,  __MODULE__, context, options)
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.accept_transfer!) do
         def accept_transfer!(ref, state, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}) do
           options_b = options
@@ -498,14 +545,17 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.lock!) do
         def lock!(context, options \\ %{}), do: internal_system_call({:lock!, options}, context, options)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.release!) do
         def release!(context, options \\ %{}), do: internal_system_call({:release!, options}, context, options)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.status_wait) do
         def status_wait(target_state, context, timeout \\ :infinity)
         def status_wait(target_state, context, timeout) when is_atom(target_state) do
@@ -549,6 +599,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.entity_status) do
         def entity_status(context, options \\ %{}) do
           timeout = options[:timeout] || 5_000
@@ -564,6 +615,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.self_call)) do
         @doc """
           Forward a call to the appropriate GenServer instance for this __MODULE__.
@@ -582,6 +634,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.self_cast)) do
 
         def self_cast(call, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}) do
@@ -595,6 +648,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.internal_system_call)) do
         def internal_system_call(call, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}) do
           options = put_in(options, [:system_call], true)
@@ -603,6 +657,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
       end
 
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.internal_system_cast)) do
         def internal_system_cast(call, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}) do
           options = put_in(options, [:system_call], true)
@@ -610,6 +665,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.internal_call)) do
         def internal_call(call, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}) do
           #IO.puts "#{__MODULE__}.internal_call #{inspect call} - #{inspect options}"
@@ -623,6 +679,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.internal_cast)) do
         def internal_cast(call, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}) do
           #IO.puts "#{__MODULE__}.internal_cast #{inspect call}"
@@ -635,6 +692,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.remote_system_call)) do
         def remote_system_call(remote_node, call, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}) do
           options = put_in(options, [:system_call], true)
@@ -642,6 +700,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.remote_system_cast)) do
         def remote_system_cast(remote_node, call, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}) do
           options = put_in(options, [:system_call], true)
@@ -649,6 +708,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.remote_call)) do
         def remote_call(remote_node, call, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}) do
           #IO.puts "#{__MODULE__}.remote_call #{inspect call}"
@@ -662,6 +722,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.remote_cast)) do
         def remote_cast(remote_node, call, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}) do
           #IO.puts "#{__MODULE__}.remote_cast #{inspect call}"
@@ -677,6 +738,8 @@ defmodule Noizu.SimplePool.ServerBehaviour do
       #-------------------------------------------------------------------------
       # s_redirect
       #-------------------------------------------------------------------------
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(MapSet.member?(features, :s_redirect)) || unquote(MapSet.member?(features, :s_redirect_handle)) do
 
         def handle_cast({:redirect, {_type, {__MODULE__, _ref}, call}}, state), do: handle_cast(call, state)
@@ -740,20 +803,25 @@ defmodule Noizu.SimplePool.ServerBehaviour do
       #-------------------------------------------------------------------------
       # fetch
       #-------------------------------------------------------------------------
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.fetch)) do
         def fetch(identifier, fetch_options \\ %{}, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}), do: s_call!(identifier, {:fetch, fetch_options}, context, options)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.save!) do
         def save!(identifier, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}), do: s_call!(identifier, :save!, context, options)
         def save_async!(identifier, context \\ Noizu.ElixirCore.CallingContext.system(%{})), do: s_cast!(identifier, :save!, context)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.reload!) do
         def reload!(identifier, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}), do: s_call!(identifier, {:reload!, options}, context, options)
         def reload_async!(identifier, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}), do: s_cast!(identifier, {:reload!, options}, context, options)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.ping!) do
         def ping!(identifier, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}) do
           timeout = options[:timeout] || @timeout
@@ -765,19 +833,23 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.kill!) do
         def kill!(identifier, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}), do: s_cast!(identifier, :kill!, context, options)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.server_kill!) do
         def server_kill!(context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}), do: internal_cast({:server_kill!, options}, context)
       end
 
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.crash!) do
         def crash!(identifier, context \\ Noizu.ElixirCore.CallingContext.system(%{}), options \\ %{}), do: s_cast!(identifier, {:crash!, options}, context, options)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.service_health_check!) do
         def service_health_check!(%Noizu.ElixirCore.CallingContext{} = context), do: internal_system_call({:health_check!, %{}}, context)
         def service_health_check!(health_check_options, %Noizu.ElixirCore.CallingContext{} = context), do: internal_system_call({:health_check!, health_check_options}, context)
@@ -786,6 +858,7 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.health_check!) do
         def health_check!(identifier, %Noizu.ElixirCore.CallingContext{} = context), do: s_call!(identifier, {:health_check!, %{}}, context)
         def health_check!(identifier, health_check_options, %Noizu.ElixirCore.CallingContext{} = context), do: s_call!(identifier, {:health_check!, health_check_options}, context)
@@ -795,6 +868,8 @@ defmodule Noizu.SimplePool.ServerBehaviour do
       #-------------------------------------------------------------------------
       # get_direct_link!
       #-------------------------------------------------------------------------
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.get_direct_link!)) do
         def get_direct_link!(ref, context, options \\ %{spawn: false}) do
           Noizu.SimplePool.ServerBehaviourDefault.get_direct_link!(__MODULE__, ref, context, options)
@@ -804,18 +879,23 @@ defmodule Noizu.SimplePool.ServerBehaviour do
       #-------------------------------------------------------------------------
       # s_call unsafe implementations
       #-------------------------------------------------------------------------
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.s_call_unsafe)) do
         def s_call_unsafe(ref, extended_call, context, options \\ %{}, timeout \\ @timeout) do
           Noizu.SimplePool.ServerBehaviourDefault.s_call_unsafe(__MODULE__, ref, extended_call, context, options, timeout)
         end #end s_call_unsafe
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.s_cast_unsafe)) do
         def s_cast_unsafe(ref, extended_call, context, options \\ %{}) do
           Noizu.SimplePool.ServerBehaviourDefault.s_cast_unsafe(__MODULE__, ref, extended_call, context, options)
         end
       end
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(MapSet.member?(features, :crash_protection)) do
 
         if (unquote(required.o_call)) do
@@ -950,6 +1030,8 @@ defmodule Noizu.SimplePool.ServerBehaviour do
         end
       end # end if feature.crash_protection
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(required.link_forward!) do
         @doc """
           Crash Protection always enabled, for now.
@@ -961,15 +1043,20 @@ defmodule Noizu.SimplePool.ServerBehaviour do
 
 
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def record_service_event!(event, details, context, options \\ %{}) do
         @server_monitor.record_service_event!(node(), @base, event, details, context, options)
       end
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_info({:compile_warning_supress, call, context}, state), do: @server_provider.internal_info_handler(call, context, state)
 
       #===============================================================================================================
       # Overridable (Note hybrid mode is used here as legacy remains in a deprecated state pending total migration to SimplePool V2
       #===============================================================================================================
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       defoverridable [
         record_service_event!: 4,
         enable_server!: 1,
@@ -978,11 +1065,15 @@ defmodule Noizu.SimplePool.ServerBehaviour do
       ]
 
       @before_compile unquote(__MODULE__)
+
+      @file __ENV__.file
     end # end quote
   end #end __using__
 
   defmacro __before_compile__(_env) do
     quote do
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if @catch_all do
         #-------------------------------------------------------------------------------
         # Internal Forwarding

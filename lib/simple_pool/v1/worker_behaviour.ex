@@ -43,12 +43,20 @@ defmodule Noizu.SimplePool.WorkerBehaviour do
     verbose = options.verbose
 
     quote do
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       import unquote(__MODULE__)
       require Logger
       @behaviour Noizu.SimplePool.WorkerBehaviour
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       use GenServer
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       @base (Module.split(__MODULE__) |> Enum.slice(0..-2) |> Module.concat)
       @server (Module.concat([@base, "Server"]))
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       @worker_state_entity (Noizu.SimplePool.Behaviour.expand_worker_state_entity(@base, unquote(options.worker_state_entity)))
       @check_interval_ms (unquote(options.check_interval_ms))
       @kill_interval_s (unquote(options.kill_interval_ms)/1000)
@@ -59,22 +67,27 @@ defmodule Noizu.SimplePool.WorkerBehaviour do
       @base_verbose (unquote(verbose))
 
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       @option_settings unquote(Macro.escape(option_settings))
       @options unquote(Macro.escape(options))
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.verbose)) do
         def verbose(), do: Noizu.SimplePool.WorkerBehaviourDefault.verbose(@base_verbose, @base)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.option_settings)) do
         def option_settings(), do: @option_settings
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.options)) do
         def options(), do: @options
       end
 
       # @start_link
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.start_link)) do
         def start_link(ref, context) do
           if (verbose()) do
@@ -92,6 +105,7 @@ defmodule Noizu.SimplePool.WorkerBehaviour do
       end # end start_link
 
       # @terminate
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.terminate)) do
         def terminate(reason, state) do
           if (verbose()) do
@@ -106,6 +120,7 @@ defmodule Noizu.SimplePool.WorkerBehaviour do
       @init
       @TODO use defmacro to strip out unnecessary compile time conditionals
       """
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.init)) do
         def init(arg) do
           Noizu.SimplePool.WorkerBehaviourDefault.init({__MODULE__, @server, @base, @worker_state_entity, @inactivity_check, @lazy_load}, arg)
@@ -113,6 +128,8 @@ defmodule Noizu.SimplePool.WorkerBehaviour do
       end # end init
 
       # @s_redirect
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(MapSet.member?(features, :s_redirect)) || unquote(MapSet.member?(features, :s_redirect_handle)) do
         def handle_call({_type, {@server, _ref, _timeout}, call}, from, state), do: handle_call(call, from, state)
         def handle_cast({_type, {@server, _ref}, call}, state), do: handle_cast(call, state)
@@ -139,21 +156,28 @@ defmodule Noizu.SimplePool.WorkerBehaviour do
         end # end handle_call/:s_call!
       end # if feature.s_redirect
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_call({_a, _b, context} = call, from, %Noizu.SimplePool.Worker.State{initialized: :delayed_init} = state) do
          state = delayed_init(state, context)
          handle_call(call, from, state)
       end
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_cast({_a, _b, context} = call, %Noizu.SimplePool.Worker.State{initialized: :delayed_init} = state) do
         state = delayed_init(state, context)
         handle_cast(call, state)
       end
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_info({_a, _b, context} = call, %Noizu.SimplePool.Worker.State{initialized: :delayed_init} = state) do
         state = delayed_init(state, context)
         handle_info(call, state)
       end
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.delayed_init)) do
         def delayed_init(state, context) do
           Noizu.SimplePool.WorkerBehaviourDefault.delayed_init({__MODULE__, @server, @base, @worker_state_entity, @inactivity_check, @lazy_load}, state, context)
@@ -163,16 +187,22 @@ defmodule Noizu.SimplePool.WorkerBehaviour do
       #-------------------------------------------------------------------------
       # Inactivity Check Handling Feature Section
       #-------------------------------------------------------------------------
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.schedule_migrate_shutdown)) do
         def schedule_migrate_shutdown(context, state) do
           Noizu.SimplePool.WorkerBehaviourDefault.schedule_migrate_shutdown(@migrate_shutdown_interval_ms, context, state)
         end
       end
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.clear_migrate_shutdown)) do
         def clear_migrate_shutdown(state) do
           Noizu.SimplePool.WorkerBehaviourDefault.clear_migrate_shutdown(state)
         end
       end
+
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_info({:i, {:migrate_shutdown, ref}, context} = call, %Noizu.SimplePool.Worker.State{migrating: status} = state) do
         Noizu.SimplePool.WorkerBehaviourDefault.handle_migrate_shutdown(__MODULE__, @server, @worker_state_entity, @inactivity_check, call, state)
       end # end handle_info/:activity_check
@@ -181,22 +211,31 @@ defmodule Noizu.SimplePool.WorkerBehaviour do
       # Inactivity Check Handling Feature Section
       #-------------------------------------------------------------------------
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       #if (unquote(required.schedule_inactivity_check)) do
         def schedule_inactivity_check(context, state) do
           Noizu.SimplePool.WorkerBehaviourDefault.schedule_inactivity_check(@check_interval_ms, context, state)
         end
       #end
+
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       #if (unquote(required.clear_inactivity_check)) do
         def clear_inactivity_check(state) do
           Noizu.SimplePool.WorkerBehaviourDefault.clear_inactivity_check(state)
         end
       #end
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_info({:i, {:activity_check, ref}, context} = call, %Noizu.SimplePool.Worker.State{initialized: _i} = state) do
         #Noizu.SimplePool.WorkerBehaviourDefault.handle_activity_check(__MODULE__, @server, @worker_state_entity, @kill_interval_s, call, state)
         inactivity_check(call, state)
       end # end handle_info/:activity_check
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def inactivity_check(call, state) do
          Noizu.SimplePool.WorkerBehaviourDefault.handle_activity_check(__MODULE__, @server, @worker_state_entity, @kill_interval_s, call, state)
       end
@@ -205,6 +244,8 @@ defmodule Noizu.SimplePool.WorkerBehaviour do
       # Special Section for handlers that require full context
       # @TODO change call_Forwarding to allow passing back and forth full state.
       #-------------------------------------------------------------------------
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.save!)) do
         def handle_call({:s, {:save!, options}, context} = call, _from, %Noizu.SimplePool.Worker.State{} = state) do
           @worker_state_entity.save!(state, options, context)
@@ -219,6 +260,8 @@ defmodule Noizu.SimplePool.WorkerBehaviour do
         end
       end
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.fetch)) do
         def handle_call({:s, {:fetch, :state}, context} = call, _from,  %Noizu.SimplePool.Worker.State{} = state) do
           {:reply, state, state}
@@ -229,6 +272,8 @@ defmodule Noizu.SimplePool.WorkerBehaviour do
         end
       end
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if (unquote(required.reload!)) do
         def handle_call({:s, {:reload!, options}, context} = call, _from,  %Noizu.SimplePool.Worker.State{} = state) do
           @worker_state_entity.reload!(state, options, context)
@@ -246,26 +291,38 @@ defmodule Noizu.SimplePool.WorkerBehaviour do
       #-------------------------------------------------------------------------
       # Load handler, placed before lazy load to avoid resending load commands
       #-------------------------------------------------------------------------
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_cast({:s, {:load, options}, context} = call, %Noizu.SimplePool.Worker.State{initialized: false} = state) do
         Noizu.SimplePool.WorkerBehaviourDefault.handle_cast_load(@worker_state_entity, @inactivity_check, call, state)
       end
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_info({:s, {:load, options}, context}, %Noizu.SimplePool.Worker.State{initialized: false} = state) do
         handle_cast({:s, {:load, options}, context}, state)
       end
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_call({:s, {:load, options}, context} = call, from, %Noizu.SimplePool.Worker.State{initialized: false} = state) do
         Noizu.SimplePool.WorkerBehaviourDefault.handle_call_load(@worker_state_entity, @inactivity_check, call, from, state)
       end
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_cast({:s, {:migrate!, ref, rebase, options}, context} = call, %Noizu.SimplePool.Worker.State{initialized: true} = state) do
         Noizu.SimplePool.WorkerBehaviourDefault.handle_cast_migrate(__MODULE__, @server, @worker_state_entity, @migrate_shutdown, call, state)
       end
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_info({:s, {:migrate!, ref, rebase, options}, context}, %Noizu.SimplePool.Worker.State{initialized: true} = state) do
         handle_cast({:s, {:migrate!, ref, rebase, options}, context}, state)
       end
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_call({:s, {:migrate!, ref, rebase, options}, context}  = call, from, %Noizu.SimplePool.Worker.State{initialized: true} = state) do
         Noizu.SimplePool.WorkerBehaviourDefault.handle_call_migrate(__MODULE__, @server, @worker_state_entity, @migrate_shutdown, call, from, state)
       end
@@ -273,6 +330,8 @@ defmodule Noizu.SimplePool.WorkerBehaviour do
       #-------------------------------------------------------------------------
       # Lazy Load Handling Feature Section
       #-------------------------------------------------------------------------
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(MapSet.member?(features, :lazy_load)) do
         def handle_call({:s, _inner, context} = call, from, %Noizu.SimplePool.Worker.State{initialized: false} = state) do
           Noizu.SimplePool.WorkerBehaviourDefault.handle_call_lazy_load(__MODULE__, @worker_state_entity, call, from, state)
@@ -288,6 +347,8 @@ defmodule Noizu.SimplePool.WorkerBehaviour do
       end # end lazy_load feature block
 
       # Capture shutdown with full state  to allow for timer clearing, etc.
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_call({:s, {:shutdown, options} = _inner_call, context} = call, from, %Noizu.SimplePool.Worker.State{initialized: true, inner_state: _inner_state} = state) do
         Noizu.SimplePool.WorkerBehaviourDefault.handle_call_shutdown(__MODULE__, @worker_state_entity, call, from, state)
       end
@@ -295,6 +356,8 @@ defmodule Noizu.SimplePool.WorkerBehaviour do
       #-------------------------------------------------------------------------
       # Call Forwarding Feature Section
       #-------------------------------------------------------------------------
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       if unquote(MapSet.member?(features, :call_forwarding)) do
         def handle_info({:s, inner_call, context} = call, %Noizu.SimplePool.Worker.State{initialized: true, inner_state: inner_state} = state) do
           Noizu.SimplePool.WorkerBehaviourDefault.handle_cast_forwarding(@worker_state_entity, @inactivity_check, call, state)
@@ -313,6 +376,8 @@ defmodule Noizu.SimplePool.WorkerBehaviour do
       #===============================================================================================================
       # Overridable (Note hybrid mode is used here as legacy remains in a deprecated state pending total migration to SimplePool V2
       #===============================================================================================================
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       defoverridable [
         schedule_inactivity_check: 2,
         clear_inactivity_check: 1,
@@ -321,21 +386,28 @@ defmodule Noizu.SimplePool.WorkerBehaviour do
 
 
       @before_compile unquote(__MODULE__)
+      @file __ENV__.file
     end # end quote
   end #end __using__
 
   defmacro __before_compile__(_env) do
     quote do
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_call(uncaught, _from, state) do
         Logger.info(fn -> "Uncaught handle_call to #{__MODULE__} . . . #{inspect uncaught}"  end)
         {:noreply, state}
       end
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_cast(uncaught, state) do
         Logger.info(fn -> "Uncaught handle_cast to #{__MODULE__} . . . #{inspect uncaught}"  end)
         {:noreply, state}
       end
 
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def handle_info(uncaught, state) do
         Logger.info(fn -> "Uncaught handle_info to #{__MODULE__} . . . #{inspect uncaught}"  end)
         {:noreply, state}
