@@ -8,15 +8,16 @@ defmodule Noizu.SimplePool.Mixfile do
 
   def project do
     [app: :noizu_simple_pool,
-     version: "2.1.2",
-     elixir: "~> 1.9",
-     package: package(),
-     deps: deps(),
-     description: "Noizu Simple Pool",
-     docs: docs(),
-     elixirc_paths: elixirc_paths(Mix.env),
-   ]
- end # end project
+      version: "2.1.2",
+      elixir: "~> 1.9",
+      package: package(),
+      deps: deps(),
+      description: "Noizu Simple Pool",
+      docs: docs(),
+      elixirc_paths: elixirc_paths(Mix.env),
+      xref: [exclude: [Noizu.FastGlobal.Cluster]]
+    ]
+  end # end project
 
   defp package do
     [
@@ -27,10 +28,13 @@ defmodule Noizu.SimplePool.Mixfile do
   end # end package
 
   def application do
-    [ applications: [:logger, :poison] ]
+    [
+      applications: [:logger, :poison],
+      extra_applications: [:semaphore, :fastglobal, :noizu_mnesia_versioning, :noizu_scaffolding, :noizu_core, :amnesia]
+    ]
   end # end application
 
-  defp deps do
+  def deps do
     [
       {:ex_doc, "~> 0.16.2", only: [:dev, :test], optional: true}, # Documentation Provider
       {:markdown, github: "devinus/markdown", only: [:dev], optional: true}, # Markdown processor for ex_doc
