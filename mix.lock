@@ -13,6 +13,7 @@
   "hoedown": {:git, "https://github.com/hoedown/hoedown.git", "980b9c549b4348d50b683ecee6abee470b98acda", []},
   "markdown": {:git, "https://github.com/devinus/markdown.git", "d065dbcc4e242a85ca2516fdadd0082712871fd8", []},
   "mime": {:hex, :mime, "1.1.0", "01c1d6f4083d8aa5c7b8c246ade95139620ef8effb009edde934e0ec3b28090a", [:mix], [], "hexpm", "33dd09e615daab5668c15cc3a33829892728fdbed910ab0c0a0edb06b45fc54d"},
+  "noizu_advanced_scaffolding": {:git, "git@github.com:noizu-labs/advanced_elixir_scaffolding.git", "e09be41c7b1c331f1914b96673228308d2994899", [branch: "master"]},
   "noizu_core": {:git, "https://github.com/noizu/ElixirCore.git", "7e7de908792fec82b7d4d09431d0d696f7250cb1", [tag: "1.0.10"]},
   "noizu_mnesia_versioning": {:git, "https://github.com/noizu/MnesiaVersioning.git", "c295e3465801974c9ec4bb6d2769a1b551832370", [tag: "0.1.9"]},
   "noizu_scaffolding": {:git, "git@github.com:noizu-labs/ElixirScaffoldingAdvanced.git", "58cc3f73fc62b614216d7330d910fd6bd30e2a9c", [branch: "master"]},

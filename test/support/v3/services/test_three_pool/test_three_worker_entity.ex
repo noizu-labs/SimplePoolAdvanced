@@ -3,7 +3,7 @@
 # Copyright (C) 2018 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule Noizu.SimplePool.Support.TestV3ThreeWorkerEntity do
+defmodule Noizu.SimplePoolAdvanced.Support.TestV3ThreeWorkerEntity do
   @vsn 1.0
 
   #-----------------------------------------------------------------------------
@@ -26,8 +26,8 @@ defmodule Noizu.SimplePool.Support.TestV3ThreeWorkerEntity do
     vsn: @vsn
   ]
 
-  use Noizu.SimplePool.V3.InnerStateBehaviour,
-      pool: Noizu.SimplePool.Support.TestV3ThreePool,
+  use Noizu.SimplePoolAdvanced.V3.InnerStateBehaviour,
+      pool: Noizu.SimplePoolAdvanced.Support.TestV3ThreePool,
       override: [:load, :supervisor_hint]
 
 
@@ -145,13 +145,13 @@ defmodule Noizu.SimplePool.Support.TestV3ThreeWorkerEntity do
 
 
 
-  defimpl Noizu.ERP, for: Noizu.SimplePool.Support.TestV3ThreeWorkerEntity do
+  defimpl Noizu.ERP, for: Noizu.SimplePoolAdvanced.Support.TestV3ThreeWorkerEntity do
     def id(obj) do
       obj.identifier
     end # end sref/1
 
     def ref(obj) do
-      {:ref, Noizu.SimplePool.Support.TestV3ThreeWorkerEntity, obj.identifier}
+      {:ref, Noizu.SimplePoolAdvanced.Support.TestV3ThreeWorkerEntity, obj.identifier}
     end # end ref/1
 
     def sref(obj) do
@@ -179,7 +179,7 @@ defmodule Noizu.SimplePool.Support.TestV3ThreeWorkerEntity do
   #-----------------------------------------------------------------------------
   # Inspect Protocol
   #-----------------------------------------------------------------------------
-  defimpl Inspect, for: Noizu.SimplePool.Support.TestV3ThreeWorkerEntity do
+  defimpl Inspect, for: Noizu.SimplePoolAdvanced.Support.TestV3ThreeWorkerEntity do
     import Inspect.Algebra
     def inspect(entity, opts) do
       heading = "#TestThreeWorkerEntity(#{inspect entity.identifier})"

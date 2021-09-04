@@ -5,21 +5,21 @@
 
 use Amnesia
 
-defdatabase Noizu.SimplePool.TestDatabase do
+defdatabase Noizu.SimplePoolAdvanced.TestDatabase do
 
   #--------------------------------------
   # Dispatch
   #--------------------------------------
-  deftable TestV3Pool.DispatchTable, [:identifier, :server, :entity], type: :set, index: [] do
-    @type t :: %TestV3Pool.DispatchTable{identifier: tuple, server: atom, entity: Noizu.SimplePool.V3.DispatchEntity.t}
+  deftable TestV3Pool.Dispatch.Table, [:identifier, :server, :entity], type: :set, index: [] do
+    @type t :: %TestV3Pool.Dispatch.Table{identifier: tuple, server: atom, entity: Noizu.SimplePoolAdvanced.V3.DispatchEntity.t}
   end
 
-  deftable TestV3TwoPool.DispatchTable, [:identifier, :server, :entity], type: :set, index: [] do
-    @type t :: %TestV3TwoPool.DispatchTable{identifier: tuple, server: atom, entity: Noizu.SimplePool.V3.DispatchEntity.t}
+  deftable TestV3TwoPool.Dispatch.Table, [:identifier, :server, :entity], type: :set, index: [] do
+    @type t :: %TestV3TwoPool.Dispatch.Table{identifier: tuple, server: atom, entity: Noizu.SimplePoolAdvanced.V3.DispatchEntity.t}
   end
 
-  deftable TestV3ThreePool.DispatchTable, [:identifier, :server, :entity], type: :set, index: [] do
-    @type t :: %TestV3ThreePool.DispatchTable{identifier: tuple, server: atom, entity: Noizu.SimplePool.V3.DispatchEntity.t}
+  deftable TestV3ThreePool.Dispatch.Table, [:identifier, :server, :entity], type: :set, index: [] do
+    @type t :: %TestV3ThreePool.Dispatch.Table{identifier: tuple, server: atom, entity: Noizu.SimplePoolAdvanced.V3.DispatchEntity.t}
   end
 
 end

@@ -7,12 +7,12 @@ defmodule Noizu.SimplePool.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :noizu_simple_pool,
+    [app: :noizu_simple_pool_advanced,
       version: "2.1.2",
       elixir: "~> 1.9",
       package: package(),
       deps: deps(),
-      description: "Noizu Simple Pool",
+      description: "Noizu Simple Pool Advanced",
       docs: docs(),
       elixirc_paths: elixirc_paths(Mix.env),
       xref: [exclude: [Noizu.FastGlobal.Cluster]]
@@ -23,14 +23,14 @@ defmodule Noizu.SimplePool.Mixfile do
     [
       maintainers: ["noizu"],
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/noizu/SimplePool"}
+      links: %{"GitHub" => "https://github.com/noizu-labs/SimplePoolAdvanced"}
     ]
   end # end package
 
   def application do
     [
       applications: [:logger, :poison],
-      extra_applications: [:semaphore, :fastglobal, :noizu_mnesia_versioning, :noizu_scaffolding, :noizu_core, :amnesia]
+      extra_applications: [:semaphore, :fastglobal, :noizu_mnesia_versioning, :noizu_advanced_scaffolding, :noizu_core, :amnesia]
     ]
   end # end application
 
@@ -41,7 +41,7 @@ defmodule Noizu.SimplePool.Mixfile do
       {:amnesia, git: "https://github.com/noizu/amnesia.git", ref: "9266002"}, # Mnesia Wrapper
 
       {:noizu_core, github: "noizu/ElixirCore", tag: "1.0.10", override: true},
-      {:noizu_scaffolding, git: "git@github.com:noizu-labs/ElixirScaffoldingAdvanced.git", branch: "master", override: true},
+      {:noizu_advanced_scaffolding, git: "git@github.com:noizu-labs/advanced_elixir_scaffolding.git", branch: "master", override: true},
       {:noizu_mnesia_versioning, github: "noizu/MnesiaVersioning", tag: "0.1.9"},
 
       {:poison, "~> 3.1.0", override: true},
