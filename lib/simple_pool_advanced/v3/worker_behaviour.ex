@@ -242,7 +242,7 @@ defmodule Noizu.SimplePoolAdvanced.V3.WorkerBehaviour do
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def terminate(reason, state) do
         verbose() && Logger.info(fn -> banner("TERMINATE #{__MODULE__} (#{inspect state.worker_ref}\n Reason: #{inspect reason}") end)
-        @pool_worker_state_entity.terminate_hook(reason, Noizu.SimplePoolAdvanced.WorkerBehaviourDefault.clear_inactivity_check(state))
+        @pool_worker_state_entity.terminate_hook(reason, Noizu.SimplePoolAdvanced.V3.WorkerBehaviour.Default.clear_inactivity_check(state))
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
