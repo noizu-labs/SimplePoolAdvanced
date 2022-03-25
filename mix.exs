@@ -41,7 +41,7 @@ defmodule Noizu.SimplePool.Mixfile do
       {:amnesia, git: "https://github.com/noizu/amnesia.git", ref: "9266002"}, # Mnesia Wrapper
 
       {:noizu_core, github: "noizu/ElixirCore", tag: "1.0.10", override: true},
-      {:noizu_advanced_scaffolding, git: "git@github.com:noizu-labs/advanced_elixir_scaffolding.git", branch: "master", override: true},
+      {:noizu_advanced_scaffolding, github: "noizu-labs/advanced_elixir_scaffolding", branch: "master", override: true},
       {:noizu_mnesia_versioning, github: "noizu/MnesiaVersioning", tag: "0.1.9"},
 
       {:poison, "~> 3.1.0", override: true},
