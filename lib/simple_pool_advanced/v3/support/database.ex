@@ -5,7 +5,7 @@
 
 use Amnesia
 
-defdatabase Noizu.SimplePoolAdvanced.V3.Database do
+defdatabase Noizu.AdvancedPool.V3.Database do
   def database(), do: __MODULE__
 
   #=======================================================

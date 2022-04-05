@@ -3,7 +3,7 @@
 # Copyright (C) 2019 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule Noizu.SimplePoolAdvanced.V3.RouterBehaviour do
+defmodule Noizu.AdvancedPool.V3.RouterBehaviour do
 
   @callback options() :: any
   @callback option(any, any) :: any
@@ -61,11 +61,11 @@ defmodule Noizu.SimplePoolAdvanced.V3.RouterBehaviour do
       # @TODO use provided options
       options = %{}
       quote do
-        alias Noizu.SimplePoolAdvanced.V3.Router.RouterProvider
+        alias Noizu.AdvancedPool.V3.Router.RouterProvider
         @options unquote(Macro.escape(options))
         @pool_server Module.split(__MODULE__) |> Enum.slice(0..-2) |> Module.concat()
         @default_timeout 30_000
-        @behaviour Noizu.SimplePoolAdvanced.V3.RouterBehaviour
+        @behaviour Noizu.AdvancedPool.V3.RouterBehaviour
 
         def options(), do: @options
         def option(option, default \\ :not_found), do: Map.get(@options, option, default)
@@ -252,12 +252,12 @@ defmodule Noizu.SimplePoolAdvanced.V3.RouterBehaviour do
       options = options || %{}
 
       quote do
-        alias Noizu.SimplePoolAdvanced.V3.Router.RouterProvider
+        alias Noizu.AdvancedPool.V3.Router.RouterProvider
         @options unquote(options)
         @pool_server Module.split(__MODULE__) |> Enum.slice(0..-2) |> Module.concat()
 
         @default_timeout 30_000
-        @behaviour Noizu.SimplePoolAdvanced.V3.RouterBehaviour
+        @behaviour Noizu.AdvancedPool.V3.RouterBehaviour
 
         def options(), do: @options
         def option(option, default \\ :not_found), do: Map.get(@options, option, default)

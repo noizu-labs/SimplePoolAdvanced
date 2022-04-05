@@ -4,8 +4,8 @@
 #-------------------------------------------------------------------------------
 
 # @todo should be renamed Default and moved into behaviour definition for consistency.
-defmodule Noizu.SimplePoolAdvanced.V3.ServiceManagement.ServiceManagementProvider do
-  alias Noizu.SimplePoolAdvanced.V3.Server.State, as: ServerState
+defmodule Noizu.AdvancedPool.V3.ServiceManagement.ServiceManagementProvider do
+  alias Noizu.AdvancedPool.V3.Server.State, as: ServerState
   require Logger
 
   @doc """

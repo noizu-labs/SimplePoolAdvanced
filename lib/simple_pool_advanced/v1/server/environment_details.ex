@@ -3,12 +3,12 @@
 # Copyright (C) 2018 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule Noizu.SimplePoolAdvanced.Server.EnvironmentDetails do
+defmodule Noizu.AdvancedPool.Server.EnvironmentDetails do
   @type t :: %__MODULE__{
                server: any,
                definition: any,
-               initial: Noizu.SimplePoolAdvanced.MonitoringFramework.Service.HealthCheck.t,
-               effective: Noizu.SimplePoolAdvanced.MonitoringFramework.Service.HealthCheck.t,
+               initial: Noizu.AdvancedPool.MonitoringFramework.Service.HealthCheck.t,
+               effective: Noizu.AdvancedPool.MonitoringFramework.Service.HealthCheck.t,
                default: any,
                status: atom,
                monitors: Map.t,

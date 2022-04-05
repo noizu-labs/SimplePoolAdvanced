@@ -3,18 +3,18 @@
 # Copyright (C) 2018 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule Noizu.SimplePoolAdvanced.Support.TestV3ThreePool do
+defmodule Noizu.AdvancedPool.Support.TestV3ThreePool do
   #alias Noizu.Scaffolding.CallingContext
-  use Noizu.SimplePoolAdvanced.V3.PoolBehaviour,
+  use Noizu.AdvancedPool.V3.PoolBehaviour,
       default_modules: [:pool_supervisor, :worker_supervisor, :monitor],
-      worker_state_entity: Noizu.SimplePoolAdvanced.Support.TestV3ThreeWorkerEntity,
-      dispatch_table: Noizu.SimplePoolAdvanced.TestDatabase.TestV3ThreePool.Dispatch.Table,
+      worker_state_entity: Noizu.AdvancedPool.Support.TestV3ThreeWorkerEntity,
+      dispatch_table: Noizu.AdvancedPool.TestDatabase.TestV3ThreePool.Dispatch.Table,
       verbose: false
 
   defmodule Worker do
     @vsn 1.0
-    use Noizu.SimplePoolAdvanced.V3.WorkerBehaviour,
-        worker_state_entity: Noizu.SimplePoolAdvanced.Support.TestV3ThreeWorkerEntity,
+    use Noizu.AdvancedPool.V3.WorkerBehaviour,
+        worker_state_entity: Noizu.AdvancedPool.Support.TestV3ThreeWorkerEntity,
         verbose: false
     require Logger
   end # end worker
@@ -24,9 +24,9 @@ defmodule Noizu.SimplePoolAdvanced.Support.TestV3ThreePool do
   #=============================================================================
   defmodule Server do
     @vsn 1.0
-    use Noizu.SimplePoolAdvanced.V3.ServerBehaviour,
-        worker_state_entity: Noizu.SimplePoolAdvanced.Support.TestV3ThreeWorkerEntity,
-        worker_lookup_handler: Noizu.SimplePoolAdvanced.WorkerLookupBehaviour.Dynamic
+    use Noizu.AdvancedPool.V3.ServerBehaviour,
+        worker_state_entity: Noizu.AdvancedPool.Support.TestV3ThreeWorkerEntity,
+        worker_lookup_handler: Noizu.AdvancedPool.WorkerLookupBehaviour.Dynamic
   end # end defmodule
   #---------------------------------------------------------------------------
   # Convenience Methods

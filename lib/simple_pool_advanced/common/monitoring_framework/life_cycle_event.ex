@@ -3,7 +3,7 @@
 # Copyright (C) 2018 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule Noizu.SimplePoolAdvanced.MonitoringFramework.LifeCycleEvent do
+defmodule Noizu.AdvancedPool.MonitoringFramework.LifeCycleEvent do
 
   @vsn 1.0
   @type t :: %__MODULE__{

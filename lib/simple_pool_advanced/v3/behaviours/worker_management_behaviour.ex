@@ -3,7 +3,7 @@
 # Copyright (C) 2019 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule Noizu.SimplePoolAdvanced.V3.WorkerManagementBehaviour do
+defmodule Noizu.AdvancedPool.V3.WorkerManagementBehaviour do
   require Logger
   @callback count_supervisor_children() :: any
   @callback group_supervisor_children(any) :: any
@@ -56,7 +56,7 @@ defmodule Noizu.SimplePoolAdvanced.V3.WorkerManagementBehaviour do
     defmacro __using__(_options) do
       quote do
         @pool_server Module.split(__MODULE__) |> Enum.slice(0 .. -2) |> Module.concat()
-        alias Noizu.SimplePoolAdvanced.V3.WorkerManagement.WorkerManagementProvider, as: Provider
+        alias Noizu.AdvancedPool.V3.WorkerManagement.WorkerManagementProvider, as: Provider
 
         @doc """
         Count children of all worker supervisors.

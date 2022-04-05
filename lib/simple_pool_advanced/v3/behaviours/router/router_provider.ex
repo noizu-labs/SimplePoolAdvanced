@@ -4,14 +4,14 @@
 #-------------------------------------------------------------------------------
 
 # @todo should be renamed Default and moved into behaviour definition for consistency.
-defmodule Noizu.SimplePoolAdvanced.V3.Router.RouterProvider do
+defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   @moduledoc """
     Provides implementation for currently supported router call variations,
     s_call with crash protection, s_call with crash protection off, etc.
     @todo need 3 argument host! method(drop server argument since we should know it already).
     @todo change worker_pid! to pid! (either the calls should all be prefixed with worker_ or the prefix should be removed).
   """
-  alias Noizu.SimplePoolAdvanced.Worker.Link
+  alias Noizu.AdvancedPool.Worker.Link
   require Logger
   @default_timeout 30_000
 

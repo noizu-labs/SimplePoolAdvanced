@@ -3,10 +3,10 @@
 # Copyright (C) 2019 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule Noizu.SimplePoolAdvanced.V3.Support.Schema.Core do
+defmodule Noizu.AdvancedPool.V3.Support.Schema.Core do
   alias Noizu.MnesiaVersioning.ChangeSet
   use Amnesia
-  use Noizu.SimplePoolAdvanced.V3.Database
+  use Noizu.AdvancedPool.V3.Database
   use Noizu.MnesiaVersioning.SchemaBehaviour
 
   def neighbors() do
@@ -23,7 +23,7 @@ defmodule Noizu.SimplePoolAdvanced.V3.Support.Schema.Core do
       %ChangeSet{
         changeset:  "Supporting Tables for Default Implementation",
         author: "Keith Brings",
-        note: "SimplePoolAdvanced.V3 Core Tables",
+        note: "AdvancedPool.V3 Core Tables",
         environments: [:test, :dev],
         update: fn() ->
                   neighbors = neighbors()

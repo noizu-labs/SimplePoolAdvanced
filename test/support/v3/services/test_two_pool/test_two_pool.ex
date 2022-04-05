@@ -3,12 +3,12 @@
 # Copyright (C) 2018 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule Noizu.SimplePoolAdvanced.Support.TestV3TwoPool do
+defmodule Noizu.AdvancedPool.Support.TestV3TwoPool do
   #alias Noizu.Scaffolding.CallingContext
-  use Noizu.SimplePoolAdvanced.V3.PoolBehaviour,
+  use Noizu.AdvancedPool.V3.PoolBehaviour,
       default_modules: [:pool_supervisor, :worker_supervisor, :monitor],
-      worker_state_entity: Noizu.SimplePoolAdvanced.Support.TestV3TwoWorkerEntity,
-      dispatch_table: Noizu.SimplePoolAdvanced.TestDatabase.TestV3TwoPool.Dispatch.Table,
+      worker_state_entity: Noizu.AdvancedPool.Support.TestV3TwoWorkerEntity,
+      dispatch_table: Noizu.AdvancedPool.TestDatabase.TestV3TwoPool.Dispatch.Table,
       verbose: false
 
   def banner(_header, _msg) do
@@ -17,8 +17,8 @@ defmodule Noizu.SimplePoolAdvanced.Support.TestV3TwoPool do
 
   defmodule Worker do
     @vsn 1.0
-    use Noizu.SimplePoolAdvanced.V3.WorkerBehaviour,
-        worker_state_entity: Noizu.SimplePoolAdvanced.Support.TestV3TwoWorkerEntity,
+    use Noizu.AdvancedPool.V3.WorkerBehaviour,
+        worker_state_entity: Noizu.AdvancedPool.Support.TestV3TwoWorkerEntity,
         verbose: false
     require Logger
   end # end worker
@@ -28,10 +28,10 @@ defmodule Noizu.SimplePoolAdvanced.Support.TestV3TwoPool do
   #=============================================================================
   defmodule Server do
     @vsn 1.0
-    use Noizu.SimplePoolAdvanced.V3.ServerBehaviour,
-        worker_state_entity: Noizu.SimplePoolAdvanced.Support.TestV3TwoWorkerEntity,
-        worker_lookup_handler: Noizu.SimplePoolAdvanced.WorkerLookupBehaviour.Dynamic
-    #alias Noizu.SimplePoolAdvanced.Support.TestTwoWorkerEntity
+    use Noizu.AdvancedPool.V3.ServerBehaviour,
+        worker_state_entity: Noizu.AdvancedPool.Support.TestV3TwoWorkerEntity,
+        worker_lookup_handler: Noizu.AdvancedPool.WorkerLookupBehaviour.Dynamic
+    #alias Noizu.AdvancedPool.Support.TestTwoWorkerEntity
   end # end defmodule
 
   #---------------------------------------------------------------------------

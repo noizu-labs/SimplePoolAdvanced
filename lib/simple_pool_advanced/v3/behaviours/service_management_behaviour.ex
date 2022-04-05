@@ -3,7 +3,7 @@
 # Copyright (C) 2019 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule Noizu.SimplePoolAdvanced.V3.ServiceManagementBehaviour do
+defmodule Noizu.AdvancedPool.V3.ServiceManagementBehaviour do
   require Logger
 
   @callback default_definition() :: any
@@ -25,11 +25,11 @@ defmodule Noizu.SimplePoolAdvanced.V3.ServiceManagementBehaviour do
     defmacro __using__(_options) do
       quote do
         require Logger
-        @behaviour Noizu.SimplePoolAdvanced.V3.ServiceManagementBehaviour
+        @behaviour Noizu.AdvancedPool.V3.ServiceManagementBehaviour
         @pool_server Module.split(__MODULE__) |> Enum.slice(0..-2) |> Module.concat()
-        alias Noizu.SimplePoolAdvanced.V3.Server.State, as: ServerState
-        alias Noizu.SimplePoolAdvanced.Server.EnvironmentDetails
-        alias Noizu.SimplePoolAdvanced.V3.ServiceManagement.ServiceManagementProvider, as: Provider
+        alias Noizu.AdvancedPool.V3.Server.State, as: ServerState
+        alias Noizu.AdvancedPool.Server.EnvironmentDetails
+        alias Noizu.AdvancedPool.V3.ServiceManagement.ServiceManagementProvider, as: Provider
 
         @doc """
 

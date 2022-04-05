@@ -3,7 +3,7 @@
 # Copyright (C) 2021 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule Noizu.SimplePoolAdvanced.V3.WorkerSupervisor.Layer2Behaviour do
+defmodule Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour do
   @moduledoc """
     WorkerSupervisorBehaviour provides the logic for managing a pool of workers. The top level Pool Supervisors will generally
     contain a number of WorkerSupervisors that in turn are referenced by Pool.Server to access, kill and spawn worker processes.
@@ -39,10 +39,10 @@ defmodule Noizu.SimplePoolAdvanced.V3.WorkerSupervisor.Layer2Behaviour do
       settings = %OptionSettings{
         option_settings: %{
           verbose: %OptionValue{option: :verbose, default: :auto},
-          restart_type: %OptionValue{option: :restart_type, default: Application.get_env(:noizu_simple_pool_advanced, :pool_restart_type, :transient)},
-          max_restarts: %OptionValue{option: :max_restarts, default: Application.get_env(:noizu_simple_pool_advanced, :pool_max_restarts, @default_max_restarts)},
-          max_seconds: %OptionValue{option: :max_seconds, default: Application.get_env(:noizu_simple_pool_advanced, :pool_max_seconds, @default_max_seconds)},
-          strategy: %OptionValue{option: :strategy, default: Application.get_env(:noizu_simple_pool_advanced, :pool_strategy, @default_strategy)}
+          restart_type: %OptionValue{option: :restart_type, default: Application.get_env(:noizu_advanced_pool, :pool_restart_type, :transient)},
+          max_restarts: %OptionValue{option: :max_restarts, default: Application.get_env(:noizu_advanced_pool, :pool_max_restarts, @default_max_restarts)},
+          max_seconds: %OptionValue{option: :max_seconds, default: Application.get_env(:noizu_advanced_pool, :pool_max_seconds, @default_max_seconds)},
+          strategy: %OptionValue{option: :strategy, default: Application.get_env(:noizu_advanced_pool, :pool_strategy, @default_strategy)}
         }
       }
 
@@ -51,14 +51,14 @@ defmodule Noizu.SimplePoolAdvanced.V3.WorkerSupervisor.Layer2Behaviour do
   end
 
   defmacro __using__(options) do
-    implementation = Keyword.get(options || [], :implementation, Noizu.SimplePoolAdvanced.V3.WorkerSupervisor.Layer2Behaviour.Default)
+    implementation = Keyword.get(options || [], :implementation, Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour.Default)
     option_settings = implementation.prepare_options(options)
     _options = option_settings.effective_options
     #@TODO - use real options.
-    message_processing_provider = Noizu.SimplePoolAdvanced.V3.MessageProcessingBehaviour.DefaultProvider
+    message_processing_provider = Noizu.AdvancedPool.V3.MessageProcessingBehaviour.DefaultProvider
 
     quote do
-      @behaviour Noizu.SimplePoolAdvanced.V3.WorkerSupervisor.Layer2Behaviour
+      @behaviour Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour
       use Supervisor
       require Logger
 
@@ -67,7 +67,7 @@ defmodule Noizu.SimplePoolAdvanced.V3.WorkerSupervisor.Layer2Behaviour do
       #----------------------------------------
       @options :override
       @option_settings :override
-      use Noizu.SimplePoolAdvanced.V3.SettingsBehaviour.Inherited, unquote([option_settings: option_settings, depth: 2])
+      use Noizu.AdvancedPool.V3.SettingsBehaviour.Inherited, unquote([option_settings: option_settings, depth: 2])
       use unquote(message_processing_provider), unquote(option_settings)
       #----------------------------------------
 

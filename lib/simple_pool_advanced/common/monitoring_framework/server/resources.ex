@@ -3,7 +3,7 @@
 # Copyright (C) 2018 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule Noizu.SimplePoolAdvanced.MonitoringFramework.Server.Resources do
+defmodule Noizu.AdvancedPool.MonitoringFramework.Server.Resources do
 
   @vsn 1.0
   @type t :: %__MODULE__{
@@ -22,7 +22,7 @@ defmodule Noizu.SimplePoolAdvanced.MonitoringFramework.Server.Resources do
     vsn: @vsn
   ]
 
-  defimpl Inspect, for: Noizu.SimplePoolAdvanced.MonitoringFramework.Server.Resources do
+  defimpl Inspect, for: Noizu.AdvancedPool.MonitoringFramework.Server.Resources do
     import Inspect.Algebra
     def inspect(entity, opts) do
       heading = "#Server.Resources(#{inspect entity.identifier})"

@@ -3,11 +3,11 @@
 # Copyright (C) 2018 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule Noizu.SimplePool.Mixfile do
+defmodule Noizu.AdvancedPool.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :noizu_simple_pool_advanced,
+    [app: :noizu_advanced_pool,
       version: "2.1.2",
       elixir: "~> 1.9",
       package: package(),
@@ -23,7 +23,7 @@ defmodule Noizu.SimplePool.Mixfile do
     [
       maintainers: ["noizu"],
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/noizu-labs/SimplePoolAdvanced"}
+      links: %{"GitHub" => "https://github.com/noizu-labs/AdvancedPool"}
     ]
   end # end package
 

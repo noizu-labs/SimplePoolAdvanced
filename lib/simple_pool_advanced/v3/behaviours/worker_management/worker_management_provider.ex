@@ -4,7 +4,7 @@
 #-------------------------------------------------------------------------------
 
 # @todo should be renamed Default and moved into behaviour definition for consistency.
-defmodule Noizu.SimplePoolAdvanced.V3.WorkerManagement.WorkerManagementProvider do
+defmodule Noizu.AdvancedPool.V3.WorkerManagement.WorkerManagementProvider do
   require Logger
 
   @doc """
@@ -183,7 +183,7 @@ defmodule Noizu.SimplePoolAdvanced.V3.WorkerManagement.WorkerManagementProvider 
     lock = dispatch_prepare_lock(pool_server, options)
 
     # @TODO use raw tuple for smaller table, faster execution.
-    %Noizu.SimplePoolAdvanced.V3.DispatchEntity{identifier: ref, server: server, state: state, lock: lock}
+    %Noizu.AdvancedPool.V3.DispatchEntity{identifier: ref, server: server, state: state, lock: lock}
   end
 
   def dispatch_create!(dispatch, pool_server, _context, _options) do

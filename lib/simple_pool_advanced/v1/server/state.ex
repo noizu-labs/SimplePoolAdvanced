@@ -3,8 +3,8 @@
 # Copyright (C) 2018 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule Noizu.SimplePoolAdvanced.Server.State do
-alias Noizu.SimplePoolAdvanced.Server.State
+defmodule Noizu.AdvancedPool.Server.State do
+alias Noizu.AdvancedPool.Server.State
 
   @type t :: %State{
     worker_supervisor: any,
@@ -13,8 +13,8 @@ alias Noizu.SimplePoolAdvanced.Server.State
     status: Map.t,
     extended: any,
     entity: any,
-    environment_details: Noizu.SimplePoolAdvanced.Server.EnvironmentDetails.t,
-    options: Noizu.SimplePoolAdvanced.OptionSettings.t
+    environment_details: Noizu.AdvancedPool.Server.EnvironmentDetails.t,
+    options: Noizu.AdvancedPool.OptionSettings.t
   }
 
   defstruct [
@@ -31,7 +31,7 @@ alias Noizu.SimplePoolAdvanced.Server.State
 #-----------------------------------------------------------------------------
 # Inspect Protocol
 #-----------------------------------------------------------------------------
-defimpl Inspect, for: Noizu.SimplePoolAdvanced.Server.State do
+defimpl Inspect, for: Noizu.AdvancedPool.Server.State do
   import Inspect.Algebra
   def inspect(entity, opts) do
     heading = "#Server.State(#{inspect entity.service})"

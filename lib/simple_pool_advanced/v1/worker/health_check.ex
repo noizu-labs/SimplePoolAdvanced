@@ -3,7 +3,7 @@
 # Copyright (C) 2018 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule  Noizu.SimplePoolAdvanced.Worker.HealthCheck do
+defmodule  Noizu.AdvancedPool.Worker.HealthCheck do
   @vsn 1.0
   @type t :: %__MODULE__{
                identifier: any,
@@ -25,7 +25,7 @@ defmodule  Noizu.SimplePoolAdvanced.Worker.HealthCheck do
 
 
 
-  defimpl Inspect, for: Noizu.SimplePoolAdvanced.Worker.HealthCheck do
+  defimpl Inspect, for: Noizu.AdvancedPool.Worker.HealthCheck do
     import Inspect.Algebra
     def inspect(entity, opts) do
       heading = "#Worker.HealthCheck(#{inspect entity.identifier})"
