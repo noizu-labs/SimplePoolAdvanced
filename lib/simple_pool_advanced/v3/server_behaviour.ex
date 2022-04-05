@@ -49,14 +49,14 @@ defmodule Noizu.SimplePoolAdvanced.V3.ServerBehaviour do
     def prepare_options(options) do
       settings = %OptionSettings{
         option_settings: %{
-          features: %OptionList{option: :features, default: Application.get_env(:noizu_simple_pool, :default_features, @default_features), valid_members: @features, membership_set: false},
+          features: %OptionList{option: :features, default: Application.get_env(:noizu_simple_pool_advanced, :default_features, @default_features), valid_members: @features, membership_set: false},
           verbose: %OptionValue{option: :verbose, default: :auto},
           worker_state_entity: %OptionValue{option: :worker_state_entity, default: :auto},
-          default_timeout: %OptionValue{option: :default_timeout, default:  Application.get_env(:noizu_simple_pool, :default_timeout, @default_timeout)},
-          shutdown_timeout: %OptionValue{option: :shutdown_timeout, default: Application.get_env(:noizu_simple_pool, :default_shutdown_timeout, @default_shutdown_timeout)},
+          default_timeout: %OptionValue{option: :default_timeout, default:  Application.get_env(:noizu_simple_pool_advanced, :default_timeout, @default_timeout)},
+          shutdown_timeout: %OptionValue{option: :shutdown_timeout, default: Application.get_env(:noizu_simple_pool_advanced, :default_shutdown_timeout, @default_shutdown_timeout)},
           default_definition: %OptionValue{option: :default_definition, default: :auto},
-          log_timeouts: %OptionValue{option: :log_timeouts, default: Application.get_env(:noizu_simple_pool, :default_log_timeouts, true)},
-          max_supervisors: %OptionValue{option: :max_supervisors, default: Application.get_env(:noizu_simple_pool, :default_max_supervisors, 100)},
+          log_timeouts: %OptionValue{option: :log_timeouts, default: Application.get_env(:noizu_simple_pool_advanced, :default_log_timeouts, true)},
+          max_supervisors: %OptionValue{option: :max_supervisors, default: Application.get_env(:noizu_simple_pool_advanced, :default_max_supervisors, 100)},
         }
       }
 
@@ -164,7 +164,7 @@ defmodule Noizu.SimplePoolAdvanced.V3.ServerBehaviour do
     end
 
     defp meta_init_default_definition(module, options) do
-      a_s = Application.get_env(:noizu_simple_pool, :definitions, %{})
+      a_s = Application.get_env(:noizu_simple_pool_advanced, :definitions, %{})
       template = %Noizu.SimplePoolAdvanced.MonitoringFramework.Service.Definition{
         identifier: {node(), module.pool()},
         server: node(),

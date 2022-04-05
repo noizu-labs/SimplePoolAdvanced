@@ -39,10 +39,10 @@ defmodule Noizu.SimplePoolAdvanced.V3.WorkerSupervisor.Layer2Behaviour do
       settings = %OptionSettings{
         option_settings: %{
           verbose: %OptionValue{option: :verbose, default: :auto},
-          restart_type: %OptionValue{option: :restart_type, default: Application.get_env(:noizu_simple_pool, :pool_restart_type, :transient)},
-          max_restarts: %OptionValue{option: :max_restarts, default: Application.get_env(:noizu_simple_pool, :pool_max_restarts, @default_max_restarts)},
-          max_seconds: %OptionValue{option: :max_seconds, default: Application.get_env(:noizu_simple_pool, :pool_max_seconds, @default_max_seconds)},
-          strategy: %OptionValue{option: :strategy, default: Application.get_env(:noizu_simple_pool, :pool_strategy, @default_strategy)}
+          restart_type: %OptionValue{option: :restart_type, default: Application.get_env(:noizu_simple_pool_advanced, :pool_restart_type, :transient)},
+          max_restarts: %OptionValue{option: :max_restarts, default: Application.get_env(:noizu_simple_pool_advanced, :pool_max_restarts, @default_max_restarts)},
+          max_seconds: %OptionValue{option: :max_seconds, default: Application.get_env(:noizu_simple_pool_advanced, :pool_max_seconds, @default_max_seconds)},
+          strategy: %OptionValue{option: :strategy, default: Application.get_env(:noizu_simple_pool_advanced, :pool_strategy, @default_strategy)}
         }
       }
 

@@ -33,11 +33,11 @@ defmodule Noizu.SimplePoolAdvanced.V3.WorkerBehaviour do
     def prepare_options(options) do
       settings = %OptionSettings{
         option_settings: %{
-          features: %OptionList{option: :features, default: Application.get_env(:noizu_simple_pool, :default_features, @default_features), valid_members: @features, membership_set: false},
+          features: %OptionList{option: :features, default: Application.get_env(:noizu_simple_pool_advanced, :default_features, @default_features), valid_members: @features, membership_set: false},
           verbose: %OptionValue{option: :verbose, default: :auto},
           worker_state_entity: %OptionValue{option: :worker_state_entity, default: :auto},
-          check_interval_ms: %OptionValue{option: :check_interval_ms, default: Application.get_env(:noizu_simple_pool, :default_inactivity_check_interval_ms, @default_check_interval_ms)},
-          kill_interval_ms: %OptionValue{option: :kill_interval_ms, default: Application.get_env(:noizu_simple_pool, :default_inactivity_kill_interval_ms, @default_kill_interval_ms)},
+          check_interval_ms: %OptionValue{option: :check_interval_ms, default: Application.get_env(:noizu_simple_pool_advanced, :default_inactivity_check_interval_ms, @default_check_interval_ms)},
+          kill_interval_ms: %OptionValue{option: :kill_interval_ms, default: Application.get_env(:noizu_simple_pool_advanced, :default_inactivity_kill_interval_ms, @default_kill_interval_ms)},
         }
       }
       OptionSettings.expand(settings, options)

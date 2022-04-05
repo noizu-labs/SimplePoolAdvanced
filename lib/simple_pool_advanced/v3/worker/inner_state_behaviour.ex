@@ -41,7 +41,7 @@ defmodule Noizu.SimplePoolAdvanced.V3.InnerStateBehaviour do
     settings = %OptionSettings{
       option_settings: %{
         pool: %OptionValue{option: :pool, required: true},
-        features: %OptionList{option: :features, default: Application.get_env(:noizu_simple_pool, :default_features, @default_features), valid_members: @features, membership_set: false},
+        features: %OptionList{option: :features, default: Application.get_env(:noizu_simple_pool_advanced, :default_features, @default_features), valid_members: @features, membership_set: false},
         only: %OptionList{option: :only, default: @provided_methods, valid_members: @methods, membership_set: true},
         override: %OptionList{option: :override, default: [], valid_members: @methods, membership_set: true},
       }

@@ -168,7 +168,7 @@ defmodule Noizu.SimplePoolAdvanced.V3.SettingsBehaviour do
 
       # Base vs. Inherited Specific
       if (module.pool() == module) do
-        verbose = if (options[:verbose] == :auto), do: Application.get_env(:noizu_simple_pool, :verbose, false), else: options[:verbose]
+        verbose = if (options[:verbose] == :auto), do: Application.get_env(:noizu_simple_pool_advanced, :verbose, false), else: options[:verbose]
         stand_alone = module.stand_alone()
         %{response| verbose: verbose, stand_alone: stand_alone}
       else

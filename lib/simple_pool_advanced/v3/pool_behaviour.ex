@@ -37,25 +37,25 @@ defmodule Noizu.SimplePoolAdvanced.V3.PoolBehaviour do
     def prepare_options(options) do
       settings = %OptionSettings{
         option_settings: %{
-          features: %OptionList{option: :features, default: Application.get_env(:noizu_simple_pool, :default_features, @default_features), valid_members: @features, membership_set: false},
-          default_modules: %OptionList{option: :default_modules, default: Application.get_env(:noizu_simple_pool, :default_modules, @default_modules), valid_members: @modules, membership_set: true},
-          verbose: %OptionValue{option: :verbose, default: Application.get_env(:noizu_simple_pool, :verbose, false)},
+          features: %OptionList{option: :features, default: Application.get_env(:noizu_simple_pool_advanced, :default_features, @default_features), valid_members: @features, membership_set: false},
+          default_modules: %OptionList{option: :default_modules, default: Application.get_env(:noizu_simple_pool_advanced, :default_modules, @default_modules), valid_members: @modules, membership_set: true},
+          verbose: %OptionValue{option: :verbose, default: Application.get_env(:noizu_simple_pool_advanced, :verbose, false)},
 
           service_manager: %OptionValue{option: :service_manager, default: Noizu.SimplePoolAdvanced.V3.ClusterManagementFramework.Cluster.ServiceManager},
           node_manager: %OptionValue{option: :node_manager, default: Noizu.SimplePoolAdvanced.V3.ClusterManagementFramework.Cluster.NodeManager},
 
           dispatch_table: %OptionValue{option: :dispatch_table, default: :auto},
           #dispatch_monitor_table: %OptionValue{option: :dispatch_monitor_table, default: :auto},
-          registry_options: %OptionValue{option: :registry_options, default: Application.get_env(:noizu_simple_pool, :default_registry_options, @default_registry_options)},
+          registry_options: %OptionValue{option: :registry_options, default: Application.get_env(:noizu_simple_pool_advanced, :default_registry_options, @default_registry_options)},
 
-          record_keeper_options: %OptionValue{option: :record_keeper_options, default: Application.get_env(:noizu_simple_pool, :default_record_keeper_options, @default_record_keeper_options)},
-          monitor_options: %OptionValue{option: :monitor_options, default: Application.get_env(:noizu_simple_pool, :default_monitor_options, @default_monitor_options)},
-          worker_options: %OptionValue{option: :worker_options, default: Application.get_env(:noizu_simple_pool, :default_worker_options, @default_worker_options)},
-          server_options: %OptionValue{option: :server_options, default: Application.get_env(:noizu_simple_pool, :default_server_options, @default_server_options)},
-          worker_supervisor_options: %OptionValue{option: :worker_supervisor_options, default: Application.get_env(:noizu_simple_pool, :default_worker_supervisor_options, @default_worker_supervisor_options)},
-          pool_supervisor_options: %OptionValue{option: :pool_supervisor_options, default: Application.get_env(:noizu_simple_pool, :default_pool_supervisor_options, @default_pool_supervisor_options)},
+          record_keeper_options: %OptionValue{option: :record_keeper_options, default: Application.get_env(:noizu_simple_pool_advanced, :default_record_keeper_options, @default_record_keeper_options)},
+          monitor_options: %OptionValue{option: :monitor_options, default: Application.get_env(:noizu_simple_pool_advanced, :default_monitor_options, @default_monitor_options)},
+          worker_options: %OptionValue{option: :worker_options, default: Application.get_env(:noizu_simple_pool_advanced, :default_worker_options, @default_worker_options)},
+          server_options: %OptionValue{option: :server_options, default: Application.get_env(:noizu_simple_pool_advanced, :default_server_options, @default_server_options)},
+          worker_supervisor_options: %OptionValue{option: :worker_supervisor_options, default: Application.get_env(:noizu_simple_pool_advanced, :default_worker_supervisor_options, @default_worker_supervisor_options)},
+          pool_supervisor_options: %OptionValue{option: :pool_supervisor_options, default: Application.get_env(:noizu_simple_pool_advanced, :default_pool_supervisor_options, @default_pool_supervisor_options)},
           worker_state_entity: %OptionValue{option: :worker_state_entity, default: :auto},
-          max_supervisors: %OptionValue{option: :max_supervisors, default: Application.get_env(:noizu_simple_pool, :default_max_supervisors, 100)},
+          max_supervisors: %OptionValue{option: :max_supervisors, default: Application.get_env(:noizu_simple_pool_advanced, :default_max_supervisors, 100)},
         }
       }
 

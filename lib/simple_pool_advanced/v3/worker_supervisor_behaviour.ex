@@ -37,30 +37,30 @@ defmodule Noizu.SimplePoolAdvanced.V3.WorkerSupervisorBehaviour do
     def prepare_options(options) do
 
 
-      default_restart_type = (Application.get_env(:noizu_simple_pool, :worker_pool_restart_type, nil)
-                              || Application.get_env(:noizu_simple_pool, :restart_type, :transient))
+      default_restart_type = (Application.get_env(:noizu_simple_pool_advanced, :worker_pool_restart_type, nil)
+                              || Application.get_env(:noizu_simple_pool_advanced, :restart_type, :transient))
 
-      default_max_restarts = (Application.get_env(:noizu_simple_pool, :worker_pool_max_restarts, nil)
-                              || Application.get_env(:noizu_simple_pool, :max_restarts, @default_max_restarts))
+      default_max_restarts = (Application.get_env(:noizu_simple_pool_advanced, :worker_pool_max_restarts, nil)
+                              || Application.get_env(:noizu_simple_pool_advanced, :max_restarts, @default_max_restarts))
 
-      default_max_seconds = (Application.get_env(:noizu_simple_pool, :worker_pool_max_seconds, nil)
-                             || Application.get_env(:noizu_simple_pool, :max_seconds, @default_max_seconds))
+      default_max_seconds = (Application.get_env(:noizu_simple_pool_advanced, :worker_pool_max_seconds, nil)
+                             || Application.get_env(:noizu_simple_pool_advanced, :max_seconds, @default_max_seconds))
 
-      default_strategy = (Application.get_env(:noizu_simple_pool, :worker_pool_strategy, nil)
-                          || Application.get_env(:noizu_simple_pool, :pool_strategy, @default_strategy))
+      default_strategy = (Application.get_env(:noizu_simple_pool_advanced, :worker_pool_strategy, nil)
+                          || Application.get_env(:noizu_simple_pool_advanced, :pool_strategy, @default_strategy))
 
 
-      default_layer2_restart_type = (Application.get_env(:noizu_simple_pool, :worker_pool_layer2_restart_type, nil)
-                                     || Application.get_env(:noizu_simple_pool, :worker_pool_restart_type, nil)
-                                     || Application.get_env(:noizu_simple_pool, :restart_type, :permanent))
+      default_layer2_restart_type = (Application.get_env(:noizu_simple_pool_advanced, :worker_pool_layer2_restart_type, nil)
+                                     || Application.get_env(:noizu_simple_pool_advanced, :worker_pool_restart_type, nil)
+                                     || Application.get_env(:noizu_simple_pool_advanced, :restart_type, :permanent))
 
-      default_layer2_max_restarts = (Application.get_env(:noizu_simple_pool, :worker_pool_layer2_max_restarts, nil)
-                                     || Application.get_env(:noizu_simple_pool, :worker_pool_max_restarts, nil)
-                                     || Application.get_env(:noizu_simple_pool, :max_restarts, @default_max_restarts))
+      default_layer2_max_restarts = (Application.get_env(:noizu_simple_pool_advanced, :worker_pool_layer2_max_restarts, nil)
+                                     || Application.get_env(:noizu_simple_pool_advanced, :worker_pool_max_restarts, nil)
+                                     || Application.get_env(:noizu_simple_pool_advanced, :max_restarts, @default_max_restarts))
 
-      default_layer2_max_seconds = (Application.get_env(:noizu_simple_pool, :worker_pool_layer2_max_seconds, nil)
-                                    || Application.get_env(:noizu_simple_pool, :worker_pool_max_seconds, nil)
-                                    || Application.get_env(:noizu_simple_pool, :max_seconds, @default_max_seconds))
+      default_layer2_max_seconds = (Application.get_env(:noizu_simple_pool_advanced, :worker_pool_layer2_max_seconds, nil)
+                                    || Application.get_env(:noizu_simple_pool_advanced, :worker_pool_max_seconds, nil)
+                                    || Application.get_env(:noizu_simple_pool_advanced, :max_seconds, @default_max_seconds))
 
       default_layer2_provider = Noizu.SimplePoolAdvanced.V3.WorkerSupervisor.Layer2Behaviour
 
