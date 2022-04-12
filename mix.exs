@@ -8,7 +8,7 @@ defmodule Noizu.AdvancedPool.Mixfile do
 
   def project do
     [app: :noizu_advanced_pool,
-      version: "2.1.2",
+      version: "2.1.3",
       elixir: "~> 1.9",
       package: package(),
       deps: deps(),
@@ -40,7 +40,7 @@ defmodule Noizu.AdvancedPool.Mixfile do
       {:markdown, github: "devinus/markdown", only: [:dev], optional: true}, # Markdown processor for ex_doc
       {:amnesia, git: "https://github.com/noizu/amnesia.git", ref: "9266002"}, # Mnesia Wrapper
 
-      {:noizu_core, github: "noizu/ElixirCore", tag: "1.0.11", override: true},
+      {:noizu_core, github: "noizu/ElixirCore", tag: "1.0.13", override: true},
       {:noizu_advanced_scaffolding, github: "noizu-labs/advanced_elixir_scaffolding", branch: "master", override: true},
       {:noizu_mnesia_versioning, github: "noizu/MnesiaVersioning", tag: "0.1.9"},
 

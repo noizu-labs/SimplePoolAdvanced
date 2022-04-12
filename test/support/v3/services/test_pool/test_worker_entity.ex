@@ -148,6 +148,27 @@ defmodule Noizu.AdvancedPool.Support.TestV3WorkerEntity do
   def record!(%__MODULE__{} = entity, _options), do: entity
 
 
+  def id_ok(o) do
+    r = ref(o)
+    r && {:ok, r} || {:error, o}
+  end
+  def ref_ok(o) do
+    r = ref(o)
+    r && {:ok, r} || {:error, o}
+  end
+  def sref_ok(o) do
+    r = sref(o)
+    r && {:ok, r} || {:error, o}
+  end
+  def entity_ok(o, options \\ %{}) do
+    r = entity(o, options)
+    r && {:ok, r} || {:error, o}
+  end
+  def entity_ok!(o, options \\ %{}) do
+    r = entity!(o, options)
+    r && {:ok, r} || {:error, o}
+  end
+
 
   defimpl Noizu.ERP, for: Noizu.AdvancedPool.Support.TestV3WorkerEntity do
     def id(obj) do
@@ -177,6 +198,29 @@ defmodule Noizu.AdvancedPool.Support.TestV3WorkerEntity do
     def entity!(obj, _options \\ nil) do
       obj
     end # end defimpl EntityReferenceProtocol, for: Tuple
+
+
+    def id_ok(o) do
+      r = ref(o)
+      r && {:ok, r} || {:error, o}
+    end
+    def ref_ok(o) do
+      r = ref(o)
+      r && {:ok, r} || {:error, o}
+    end
+    def sref_ok(o) do
+      r = sref(o)
+      r && {:ok, r} || {:error, o}
+    end
+    def entity_ok(o, options \\ %{}) do
+      r = entity(o, options)
+      r && {:ok, r} || {:error, o}
+    end
+    def entity_ok!(o, options \\ %{}) do
+      r = entity!(o, options)
+      r && {:ok, r} || {:error, o}
+    end
+
   end
 
 
