@@ -9,6 +9,8 @@ defmodule  Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Service.State do
   @sref "service-state"
   @persistence_layer {Noizu.AdvancedPool.V3.Database, cascade_block?: true, table: Noizu.AdvancedPool.V3.Database.Cluster.Service.State.Table}
   defmodule Entity do
+    @universal_identifier false
+    @universal_lookup false
     Noizu.DomainObject.noizu_entity() do
       identifier :atom
       public_field :status, :unknown

@@ -1,25 +1,16 @@
 #-------------------------------------------------------------------------------
 # Author: Keith Brings
-# Copyright (C) 2020 Noizu Labs, Inc. All rights reserved.
+# Copyright (C) 2022 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
 defmodule  Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Definition do
   @vsn 1.0
-  @type t :: %__MODULE__{
-               cluster: any,
-               monitors: Map.t,
-               telemetrics: Map.t,
-               meta: Map.t,
-               vsn: any
-             }
-
-  defstruct [
-    cluster: nil,
-    monitors: %{},
-    telemetrics: %{},
-    meta: %{},
-    vsn: @vsn
-  ]
+  use Noizu.SimpleObject
+  Noizu.SimpleObject.noizu_struct() do
+    public_field :cluster
+    public_field :monitors, %{}
+    public_field :telemetrics, %{}
+  end
 
   def new(cluster) do
     %__MODULE__{

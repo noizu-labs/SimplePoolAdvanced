@@ -3,13 +3,14 @@
 # Copyright (C) 2018 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule Noizu.AdvancedPool.V3.DispatchEntity do
+defmodule Noizu.AdvancedPool.MonitoringFramework.Server.Resources do
   @vsn 1.0
   use Noizu.SimpleObject
+
   Noizu.SimpleObject.noizu_struct() do
     public_field :identifier
-    public_field :state, :spawning
-    public_field :server
-    public_field :lock
+    public_field :time_stamp
+    public_field :cpu, %{nproc: 0, load: %{1 => 0.0, 5 => 0.0, 15 => 0.0, 30 => 0.0}}
+    public_field :ram, %{total: 0.0, allocated: 0.0}
   end
 end

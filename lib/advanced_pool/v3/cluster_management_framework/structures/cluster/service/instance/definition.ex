@@ -1,33 +1,20 @@
 #-------------------------------------------------------------------------------
 # Author: Keith Brings
-# Copyright (C) 2020 Noizu Labs, Inc. All rights reserved.
+# Copyright (C) 2022 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
 defmodule  Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Service.Instance.Definition do
   @vsn 1.0
-  @type t :: %__MODULE__{
-               service: any,
-               node: any,
-               launch_parameters: Map.t,
-               worker_window: Map.t,
-               weight: float,
-               monitors: Map.t,
-               telemetrics: Map.t,
-               meta: Map.t,
-               vsn: any
-             }
-
-  defstruct [
-    service: nil,
-    node: nil,
-    launch_parameters: :auto,
-    worker_window: %{low: nil, high: nil, target: nil},
-    weight: 1.0,
-    monitors: %{},
-    telemetrics: %{},
-    meta: %{},
-    vsn: @vsn
-  ]
+  use Noizu.SimpleObject
+  Noizu.SimpleObject.noizu_struct() do
+    public_field :service
+    public_field :node
+    public_field :launch_parameters, :auto
+    public_field :worker_window, %{low: nil, high: nil, target: nil}
+    public_field :weight, 1.0
+    public_field :monitors, %{}
+    public_field :telemetrics, %{}
+  end
 
   def new(service, node, worker_window, weight) do
     %__MODULE__{

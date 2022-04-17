@@ -1,25 +1,16 @@
 #-------------------------------------------------------------------------------
 # Author: Keith Brings
-# Copyright (C) 2020 Noizu Labs, Inc. All rights reserved.
+# Copyright (C) 2022 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
 defmodule  Noizu.AdvancedPool.V3.ClusterManagement.HealthReportDefinition do
   @vsn 1.0
-  @type t :: %__MODULE__{
-               subject: any,
-               checks: Map.t,
-               updated_on: DateTime.t,
-               meta: Map.t,
-               vsn: any
-             }
-
-  defstruct [
-    subject: nil,
-    checks: %{},
-    updated_on: nil,
-    meta: %{},
-    vsn: @vsn
-  ]
+  use Noizu.SimpleObject
+  Noizu.SimpleObject.noizu_struct() do
+    public_field :subject
+    public_field :checks, %{}
+    public_field :updated_on
+  end
 
   def new(subject) do
     %__MODULE__{

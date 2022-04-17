@@ -5,31 +5,17 @@
 
 defmodule  Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.Status do
   @vsn 1.0
-  @type t :: %__MODULE__{
-               node: any,
-               status: atom,
-               state: atom,
-               desired_state: atom,
-               health_report: Noizu.AdvancedPool.V3.ClusterManagement.HealthReport.t,
-               updated_on: DateTime.t,
-               state_changed_on: DateTime.t,
-               desired_state_changed_on: DateTime.t,
-               meta: Map.t,
-               vsn: any
-             }
-
-  defstruct [
-    node: nil,
-    status: :unknown,
-    state: :offline,
-    desired_state: :offline,
-    health_report: nil,
-    updated_on: nil,
-    state_changed_on: nil,
-    desired_state_changed_on: nil,
-    meta: %{},
-    vsn: @vsn
-  ]
+  use Noizu.SimpleObject
+  Noizu.SimpleObject.noizu_struct() do
+    public_field :node
+    public_field :status, :unknown
+    public_field :state, :offline
+    public_field :desired_state, :offline
+    public_field :health_report
+    public_field :updated_on
+    public_field :state_changed_on
+    public_field :desired_state_changed_on
+  end
 
   def new(node) do
     %__MODULE__{

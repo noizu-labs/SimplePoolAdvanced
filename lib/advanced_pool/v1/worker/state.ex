@@ -1,40 +1,19 @@
 #-------------------------------------------------------------------------------
 # Author: Keith Brings
-# Copyright (C) 2018 Noizu Labs, Inc. All rights reserved.
+# Copyright (C) 2022 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
 defmodule Noizu.AdvancedPool.Worker.State do
-alias Noizu.AdvancedPool.Worker.State
-  @type t :: %State{
-    initialized: boolean,
-    migrating: boolean,
-    worker_ref: tuple,
-    inner_state: any,
-    last_activity: any,
-    extended: any
-  }
+  alias Noizu.AdvancedPool.Worker.State
 
-  defstruct [
-    initialized: false,
-    migrating: false,
-    worker_ref: nil,
-    inner_state: nil,
-    last_activity: nil,
-    extended: %{}
-  ]
-
-  defimpl Inspect, for: Noizu.AdvancedPool.Worker.State do
-    import Inspect.Algebra
-    def inspect(entity, opts) do
-      heading = "#Worker.State(#{inspect entity.worker_ref})"
-      {separator, end_separator} = if opts.pretty, do: {"\n   ", "\n"}, else: {" ", " "}
-      inner = cond do
-        opts.limit == :infinity ->
-          concat(["<#{separator}", to_doc(Map.from_struct(entity), opts), "#{end_separator}>"])
-        true -> "<>"
-      end
-      concat [heading, inner]
-    end # end inspect/2
-  end # end defimpl
-
+  @vsn 1.0
+  use Noizu.SimpleObject
+  Noizu.SimpleObject.noizu_struct() do
+    public_field :initialized, false
+    public_field :migrating, false
+    public_field :worker_ref
+    public_field :inner_state
+    public_field :last_activity
+    public_field :extended, %{}
+  end
 end

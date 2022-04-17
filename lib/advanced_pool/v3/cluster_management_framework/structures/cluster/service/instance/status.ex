@@ -1,43 +1,25 @@
 #-------------------------------------------------------------------------------
 # Author: Keith Brings
-# Copyright (C) 2020 Noizu Labs, Inc. All rights reserved.
+# Copyright (C) 2022 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
 defmodule  Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Service.Instance.Status do
   @vsn 1.0
-  @type t :: %__MODULE__{
-               service: any,
-               node: any,
-               service_monitor: any,
-               service_process: any,
-               service_error: any,
-               status: atom,
-               state: atom,
-               pending_state: atom,
-               health_report: Noizu.AdvancedPool.V3.ClusterManagement.HealthReport.t,
-               updated_on: DateTime.t,
-               state_changed_on: DateTime.t,
-               pending_state_changed_on: DateTime.t,
-               meta: Map.t,
-               vsn: any
-             }
-
-  defstruct [
-    service: nil,
-    node: nil,
-    service_monitor: nil,
-    service_process: nil,
-    service_error: nil,
-    status: :unknown,
-    state: :offline,
-    pending_state: :offline,
-    health_report: nil,
-    updated_on: nil,
-    state_changed_on: nil,
-    pending_state_changed_on: nil,
-    meta: %{},
-    vsn: @vsn
-  ]
+  use Noizu.SimpleObject
+  Noizu.SimpleObject.noizu_struct() do
+    public_field :service
+    public_field :node
+    public_field :service_monitor
+    public_field :service_process
+    public_field :service_error
+    public_field :status, :unknown
+    public_field :state, :offline
+    public_field :pending_state, :offline
+    public_field :health_report
+    public_field :updated_on
+    public_field :state_changed_on
+    public_field :pending_state_changed_on
+  end
 
   def new(service, node, pool_supervisor_pid, error) do
     %__MODULE__{
