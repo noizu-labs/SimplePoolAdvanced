@@ -321,7 +321,7 @@ defmodule Noizu.AdvancedPool.V3.ServerBehaviour do
           end)
         end
         args = %{definition: final_definition, context: context}
-        GenServer.start_link(__MODULE__, args, name: __MODULE__, restart: :permanent)
+        Supervisor.start_link(__MODULE__, args, [{:name, __MODULE__}, {:restart, :permanent}])
       end
 
       #---------------

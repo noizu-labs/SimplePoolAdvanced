@@ -230,13 +230,13 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def start_link(ref, context) do
         verbose() && Logger.info(fn -> {banner("START_LINK/2 #{__MODULE__} (#{inspect ref})"), Noizu.ElixirCore.CallingContext.metadata(context)} end)
-        GenServer.start_link(__MODULE__, {ref, context})
+        Supervisor.start_link(__MODULE__, {ref, context}, [{:name, __MODULE__}, {:restart, :permanent}])
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def start_link(ref, migrate_args, context) do
         verbose() && Logger.info(fn -> {banner("START_LINK/3 #{__MODULE__} (#{inspect migrate_args})"), Noizu.ElixirCore.CallingContext.metadata(context)} end)
-        GenServer.start_link(__MODULE__, {:migrate, ref, migrate_args, context})
+        Supervisor.start_link(__MODULE__, {:migrate, ref, migrate_args, context}, [{:name, __MODULE__}, {:restart, :permanent}])
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
