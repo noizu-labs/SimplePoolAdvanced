@@ -124,7 +124,7 @@ defmodule Noizu.AdvancedPool.V3.AcceptanceTest do
     ref = Noizu.AdvancedPool.TestHelpers.unique_ref_v2(:one)
     sut = Noizu.AdvancedPool.Support.TestV3Pool.fetch!(ref, :inner_state, @context)
     case sut do
-      %Noizu.AdvancedPool.Support.TestV3WorkerEntity{} -> assert true == true
+      %Noizu.AdvancedPool.Support.TestV3Worker.Entity{} -> assert true == true
       _ -> assert sut == :start
     end
   end

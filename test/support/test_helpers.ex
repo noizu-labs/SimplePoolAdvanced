@@ -4,9 +4,9 @@
 #-------------------------------------------------------------------------------
 
 defmodule Noizu.AdvancedPool.TestHelpers do
-  def unique_ref_v2(:one), do: {:ref, Noizu.AdvancedPool.Support.TestV3WorkerEntity, "test_#{inspect :os.system_time(:microsecond)}"}
-  def unique_ref_v2(:two), do: {:ref, Noizu.AdvancedPool.Support.TestV3TwoWorkerEntity, "test_#{inspect :os.system_time(:microsecond)}"}
-  def unique_ref_v2(:three), do: {:ref, Noizu.AdvancedPool.Support.TestV3ThreeWorkerEntity, "test_#{inspect :os.system_time(:microsecond)}"}
+  def unique_ref_v2(:one), do: {:ref, Noizu.AdvancedPool.Support.TestV3Worker.Entity, "test_#{inspect :os.system_time(:microsecond)}"}
+  def unique_ref_v2(:two), do: {:ref, Noizu.AdvancedPool.Support.TestV3WorkerTwo.Entity, "test_#{inspect :os.system_time(:microsecond)}"}
+  def unique_ref_v2(:three), do: {:ref, Noizu.AdvancedPool.Support.TestV3WorkerThree.Entity, "test_#{inspect :os.system_time(:microsecond)}"}
 
   require Logger
   @pool_options %{hard_limit: 250, soft_limit: 150, target: 100}
@@ -122,7 +122,7 @@ defmodule Noizu.AdvancedPool.TestHelpers do
       health_report: Noizu.AdvancedPool.V3.ClusterManagement.HealthReport.new({:ref, Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Service.State.Entity, service}),
       telemetry_handler: telemetry_handler,
       event_handler: event_handler,
-    } |> Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Service.State.Repo.create!(context)
+    } |> Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Service.State.Repo.create!(context, override_identifier: true)
 
     #-------------------------------------
     # test_service_two
@@ -147,7 +147,7 @@ defmodule Noizu.AdvancedPool.TestHelpers do
       health_report: Noizu.AdvancedPool.V3.ClusterManagement.HealthReport.new({:ref, Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Service.State.Entity, service}),
       telemetry_handler: telemetry_handler,
       event_handler: event_handler,
-    } |> Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Service.State.Repo.create!(context)
+    } |> Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Service.State.Repo.create!(context, override_identifier: true)
 
     #-------------------------------------
     # test_service_three
@@ -172,7 +172,7 @@ defmodule Noizu.AdvancedPool.TestHelpers do
       health_report: Noizu.AdvancedPool.V3.ClusterManagement.HealthReport.new({:ref, Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Service.State.Entity, service}),
       telemetry_handler: telemetry_handler,
       event_handler: event_handler,
-    } |> Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Service.State.Repo.create!(context)
+    } |> Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Service.State.Repo.create!(context, override_identifier: true)
 
     #----------------------------------------------------------------
     # Node Manager Definitions
@@ -183,7 +183,7 @@ defmodule Noizu.AdvancedPool.TestHelpers do
       node_definition: Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.Definition.new(cluster_node, %{low: 0, high: 1000, target: 500}, %{low: 0.0, high: 85.0, target: 70.0}, %{low: 0.0, high: 85.0, target: 70.0}, %{low: 0.0, high: 85.0, target: :none}, 1.0),
       status_details: Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.Status.new(cluster_node ),
       health_report: Noizu.AdvancedPool.V3.ClusterManagement.HealthReport.new({:ref, Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.State.Entity, cluster_node }),
-    } |> Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.State.Repo.create!(context)
+    } |> Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.State.Repo.create!(context, override_identifier: true)
 
     cluster_node = :"second@127.0.0.1"
     %Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.State.Entity{
@@ -191,7 +191,7 @@ defmodule Noizu.AdvancedPool.TestHelpers do
       node_definition: Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.Definition.new(cluster_node, %{low: 0, high: 1000, target: 500}, %{low: 0.0, high: 85.0, target: 70.0}, %{low: 0.0, high: 85.0, target: 70.0}, %{low: 0.0, high: 85.0, target: :none}, 1.0),
       status_details: Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.Status.new(cluster_node ),
       health_report: Noizu.AdvancedPool.V3.ClusterManagement.HealthReport.new({:ref, Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.State.Entity, cluster_node }),
-    } |> Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.State.Repo.create!(context)
+    } |> Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.State.Repo.create!(context, override_identifier: true)
 
     #----------------------------------------------------------------
     # Populate Cluster Configuration
@@ -215,7 +215,7 @@ defmodule Noizu.AdvancedPool.TestHelpers do
       health_report: Noizu.AdvancedPool.V3.ClusterManagement.HealthReport.new({:ref, Noizu.AdvancedPool.V3.ClusterManagement.Cluster.State.Entity, :default_cluster}),
       telemetry_handler: telemetry_handler,
       event_handler: event_handler,
-    } |> Noizu.AdvancedPool.V3.ClusterManagement.Cluster.State.Repo.create!(context)
+    } |> Noizu.AdvancedPool.V3.ClusterManagement.Cluster.State.Repo.create!(context, override_identifier: true)
 
     :ok
   end
@@ -297,10 +297,10 @@ defmodule Noizu.AdvancedPool.TestHelpers do
       Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.NodeManager.start({:"second@127.0.0.1", %{}}, context)
       Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.NodeManager.bring_node_online(:"second@127.0.0.1", %{}, context)
       case Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.NodeManager.block_for_status(:"second@127.0.0.1", [:green, :degraded], context, 30_000) do
-        {:ok, _s} ->
+        {:ok, s} ->
           Logger.info("""
           ================================================================
-          !!! Test Cluster Services:  # {inspect s} !!!
+          !!! Test Cluster Services:  #{inspect s} !!!
           ================================================================
           """)
 

@@ -6,7 +6,7 @@ defmodule Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.NodeManager d
 
   use Noizu.AdvancedPool.V3.StandAloneServiceBehaviour,
       default_modules: [:pool_supervisor, :monitor],
-      worker_state_entity: Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.NodeManager.WorkerEntity,
+      worker_state_entity: Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.State.Entity,
       verbose: false
 
 
@@ -211,8 +211,9 @@ defmodule Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.NodeManager d
           v
           |> Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.State.Entity.reset(context, configuration)
           |> Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.State.Repo.update!(context)
-        _ -> Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.State.Entity.ref(node_name)
+        _ -> %Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.State.Entity{identifier: node_name}
       end
+      IO.puts "NODE STATE = #{inspect node_state}"
       # @TODO setup heart beat for background processing.
 
       %State{

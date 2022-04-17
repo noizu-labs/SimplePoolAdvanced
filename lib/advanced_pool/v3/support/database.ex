@@ -8,6 +8,41 @@ use Amnesia
 defdatabase Noizu.AdvancedPool.V3.Database do
   def database(), do: __MODULE__
 
+
+  def create_handler(%{__struct__: table} = record, _context, _options) do
+    table.write(record)
+  end
+
+  def create_handler!(%{__struct__: table} = record, _context, _options) do
+    table.write!(record)
+  end
+
+  def update_handler(%{__struct__: table} = record, _context, _options) do
+    table.write(record)
+  end
+
+  def update_handler!(%{__struct__: table} = record, _context, _options) do
+    table.write!(record)
+  end
+
+  def delete_handler(%{__struct__: table} = record, _context, _options) do
+    table.delete(record.identifier)
+  end
+
+  def delete_handler!(%{__struct__: table} = record, _context, _options) do
+    table.delete!(record.identifier)
+  end
+
+
+
+
+
+
+
+
+
+
+
   #=======================================================
   # Cluster Management Tables
   #=======================================================
