@@ -139,13 +139,15 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour do
       end)
     end
 
-
     def count_children(module) do
       {a,s, u, w} = Task.async_stream(
                       module.available_supervisors(),
                       fn(s) ->
-                        u = Supervisor.count_children(s)
-                        {u.active, u.specs, u.supervisors, u.workers}
+                        try do
+                          u = Supervisor.count_children(s)
+                          {u.active, u.specs, u.supervisors, u.workers}
+                        catch :exit, _ -> :error
+                        end
                       end,
                       [ordered: false, timeout: 60_000, on_timeout: :kill_task]
                     ) |> Enum.reduce({0,0,0,0}, fn(x, {acc_a, acc_s, acc_u, acc_w}) ->
