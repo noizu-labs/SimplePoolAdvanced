@@ -171,19 +171,49 @@ defmodule Noizu.AdvancedPool.V3.WorkerManagementBehaviour do
         """
         def release!(context, options \\ %{}), do: Provider.release!(@pool_server, context, options)
 
+        @doc """
 
-
-
-
-
+        """
         def host!(ref, context, options \\ %{}), do: Provider.host!(@pool_server, ref, context, options)
+
+        @doc """
+
+        """
         def record_event!(ref, event, details, context, options \\ %{}), do: Provider.record_event!(@pool_server, ref, event, details, context, options)
+
+        @doc """
+
+        """
         def events!(ref, context, options \\ %{}), do: Provider.events!(@pool_server, ref, context, options)
+
+        @doc """
+
+        """
         def set_node!(ref, context, options \\ %{}), do: Provider.set_node!(@pool_server, ref, context, options)
+
+        @doc """
+
+        """
         def register!(ref, context, options \\ %{}), do: Provider.register!(@pool_server, ref, context, options)
+
+        @doc """
+
+        """
         def unregister!(ref, context, options \\ %{}), do: Provider.unregister!(@pool_server, ref, context, options)
+
+        @doc """
+
+        """
         def obtain_lock!(ref, context, options \\ %{}), do: Provider.obtain_lock!(@pool_server, ref, context, options)
+
+        @doc """
+
+        """
         def release_lock!(ref, context, options \\ %{}), do: Provider.release_lock!(@pool_server, ref, context, options)
+
+        @doc """
+
+        """
         def process!(ref, context, options \\ %{}), do: Provider.process!(@pool_server, ref, context, options)
 
 

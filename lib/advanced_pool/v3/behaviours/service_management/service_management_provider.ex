@@ -9,7 +9,7 @@ defmodule Noizu.AdvancedPool.V3.ServiceManagement.ServiceManagementProvider do
   require Logger
 
   @doc """
-
+  Default Definition for Service
   """
   def default_definition(pool_server) do
     pool_server.meta()[:default_definition]
@@ -17,17 +17,17 @@ defmodule Noizu.AdvancedPool.V3.ServiceManagement.ServiceManagementProvider do
   end
 
   @doc """
-
+  Enable Server for handling services.
   """
   def enable_server!(_pool_server, _node), do: :pending # Not implemented for V1 either
 
   @doc """
-
+  Disable Server for handling services.
   """
   def disable_server!(_pool_server, _node), do: :pending # Not implemented for V1 either
 
   @doc """
-
+  Get status of Service
   """
   def status(pool_server, args \\ {}, context \\ nil), do: pool_server.router().internal_call({:status, args}, context)
 
@@ -62,7 +62,7 @@ defmodule Noizu.AdvancedPool.V3.ServiceManagement.ServiceManagementProvider do
 
 
   @doc """
-
+  Wait for service to reach target state.
   """
   def status_wait(pool_server, target_state, context, timeout \\ :infinity)
   def status_wait(pool_server, target_state, context, timeout) when is_atom(target_state) do
@@ -105,7 +105,7 @@ defmodule Noizu.AdvancedPool.V3.ServiceManagement.ServiceManagementProvider do
   end
 
   @doc """
-
+  Get service status.
   """
   def entity_status(pool_server, context, options \\ %{}) do
     try do
@@ -126,12 +126,12 @@ defmodule Noizu.AdvancedPool.V3.ServiceManagement.ServiceManagementProvider do
   end
 
   @doc """
-
+  Kill Pool.
   """
   def server_kill!(pool_server, args \\ {}, context \\ nil, options \\ %{}), do: pool_server.router().internal_cast({:server_kill!, args, options}, context, options)
 
   @doc """
-
+  Perform Service Health Check.
   """
   def service_health_check!(pool_server, %Noizu.ElixirCore.CallingContext{} = context) do
     pool_server.router().internal_system_call({:health_check!, {}, %{}}, context)
@@ -147,7 +147,7 @@ defmodule Noizu.AdvancedPool.V3.ServiceManagement.ServiceManagementProvider do
 
 
   @doc """
-
+  Record Service Event
   """
   def record_service_event!(pool_server, event, details, context, _options) do
     Logger.error("Service Manager V2 record_service_event NYI| #{inspect pool_server}, #{inspect event}, #{inspect details}", Noizu.ElixirCore.CallingContext.metadata(context))

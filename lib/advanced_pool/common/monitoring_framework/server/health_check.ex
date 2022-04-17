@@ -1,11 +1,12 @@
 #-------------------------------------------------------------------------------
 # Author: Keith Brings
-# Copyright (C) 2018 Noizu Labs, Inc. All rights reserved.
+# Copyright (C) 2022 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
 defmodule  Noizu.AdvancedPool.MonitoringFramework.Server.HealthCheck do
-  alias Noizu.AdvancedPool.MonitoringFramework.Server.Resources
-  alias Noizu.AdvancedPool.MonitoringFramework.LifeCycleEvent
+  @moduledoc """
+    Track the Health Status of a Server Node.
+  """
   @vsn 1.0
   use Noizu.SimpleObject
   Noizu.SimpleObject.noizu_struct() do

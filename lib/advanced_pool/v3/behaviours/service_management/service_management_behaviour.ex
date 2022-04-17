@@ -32,64 +32,64 @@ defmodule Noizu.AdvancedPool.V3.ServiceManagementBehaviour do
         alias Noizu.AdvancedPool.V3.ServiceManagement.ServiceManagementProvider, as: Provider
 
         @doc """
-
+        Obtain service default definition.
         """
         def default_definition(), do: Provider.default_definition(@pool_server)
 
         @doc """
-
+        Enable service.
         """
         def enable_server!(node), do: Provider.enable_server!(@pool_server, node)
 
         @doc """
-
+        Disable service.
         """
         def disable_server!(node), do: Provider.disable_server!(@pool_server, node)
 
         @doc """
-
+        Obtain service status.
         """
         def status(args \\ {}, context \\ nil), do: Provider.status(@pool_server, args, context)
 
         @doc """
-
+        Load service pool.
         """
         def load_pool(args \\ {}, context \\ nil, options \\ nil), do: Provider.load_pool(@pool_server, args, context, options)
 
         @doc """
-
+        Load pool complete callback.
         """
         def load_complete(this, process, context), do: Provider.load_complete(@pool_server, this, process, context)
 
         @doc """
-
+        Begin async load_pool.
         """
         def load_begin(this, process, context), do: Provider.load_begin(@pool_server, this, process, context)
 
         @doc """
-
+        Wait for service to meet target state.
         """
         def status_wait(target_state, context, timeout \\ :infinity), do: Provider.status_wait(@pool_server, target_state, context, timeout)
 
         @doc """
-
+        Get entity status
         """
         def entity_status(context, options \\ %{}), do: Provider.entity_status(@pool_server, context, options)
 
         @doc """
-
+        Kill service worker.
         """
         def server_kill!(args \\ {}, context \\ nil, options \\ %{}), do: Provider.server_kill!(@pool_server, args, context, options)
 
         @doc """
-
+        Perform service health check.
         """
         def service_health_check!(%Noizu.ElixirCore.CallingContext{} = context), do: Provider.service_health_check!(@pool_server, context)
         def service_health_check!(health_check_options, %Noizu.ElixirCore.CallingContext{} = context), do: Provider.service_health_check!(@pool_server, health_check_options, context)
         def service_health_check!(health_check_options, %Noizu.ElixirCore.CallingContext{} = context, options), do: Provider.service_health_check!(@pool_server, health_check_options, context, options)
 
         @doc """
-
+        Record service event.
         """
         def record_service_event!(event, details, context, options), do: Provider.record_service_event!(@pool_server, event, details, context, options)
 

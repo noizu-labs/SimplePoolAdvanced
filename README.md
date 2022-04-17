@@ -1,12 +1,12 @@
-SimplePool
+AdvancedPool
 ================
 
-**SimplePool** provides scaffolding for working with long lived distributed worker processes. 
+**AdvancedPool** provides scaffolding for working with long lived distributed worker processes. 
 SimplePool library has been highly optimized to work at scale and is capable of managing millions 
 of frequently accessed long lived processes, while exposing the ability for developers to override 
 internal behavior as needed by their individual projects or for specific worker types.    
 
-**SimplePool** provides support for 
+**AdvancedPool** provides support for 
 - monitoring services (failures per minute, etc.)
 - distributing load across a cluster.
 - counting workers across the distributed cluster.
@@ -49,17 +49,6 @@ Manages Layer2 Worker Supervisor Segments
 Layer 2 of the Pool.WorkerSupervisor node. Per process compile time settings and run time options control how many supervisors are spawned. 
 The large number of Segments coupled with fragmented Dispatch workers help to avoid per supervisor bottlenecks when rapidly spawning hundreds of thousands of workers on initial start.
 
-
-Version 2 
-----------------------------
-The SimplePool Library includes two alternative implementations. 
-To allow gradual migration of Pools from the previous implementation to the new implementation on existing projects. 
-
-Version2 libraries take advantage of newer Elixir features and seeks to reduce some of the compile time overhead introduced
-by the forced recompiles caused from heavy reliance of interconnected modules and metaprogramming. 
-Version2 additionally relies on ElixirScaffolding.V2 entity/repo types with the same considerations in mind.  
-
-
 How it Works
 ----------------------------
 (Additional Documentation Pending)
@@ -71,7 +60,7 @@ What Happens Behind The Scenes
 
 Example
 ----------------------------
-See test/support/v2/services/test_pool for an example of a simple server/worker setup.
+See test/support/v3/services/test_pool for an example of a simple server/worker setup.
 
 ```
  # Code Snippets Pending
@@ -79,7 +68,7 @@ See test/support/v2/services/test_pool for an example of a simple server/worker 
 
 Running Test Suite
 ----------------------------
-Because SimplePool coordinates activites between multiple nodes the test suite requires some additional steps to run. 
+Because AdvancedPool coordinates activities between multiple nodes the test suite requires some additional steps to run. 
 To run the suite first launch the second node using `./test-node.sh` then in a second console window launch the actual suite with `./run-test.sh`.
 
 

@@ -4,6 +4,10 @@
 #-------------------------------------------------------------------------------
 
 defmodule Noizu.AdvancedPool.MonitoringFramework.Server.Resources do
+  @moduledoc """
+  Track Node Server Resources.
+  """
+
   @vsn 1.0
   use Noizu.SimpleObject
 

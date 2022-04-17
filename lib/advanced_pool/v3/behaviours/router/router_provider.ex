@@ -91,7 +91,7 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   #---------------------------------------------
 
   @doc """
-    Forward a call to appropriate worker. Spawn worker if not currently active.
+    Forward a call to appropriate worker host node, where rs_call will be invoked. Spawn worker if not currently active.
   """
   def s_call_crash_protection!(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
     timeout = timeout || 30_000 #@TODO final logic
@@ -127,6 +127,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     end # end try
   end
 
+  @doc """
+    Forward a call to appropriate worker host node, where rs_call will be invoked. No action taken if node does not exist.
+  """
   def s_call_crash_protection(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
     case pool_server.worker_management().worker_ref!(identifier, context) do
       e = {:error, _details} -> e
@@ -143,6 +146,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     end
   end
 
+  @doc """
+    Version of s_call that will be invoked on a worker process' host node.
+  """
   def rs_call_crash_protection(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
     extended_call = pool_server.router().extended_call(:s_call, identifier, call, context, options, timeout)
     try do
@@ -153,6 +159,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     end # end try
   end
 
+  @doc """
+  Forward s_cast to worker's host node. Spawn process if not found.
+  """
   def s_cast_crash_protection!(pool_server, identifier, call, context, options \\ nil) do
     case pool_server.worker_management().worker_ref!(identifier, context) do
       e = {:error, _details} -> e
@@ -169,6 +178,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     end
   end
 
+  @doc """
+    Version of s_cast! that will be invoked on a worker process' host node.
+  """
   def rs_cast_crash_protection!(pool_server, identifier, call, context, options \\ nil) do
     timeout = nil
     extended_call = pool_server.router().extended_call(:s_cast!, identifier, call, context, options, timeout)
@@ -180,6 +192,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     end # end try
   end
 
+  @doc """
+  Forward s_cast to worker's host node.
+  """
   def s_cast_crash_protection(pool_server, identifier, call, context, options \\ nil) do
     case pool_server.worker_management().worker_ref!(identifier, context) do
       e = {:error, _details} -> e
@@ -196,6 +211,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     end
   end
 
+  @doc """
+    Version of s_cast that will be invoked on a worker process' host node.
+  """
   def rs_cast_crash_protection(pool_server, identifier, call, context, options \\ nil) do
     timeout = nil
     extended_call = pool_server.router().extended_call(:s_cast, identifier, call, context, options, timeout)
@@ -234,6 +252,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     pool_server.router().s_call_unsafe(identifier, extended_call, context, options, timeout)
   end
 
+  @doc """
+  Forward s_call to node host, no crash protection.
+  """
   def s_call_no_crash_protection(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
     case pool_server.worker_management().worker_ref!(identifier, context) do
       e = {:error, _details} -> e
@@ -246,11 +267,17 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     end
   end
 
+  @doc """
+    Implementation of s_call invoked on host node.
+  """
   def rs_call_no_crash_protection(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
     extended_call = pool_server.router().extended_call(:s_call, identifier, call, context, options, timeout)
     pool_server.router().s_call_unsafe(identifier, extended_call, context, options, timeout)
   end
 
+  @doc """
+    Forward s_cast to server node with no crash protection.
+  """
   def s_cast_no_crash_protection!(pool_server, identifier, call, context, options \\ nil) do
     case pool_server.worker_management().worker_ref!(identifier, context) do
       e = {:error, _details} -> e
@@ -263,6 +290,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     end
   end
 
+  @doc """
+    Implementation of s_cast invoked on host node.
+  """
   def rs_cast_no_crash_protection!(pool_server, identifier, call, context, options \\ nil) do
     timeout = nil
     extended_call = pool_server.router().extended_call(:s_cast!, identifier, call, context, options, timeout)
@@ -281,6 +311,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     end
   end
 
+  @doc """
+    Implementation of s_cast invoked on host node.
+  """
   def rs_cast_no_crash_protection(pool_server, identifier, call, context, options \\ nil) do
     timeout = nil
     extended_call = pool_server.router().extended_call(:s_cast, identifier, call, context, options, timeout)
@@ -290,11 +323,17 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   #----------------------------------------
   # extended calls
   #----------------------------------------
+  @doc """
+    Prepare extended call tuple.
+  """
   def extended_call_with_redirect_support(pool_server, s_type, ref, call, context, options, timeout \\ nil) do
     call = extended_call_without_redirect_support(pool_server, s_type, ref, call, context, options, timeout)
     {:msg_envelope, {pool_server.pool_worker(), {s_type, ref, timeout}}, call}
   end
 
+  @doc """
+    Prepare extended call tuple.
+  """
   def extended_call_without_redirect_support(_pool_server, s_type, _ref, call, context, _options, _timeout \\ nil) do
     {msg_prefix, spawn_type} = case s_type do
       # Standard Message
@@ -324,7 +363,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   #----------------------------------------
   #
   #----------------------------------------
-
+  @doc """
+    Call PoolServer (self)
+  """
   def self_call(pool_server, call, context \\ nil, options \\ nil) do
     # note, we leave out some of the complexity from the V1 implementation, which verifies that a given node
     # supports the pool service we represent.
@@ -333,6 +374,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     GenServer.call(pool_server, extended_call, timeout)
   end
 
+  @doc """
+    Cast to PoolServer (self)
+  """
   def self_cast(pool_server, call, context \\ nil, _options \\ nil) do
     # note, we leave out some of the complexity from the V1 implementation, which verifies that a given node
     # supports the pool service we represent.
@@ -347,12 +391,18 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   #----------------------------------------
   #
   #----------------------------------------
+  @doc """
+    Make internal system call to pool server ( se lf)
+  """
   def internal_system_call(pool_server, call, context \\ nil, options \\ nil) do
     extended_call = {:m, call, context}
     timeout = options[:timeout] || pool_server.router().option(:defaul_timeout, @default_timeout)
     GenServer.call(pool_server, extended_call, timeout)
   end
 
+  @doc """
+    Make internal system cast to pool server ( se lf)
+  """
   def internal_system_cast(pool_server, call, context \\ nil, _options \\ nil) do
     extended_call = {:m, call, context}
     GenServer.cast(pool_server, extended_call)
@@ -361,6 +411,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   #----------------------------------------
   #
   #----------------------------------------
+  @doc """
+    Make remote call to pool server (redirecting to hose if appropriate.
+  """
   def remote_system_call(pool_server, remote_node, call, context \\ nil, options \\ nil) do
     extended_call = {:m, call, context}
     timeout = options[:timeout] || pool_server.router().option(:defaul_timeout, @default_timeout)
@@ -371,6 +424,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     end
   end
 
+  @doc """
+    Make remote cast to pool server (redirecting to hose if appropriate.
+  """
   def remote_system_cast(pool_server, remote_node, call, context \\ nil, _options \\ nil) do
     extended_call = {:m, call, context}
     if (remote_node == node()) do
@@ -383,12 +439,18 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   #----------------------------------------
   #
   #----------------------------------------
+  @doc """
+    Make internal call to pool server.
+  """
   def internal_call(pool_server, call, context \\ nil, options \\ nil) do
     extended_call = {:i, call, context}
     timeout = options[:timeout] || pool_server.router().option(:defaul_timeout, @default_timeout)
     GenServer.call(pool_server, extended_call, timeout)
   end
 
+  @doc """
+    Make internal cast to pool server.
+  """
   def internal_cast(pool_server, call, context \\ nil, _options \\ nil) do
     extended_call = {:i, call, context}
     GenServer.cast(pool_server, extended_call)
@@ -397,6 +459,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   #----------------------------------------
   #
   #----------------------------------------
+  @doc """
+    Make remote call to pool server.
+  """
   def remote_call(pool_server, remote_node, call, context \\ nil, options \\ nil) do
     extended_call = {:i, call, context}
     timeout = options[:timeout] || pool_server.router().option(:defaul_timeout, @default_timeout)
@@ -407,6 +472,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     end
   end
 
+  @doc """
+    Make remote cast to pool server.
+  """
   def remote_cast(pool_server, remote_node, call, context \\ nil, _options \\ nil) do
     extended_call = {:i, call, context}
     if (remote_node == node()) do
@@ -419,6 +487,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   #----------------------------------------
   #
   #----------------------------------------
+  @doc """
+    Forward link to worker.
+  """
   def link_forward!(pool_server, %Link{} = link, call, context, options \\ nil) do
     timeout = nil
     extended_call = pool_server.router().extended_call(:s_cast, link.ref, call, context, options, timeout)
@@ -452,6 +523,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   #----------------------------------------
   #
   #----------------------------------------
+  @doc """
+    Get direct link to worker.
+  """
   def get_direct_link!(pool_server, ref, context, options \\ %{}) do
     options = options || %{}
     case pool_server.pool_worker_state_entity().ref(ref) do
@@ -493,6 +567,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   #----------------------------------------
   #
   #----------------------------------------
+  @doc """
+    Deal with s_call/s_cast exception
+  """
   defp handle_s_exception(exception, s_type, pool_server, identifier, extended_call, timeout, context, options) do
     case exception do
       {:timeout, c} ->

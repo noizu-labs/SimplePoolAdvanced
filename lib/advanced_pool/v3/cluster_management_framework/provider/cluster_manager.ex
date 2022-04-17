@@ -368,7 +368,7 @@ defmodule Noizu.AdvancedPool.V3.ClusterManagementFramework.ClusterManager do
       end
     end
 
-    def infp_router_user({:spawn, envelope}, state), do: info_router_user(envelope, state)
+    def info_router_user({:spawn, envelope}, state), do: info_router_user(envelope, state)
     def info_router_user({:passive, envelope}, state), do: info_router_user(envelope, state)
     def info_router_user(envelope, state) do
       case envelope do
