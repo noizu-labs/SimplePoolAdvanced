@@ -237,7 +237,7 @@ defmodule Noizu.AdvancedPool.V3.SettingsBehaviour do
 
   defmodule Base do
     defmacro __using__(opts) do
-      option_settings = Macro.expand(opts[:option_settings], __CALLER__)
+      option_settings = Macro.expand(opts[:option_settings], __ENV__)
       options = option_settings.effective_options
       pool_worker_state_entity = Map.get(options, :worker_state_entity, :auto)
       stand_alone = opts[:stand_alone] || false
@@ -376,7 +376,7 @@ defmodule Noizu.AdvancedPool.V3.SettingsBehaviour do
   defmodule Inherited do
     defmacro __using__(opts) do
       depth = opts[:depth] || 1
-      option_settings = Macro.expand(opts[:option_settings], __CALLER__)
+      option_settings = Macro.expand(opts[:option_settings], __ENV__)
       options = option_settings.effective_options
 
       pool_worker_state_entity = Map.get(options, :worker_state_entity, :auto)
