@@ -65,7 +65,8 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
         true -> :ok
       end
       # TODO V2 version needed.
-      {:ok, %Noizu.AdvancedPool.Worker.State{extended: %{set_node_task: r || task}, initialized: :delayed_init, worker_ref: ref, inner_state: {:transfer, initial_state}}}
+      state = %Noizu.AdvancedPool.Worker.State{extended: %{set_node_task: r || task}, initialized: :delayed_init, worker_ref: ref, inner_state: {:transfer, initial_state}}
+      {:ok, state}
     end
 
     def init(pool_worker, {ref, context}) do
@@ -86,7 +87,8 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
         true -> :ok
       end
       # TODO V2 version needed.
-      {:ok, %Noizu.AdvancedPool.Worker.State{extended: %{set_node_task:  r || task}, initialized: :delayed_init, worker_ref: ref, inner_state: :start}}
+      state = %Noizu.AdvancedPool.Worker.State{extended: %{set_node_task:  r || task}, initialized: :delayed_init, worker_ref: ref, inner_state: :start}
+      {:ok, state}
     end
 
     def delayed_init(pool_worker, state, context) do
@@ -230,13 +232,13 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def start_link(ref, context) do
         verbose() && Logger.info(fn -> {banner("START_LINK/2 #{__MODULE__} (#{inspect ref})"), Noizu.ElixirCore.CallingContext.metadata(context)} end)
-        Supervisor.start_link(__MODULE__, {ref, context}, [{:name, __MODULE__}, {:restart, :permanent}])
+        GenServer.start_link(__MODULE__, {ref, context}, [{:name, __MODULE__}, {:restart, :permanent}])
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def start_link(ref, migrate_args, context) do
         verbose() && Logger.info(fn -> {banner("START_LINK/3 #{__MODULE__} (#{inspect migrate_args})"), Noizu.ElixirCore.CallingContext.metadata(context)} end)
-        Supervisor.start_link(__MODULE__, {:migrate, ref, migrate_args, context}, [{:name, __MODULE__}, {:restart, :permanent}])
+        GenServer.start_link(__MODULE__, {:migrate, ref, migrate_args, context}, [{:name, __MODULE__}, {:restart, :permanent}])
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"

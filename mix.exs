@@ -43,7 +43,8 @@ defmodule Noizu.AdvancedPool.Mixfile do
       {:noizu_core, github: "noizu/ElixirCore", tag: "1.0.15", override: true},
       {:noizu_advanced_scaffolding, github: "noizu-labs/advanced_elixir_scaffolding", branch: "master", override: true},
       {:noizu_mnesia_versioning, github: "noizu/MnesiaVersioning", tag: "0.1.9"},
-
+      {:plug, "~> 1.11.1", optional: true},
+      {:telemetry, "~> 1.1.0", optional: true, override: true},
       {:poison, "~> 3.1.0", override: true},
       {:fastglobal, "~> 1.0"}, # https://github.com/discordapp/fastglobal
       {:semaphore, "~> 1.0"}, # https://github.com/discordapp/semaphore

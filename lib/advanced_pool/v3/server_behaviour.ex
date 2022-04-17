@@ -321,7 +321,7 @@ defmodule Noizu.AdvancedPool.V3.ServerBehaviour do
           end)
         end
         args = %{definition: final_definition, context: context}
-        Supervisor.start_link(__MODULE__, args, [{:name, __MODULE__}, {:restart, :permanent}])
+        GenServer.start_link(__MODULE__, args, [{:name, __MODULE__}, {:restart, :permanent}])
       end
 
       #---------------
@@ -337,7 +337,7 @@ defmodule Noizu.AdvancedPool.V3.ServerBehaviour do
         state = initial_state(definition, context)
 
         __MODULE__.ServiceManagement.record_service_event!(:start, %{definition: definition, options: @option_settings}, context, %{})
-        spawn fn -> __MODULE__.enable_server!() end
+        __MODULE__.enable_server!()
         {:ok, state}
       end
 

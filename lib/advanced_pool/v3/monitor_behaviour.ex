@@ -72,7 +72,7 @@ defmodule Noizu.AdvancedPool.V3.MonitorBehaviour do
       #---------------
       def start_link(server_process \\ :error, definition \\ :default, context \\ nil) do
         # @todo :wip
-        Supervisor.start_link(__MODULE__, [server_process, definition, context], [{:name, __MODULE__}, {:restart, :permanent}])
+        GenServer.start_link(__MODULE__, [server_process, definition, context], [{:name, __MODULE__}, {:restart, :permanent}])
       end
 
       #---------------
