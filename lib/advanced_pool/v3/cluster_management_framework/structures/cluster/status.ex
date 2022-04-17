@@ -8,7 +8,7 @@ defmodule  Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Status do
   use Noizu.SimpleObject
   Noizu.SimpleObject.noizu_struct() do
     public_field :cluster
-    public_field :cluster, :unknown
+    public_field :status, :unknown
     public_field :state, :offline
     public_field :desired_state, :offline
     public_field :health_report
