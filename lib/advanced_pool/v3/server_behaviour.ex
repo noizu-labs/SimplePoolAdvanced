@@ -235,7 +235,7 @@ defmodule Noizu.AdvancedPool.V3.ServerBehaviour do
   #=================================================================
   defmacro __using__(options) do
     implementation = Keyword.get(options || [], :implementation, Noizu.AdvancedPool.V3.ServerBehaviour.Default)
-    option_settings = implementation.prepare_options(options)
+    option_settings = implementation.prepare_options(Macro.expand(options, __ENV__))
 
     # Temporary Hardcoding
     router_provider = Noizu.AdvancedPool.V3.RouterBehaviour.DefaultProvider
@@ -337,7 +337,7 @@ defmodule Noizu.AdvancedPool.V3.ServerBehaviour do
         state = initial_state(definition, context)
 
         __MODULE__.ServiceManagement.record_service_event!(:start, %{definition: definition, options: @option_settings}, context, %{})
-        __MODULE__.enable_server!()
+        spawn fn -> __MODULE__.enable_server!() end
         {:ok, state}
       end
 
