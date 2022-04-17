@@ -203,12 +203,21 @@ defmodule Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.ServiceManage
   #--------------------------
   def select_host(service, _ref, context, _opts \\ %{}) do
     # Temporary rough logic, needs to check for service instance/node status, lock status, weight, health, etc.
-    c = Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Service.State.Repo.get!(service, context) # c = Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Service.State.Repo.cached(service, context)
+    c = Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Service.State.Repo.cached(service, context) # c = Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Service.State.Repo.cached(service, context)
     instances = (c && c.instance_definitions || %{}) |> Enum.map(fn({k, _v}) -> k end)
     case Enum.take_random(instances, 1) do
       [n] -> {:ack, n}
       _ -> {:nack, :no_available_hosts}
     end
+  end
+
+  #--------------------------
+  # hosts/2
+  #--------------------------
+  def hosts(service, context) do
+    # Temporary rough logic, needs to check for service instance/node status, lock status, weight, health, etc.
+    c = Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Service.State.Repo.cached(service, context) # c = Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Service.State.Repo.cached(service, context)
+    (c && c.instance_definitions || %{}) |> Enum.map(fn({k, _v}) -> k end)
   end
 
   #======================================================
