@@ -5,7 +5,7 @@
 
 defmodule Noizu.AdvancedPool.Support.TestV3Pool do
   #alias Noizu.Scaffolding.CallingContext
-  use Noizu.AdvancedPool.V3.PoolBehaviour,
+  use Noizu.AdvancedPool.PoolBehaviour,
       default_modules: [:pool_supervisor, :worker_supervisor, :monitor],
       worker_state_entity: Noizu.AdvancedPool.Support.TestV3Worker.Entity,
       dispatch_table: Noizu.AdvancedPool.TestDatabase.TestV3Pool.Dispatch.Table,

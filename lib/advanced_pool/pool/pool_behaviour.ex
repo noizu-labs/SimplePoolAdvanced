@@ -13,7 +13,22 @@ defmodule Noizu.AdvancedPool.PoolBehaviour do
     options = option_settings[:effective_options]
     default_modules = options[:default_modules]
     max_supervisors = options[:max_supervisors]
-    message_processing_provider = Noizu.AdvancedPool.MessageProcessingBehaviour.DefaultProvider
+    message_processing_provider = options[:message_provider] || Noizu.AdvancedPool.MessageProcessingBehaviour.DefaultProvider
+
+    include_worker_module = default_modules[:worker]
+    include_server_module = default_modules[:server]
+    include_worker_supervisor_module = default_modules[:worker_supervisor]
+    include_pool_supervisor_module = default_modules[:pool_supervisor]
+    include_monitor_module = default_modules[:monitor]
+    include_record_keeper_module = default_modules[:record_keeper]
+
+    worker_module_options = options[:worker_options]
+    server_module_options = options[:server_options]
+    worker_supervisor_module_options = options[:worker_supervisor_options]
+    pool_supervisor_module_options = options[:pool_supervisor_options]
+    monitor_module_options = options[:monitor_options]
+    record_keeper_module_options = options[:record_keeper_options]
+
 
     quote do
       require Logger
@@ -31,7 +46,16 @@ defmodule Noizu.AdvancedPool.PoolBehaviour do
       #===========================================
       # Methods
       #===========================================
+
+
+      #---------------------------------------
+      #
+      #---------------------------------------
       defdelegate start(definition \\ :default, context \\ nil), to: __MODULE__.PoolSupervisor, as: :start_link
+
+      #---------------------------------------
+      #
+      #---------------------------------------
       def start_remote(elixir_node, definition \\ :default, context \\ nil) do
         if (elixir_node == node()) do
           __MODULE__.PoolSupervisor.start_link(definition, context)
@@ -40,6 +64,9 @@ defmodule Noizu.AdvancedPool.PoolBehaviour do
         end
       end
 
+      #---------------------------------------
+      #
+      #---------------------------------------
       def stand_alone(), do: false
 
 
@@ -116,40 +143,40 @@ defmodule Noizu.AdvancedPool.PoolBehaviour do
       #--------------------------
       # Sub Modules
       #--------------------------
-      if (unquote(default_modules[:worker])) do
+      if (unquote(include_worker_module)) do
         defmodule Worker do
-          use Noizu.AdvancedPool.V3.WorkerBehaviour, unquote(options[:worker_options])
+          use Noizu.AdvancedPool.V3.WorkerBehaviour, unquote(worker_module_options)
         end
       end
 
-      if (unquote(default_modules[:server])) do
+      if (unquote(include_server_module)) do
         defmodule Server do
-          use Noizu.AdvancedPool.V3.ServerBehaviour, unquote(options[:server_options])
+          use Noizu.AdvancedPool.V3.ServerBehaviour, unquote(server_module_options)
           def lazy_load(state), do: state
         end
       end
 
-      if (unquote(default_modules[:worker_supervisor])) do
+      if (unquote(include_worker_supervisor_module)) do
         defmodule WorkerSupervisor do
-          use Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour, unquote(options[:worker_supervisor_options])
+          use Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour, unquote(worker_supervisor_module_options)
         end
       end
 
-      if (unquote(default_modules[:pool_supervisor])) do
+      if (unquote(include_pool_supervisor_module)) do
         defmodule PoolSupervisor do
-          use Noizu.AdvancedPool.V3.PoolSupervisorBehaviour, unquote(options[:pool_supervisor_options])
+          use Noizu.AdvancedPool.V3.PoolSupervisorBehaviour, unquote(pool_supervisor_module_options)
         end
       end
 
-      if (unquote(default_modules[:monitor])) do
+      if (unquote(include_monitor_module)) do
         defmodule Monitor do
-          use Noizu.AdvancedPool.V3.MonitorBehaviour, unquote(options[:monitor_options])
+          use Noizu.AdvancedPool.V3.MonitorBehaviour, unquote(monitor_module_options)
         end
       end
 
-      if (unquote(default_modules[:record_keeper])) do
+      if (unquote(include_record_keeper_module)) do
         defmodule RecordKeeper do
-          use Noizu.AdvancedPool.RecordKeeperBehaviour, unquote(options[:record_keeper_options])
+          use Noizu.AdvancedPool.RecordKeeperBehaviour, unquote(record_keeper_module_options)
         end
       end
 
