@@ -101,22 +101,22 @@ defmodule Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.NodeManager d
   #--------------------------
   # service_definition/3
   #--------------------------
-  defdelegate service_definition(service, context, options \\ %{}), to: Noizu.AdvancedPool.V3.ClusterManagementFramework.ClusterManager
+  def service_definition(service, context, options \\ %{}), do: Noizu.AdvancedPool.V3.ClusterManagementFramework.ClusterManager.service_definition(service, context, options)
 
   #--------------------------
   # service_status_details/3
   #--------------------------
-  defdelegate service_status_details(service, context, options \\ %{}), to: Noizu.AdvancedPool.V3.ClusterManagementFramework.ClusterManager
+  def service_status_details(service, context, options \\ %{}), do: Noizu.AdvancedPool.V3.ClusterManagementFramework.ClusterManager.service_status_details(service, context, options)
 
   #--------------------------
   # block_for_service_state/5
   #--------------------------
-  defdelegate block_for_service_state(service, desired_state, context, options, timeout \\ :infinity), to: Noizu.AdvancedPool.V3.ClusterManagementFramework.ClusterManager
+  def block_for_service_state(service, desired_state, context, options, timeout \\ :infinity), do: Noizu.AdvancedPool.V3.ClusterManagementFramework.ClusterManager.block_for_service_state(service, desired_state, context, options, timeout)
 
   #--------------------------
   # block_for_service_status/5
   #--------------------------
-  defdelegate block_for_service_status(service, desired_status, context, options, timeout \\ :infinity), to: Noizu.AdvancedPool.V3.ClusterManagementFramework.ClusterManager
+  def block_for_service_status(service, desired_status, context, options, timeout \\ :infinity), do: Noizu.AdvancedPool.V3.ClusterManagementFramework.ClusterManager.block_for_service_status(service, desired_status, context, options, timeout)
 
   #--------------------------
   # lock_service_instance/4

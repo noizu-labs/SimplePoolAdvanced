@@ -51,16 +51,19 @@ defmodule Noizu.AdvancedPool.PoolBehaviour do
       #---------------------------------------
       #
       #---------------------------------------
-      defdelegate start(definition \\ :default, context \\ nil), to: __MODULE__.PoolSupervisor, as: :start_link
+      @doc """
+      GenServer.start pool.
+      """
+      def start(definition \\ :default, context \\ nil), do: __supervisor__().start_link(definition, context)
 
       #---------------------------------------
       #
       #---------------------------------------
       def start_remote(elixir_node, definition \\ :default, context \\ nil) do
         if (elixir_node == node()) do
-          __MODULE__.PoolSupervisor.start_link(definition, context)
+          __supervisor__().start_link(definition, context)
         else
-          :rpc.call(elixir_node, __MODULE__.PoolSupervisor, :start_link, [definition, context])
+          :rpc.call(elixir_node, __supervisor__(), :start_link, [definition, context])
         end
       end
 
@@ -77,38 +80,38 @@ defmodule Noizu.AdvancedPool.PoolBehaviour do
       # to delivery commands to the correct worker processes.
       #----------------------------------------------------
       #===========================================
-      defdelegate s_call(identifier, call, context, options \\ nil, timeout \\ nil), to: __MODULE__.Server.Router
-      defdelegate s_call!(identifier, call, context, options \\ nil, timeout \\ nil), to: __MODULE__.Server.Router
-      defdelegate s_cast(identifier, call, context, options \\ nil), to: __MODULE__.Server.Router
-      defdelegate s_cast!(identifier, call, context, options \\ nil), to: __MODULE__.Server.Router
-      defdelegate get_direct_link!(ref, context, options \\ nil), to: __MODULE__.Server.Router
-      defdelegate link_forward!(link, call, context, options \\ nil), to: __MODULE__.Server.Router
-      defdelegate server_call(call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :self_call
-      defdelegate server_cast(call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :self_cast
-      defdelegate server_internal_call(call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :internal_call
-      defdelegate server_internal_cast(call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :internal_cast
-      defdelegate remote_server_internal_call(remote_node, call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :remote_call
-      defdelegate remote_server_internal_cast(remote_node, call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :remote_cast
-      defdelegate server_system_call(call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :internal_system_call
-      defdelegate server_system_cast(call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :internal_system_cast
-      defdelegate remote_server_system_call(elixir_node, call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :remote_system_call
-      defdelegate remote_server_system_cast(elixir_node, call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :remote_system_cast
+      def s_call(identifier, call, context, options \\ nil, timeout \\ nil), do: __router__().s_call(identifier, call, context, options, timeout)
+      def s_call!(identifier, call, context, options \\ nil, timeout \\ nil), do: __router__().s_call!(identifier, call, context, options, timeout)
+      def s_cast(identifier, call, context, options \\ nil), do: __router__().s_cast(identifier, call, context, options)
+      def s_cast!(identifier, call, context, options \\ nil), do: __router__().s_cast!(identifier, call, context, options)
+      def get_direct_link!(ref, context, options \\ nil), do: __router__().get_direct_link!(ref, context, options)
+      def link_forward!(link, call, context, options \\ nil), do: __router__().link_forward!(link, call, context, options)
+      def server_call(call, context \\ nil, options \\ nil), do: __router__().self_call(call, context, options)
+      def server_cast(call, context \\ nil, options \\ nil), do: __router__().self_cast(call, context, options)
+      def server_internal_call(call, context \\ nil, options \\ nil), do: __router__().internal_call(call, context, options)
+      def server_internal_cast(call, context \\ nil, options \\ nil), do: __router__().internal_cast(call, context, options)
+      def remote_server_internal_call(remote_node, call, context \\ nil, options \\ nil), do: __router__().remote_call(remote_node, call, context, options)
+      def remote_server_internal_cast(remote_node, call, context \\ nil, options \\ nil), do: __router__().remote_cast(remote_node, call, context, options)
+      def server_system_call(call, context \\ nil, options \\ nil), do: __router__().internal_system_call(call, context, options)
+      def server_system_cast(call, context \\ nil, options \\ nil), do: __router__().internal_system_cast(call, context, options)
+      def remote_server_system_call(elixir_node, call, context \\ nil, options \\ nil), do: __router__().remote_system_call(elixir_node, call, context, options)
+      def remote_server_system_cast(elixir_node, call, context \\ nil, options \\ nil), do: __router__().remote_system_cast(elixir_node, call, context, options)
 
       #==========================================================
       # Built in Worker Convenience Methods.
       #==========================================================
-      defdelegate wake!(ref, request \\ :state, context \\ nil, options \\ nil), to: __MODULE__.Server
-      defdelegate fetch!(ref, request \\ :state, context \\ nil, options \\ nil), to: __MODULE__.Server
-      defdelegate save!(ref, args \\ {}, context \\ nil, options \\ nil), to: __MODULE__.Server
-      defdelegate save_async!(ref, args \\ {}, context \\ nil, options \\ nil), to: __MODULE__.Server
-      defdelegate reload!(ref, args \\ {}, context \\ nil, options \\ nil), to: __MODULE__.Server
-      defdelegate reload_async!(ref, args \\ {}, context \\ nil, options \\ nil), to: __MODULE__.Server
-      defdelegate load!(ref, args \\ {}, context \\ nil, options \\ nil), to: __MODULE__.Server
-      defdelegate load_async!(ref, args \\ {}, context \\ nil, options \\ nil), to: __MODULE__.Server
-      defdelegate ping(ref, args \\ {}, context \\ nil, options \\ nil), to: __MODULE__.Server
-      defdelegate kill!(ref, args \\ {}, context \\ nil, options \\ nil), to: __MODULE__.Server
-      defdelegate crash!(ref, args \\ {}, context \\ nil, options \\ nil), to: __MODULE__.Server
-      defdelegate health_check!(ref, args \\ {}, context \\ nil, options \\ nil), to: __MODULE__.Server
+      def wake!(ref, request \\ :state, context \\ nil, options \\ nil), do: __server__().wake!(ref, request, context, options)
+      def fetch!(ref, request \\ :state, context \\ nil, options \\ nil), do: __server__().fetch!(ref, request, context, options)
+      def save!(ref, args \\ {}, context \\ nil, options \\ nil), do: __server__().save!(ref, args, context, options)
+      def save_async!(ref, args \\ {}, context \\ nil, options \\ nil), do: __server__().save_async!(ref, args, context, options)
+      def reload!(ref, args \\ {}, context \\ nil, options \\ nil), do: __server__().reload!(ref, args, context, options)
+      def reload_async!(ref, args \\ {}, context \\ nil, options \\ nil), do: __server__().reload_async!(ref, args, context, options)
+      def load!(ref, args \\ {}, context \\ nil, options \\ nil), do: __server__().load!(ref, args, context, options)
+      def load_async!(ref, args \\ {}, context \\ nil, options \\ nil), do: __server__().load_async!(ref, args, context, options)
+      def ping(ref, args \\ {}, context \\ nil, options \\ nil), do: __server__().ping(ref, args, context, options)
+      def kill!(ref, args \\ {}, context \\ nil, options \\ nil), do: __server__().kill!(ref, args, context, options)
+      def crash!(ref, args \\ {}, context \\ nil, options \\ nil), do: __server__().crash!(ref, args, context, options)
+      def health_check!(ref, args \\ {}, context \\ nil, options \\ nil), do: __server__().health_check!(ref, args, context, options)
 
       #--------------------------
       # Overridable
@@ -117,27 +120,6 @@ defmodule Noizu.AdvancedPool.PoolBehaviour do
         start: 2,
         start_remote: 3,
         stand_alone: 0,
-
-        #-----------------------------
-        # Routing Overrides
-        #-----------------------------
-        s_call: 5,
-        s_call!: 5,
-        s_cast: 4,
-        s_cast!: 4,
-        get_direct_link!: 3,
-        link_forward!: 4,
-        server_call: 3,
-        server_cast: 3,
-        server_internal_call: 3,
-        server_internal_cast: 3,
-        remote_server_internal_call: 4,
-        remote_server_internal_cast: 4,
-        server_system_call: 3,
-        server_system_cast: 3,
-        remote_server_system_call: 4,
-        remote_server_system_cast: 4,
-
       ]
 
       #--------------------------

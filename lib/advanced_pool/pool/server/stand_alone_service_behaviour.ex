@@ -38,13 +38,19 @@ defmodule Noizu.AdvancedPool.V3.StandAloneServiceBehaviour do
       @implementation unquote(implementation)
       @module __MODULE__
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       use Noizu.AdvancedPool.SettingsBehaviour.Base, unquote([option_settings: option_settings, stand_alone: true])
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       use unquote(message_processing_provider), unquote(option_settings)
 
       #--------------------------
       # Methods
       #--------------------------
-      defdelegate start(definition \\ :default, context \\ nil), to: __MODULE__.PoolSupervisor, as: :start_link
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
+      def start(definition \\ :default, context \\ nil), do: __supervisor__.start_link(definition, context)
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def stand_alone(), do: true
 
 
@@ -53,24 +59,37 @@ defmodule Noizu.AdvancedPool.V3.StandAloneServiceBehaviour do
       # which will in turn hook into the Server.Router and worker spawning logic
       # to delivery commands to the correct worker processes.
       #----------------------------------------------------
-      defdelegate s_call(identifier, call, context, options \\ nil, timeout \\ nil), to: __MODULE__.Server.Router
-      defdelegate s_call!(identifier, call, context, options \\ nil, timeout \\ nil), to: __MODULE__.Server.Router
-      defdelegate s_cast(identifier, call, context, options \\ nil), to: __MODULE__.Server.Router
-      defdelegate s_cast!(identifier, call, context, options \\ nil), to: __MODULE__.Server.Router
-      defdelegate get_direct_link!(ref, context, options \\ nil), to: __MODULE__.Server.Router
-      defdelegate link_forward!(link, call, context, options \\ nil), to: __MODULE__.Server.Router
-      defdelegate server_call(call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :self_call
-      defdelegate server_cast(call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :self_cast
-      defdelegate server_internal_call(call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :internal_call
-      defdelegate server_internal_cast(call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :internal_cast
-      defdelegate remote_server_internal_call(remote_node, call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :remote_call
-      defdelegate remote_server_internal_cast(remote_node, call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :remote_cast
-      defdelegate server_system_call(call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :internal_system_call
-      defdelegate server_system_cast(call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :internal_system_cast
-      defdelegate remote_server_system_call(elixir_node, call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :remote_system_call
-      defdelegate remote_server_system_cast(elixir_node, call, context \\ nil, options \\ nil), to: __MODULE__.Server.Router, as: :remote_system_cast
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
+      def s_call(identifier, call, context, options \\ nil, timeout \\ nil), do: __MODULE__.Server.Router.s_call(identifier, call, context, options, timeout)
+      def s_call!(identifier, call, context, options \\ nil, timeout \\ nil), do: __MODULE__.Server.Router.s_call!(identifier, call, context, options, timeout)
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
+      def s_cast(identifier, call, context, options \\ nil), do: __MODULE__.Server.Router.s_cast(identifier, call, context, options)
+      def s_cast!(identifier, call, context, options \\ nil), do: __MODULE__.Server.Router.s_cast!(identifier, call, context, options)
 
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
+      def get_direct_link!(ref, context, options \\ nil), do: __MODULE__.Server.Router.get_direct_link!(ref, context, options)
+      def link_forward!(link, call, context, options \\ nil), do: __MODULE__.Server.Router.link_forward!(link, call, context, options)
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
+      def server_call(call, context \\ nil, options \\ nil), do: __MODULE__.Server.Router.self_call(call, context, options)
+      def server_cast(call, context \\ nil, options \\ nil), do: __MODULE__.Server.Router.self_cast(call, context, options)
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
+      def server_internal_call(call, context \\ nil, options \\ nil), do: __MODULE__.Server.Router.internal_call(call, context, options)
+      def server_internal_cast(call, context \\ nil, options \\ nil), do: __MODULE__.Server.Router.internal_cast(call, context, options)
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
+      def remote_server_internal_call(remote_node, call, context \\ nil, options \\ nil), do: __MODULE__.Server.Router.remote_call(remote_node, call, context, options)
+      def remote_server_internal_cast(remote_node, call, context \\ nil, options \\ nil), do: __MODULE__.Server.Router.remote_cast(remote_node, call, context, options)
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
+      def server_system_call(call, context \\ nil, options \\ nil), do: __MODULE__.Server.Router.internal_system_call(call, context, options)
+      def server_system_cast(call, context \\ nil, options \\ nil), do: __MODULE__.Server.Router.internal_system_cast(call, context, options)
+
+      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
+      def remote_server_system_call(elixir_node, call, context \\ nil, options \\ nil), do: __MODULE__.Server.Router.remote_system_call(elixir_node, call, context, options)
+      def remote_server_system_cast(elixir_node, call, context \\ nil, options \\ nil), do: __MODULE__.Server.Router.remote_system_cast(elixir_node, call, context, options)
 
       #--------------------------
       # Overridable
