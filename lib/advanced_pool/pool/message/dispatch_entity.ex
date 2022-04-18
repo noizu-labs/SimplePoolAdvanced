@@ -3,7 +3,7 @@
 # Copyright (C) 2018 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule Noizu.AdvancedPool.V3.DispatchEntity do
+defmodule Noizu.AdvancedPool.DispatchEntity do
   @vsn 1.0
   use Noizu.SimpleObject
   Noizu.SimpleObject.noizu_struct() do

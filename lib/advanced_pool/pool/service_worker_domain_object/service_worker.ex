@@ -1,4 +1,4 @@
-defmodule Noizu.AdvancedPool.V3.Service.DomainObject do
+defmodule Noizu.AdvancedPool.ServiceWorker do
 
   defmacro __using__(options \\ nil) do
     options = Macro.expand(options, __ENV__)
@@ -28,6 +28,4 @@ defmodule Noizu.AdvancedPool.V3.Service.DomainObject do
     options = Macro.expand(options, __ENV__)
     Noizu.AdvancedScaffolding.Internal.DomainObject.Repo.__noizu_repo__(__CALLER__, options, block)
   end
-
-
 end

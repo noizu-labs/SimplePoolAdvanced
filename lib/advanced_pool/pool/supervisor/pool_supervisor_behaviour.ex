@@ -307,7 +307,7 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour do
     option_settings = implementation.prepare_options_slim(options)
     #options = option_settings.effective_options
     #features = MapSet.new(options.features)
-    message_processing_provider = Noizu.AdvancedPool.V3.MessageProcessingBehaviour.DefaultProvider
+    message_processing_provider = Noizu.AdvancedPool.MessageProcessingBehaviour.DefaultProvider
 
     quote do
       @behaviour Noizu.AdvancedPool.V3.PoolSupervisorBehaviour
@@ -319,7 +319,7 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour do
       @module __MODULE__
 
       #----------------------------
-      use Noizu.AdvancedPool.V3.SettingsBehaviour.Inherited, unquote([option_settings: option_settings])
+      use Noizu.AdvancedPool.SettingsBehaviour.Inherited, unquote([option_settings: option_settings])
       use unquote(message_processing_provider), unquote(option_settings)
       #--------------------------------
 

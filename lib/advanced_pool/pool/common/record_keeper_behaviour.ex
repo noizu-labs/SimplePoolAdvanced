@@ -3,7 +3,7 @@
 # Copyright (C) 2019 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule Noizu.AdvancedPool.V3.RecordKeeperBehaviour do
+defmodule Noizu.AdvancedPool.RecordKeeperBehaviour do
 
   defmacro __using__(options) do
     options = Macro.expand(options, __ENV__)
@@ -15,7 +15,7 @@ defmodule Noizu.AdvancedPool.V3.RecordKeeperBehaviour do
 
       @pool :pending
       @pool_worker_state_entity :pending
-      use Noizu.AdvancedPool.V3.SettingsBehaviour.Inherited, unquote([option_settings: option_settings])
+      use Noizu.AdvancedPool.SettingsBehaviour.Inherited, unquote([option_settings: option_settings])
 
       def initial_value(worker, args, context) do
         %{}

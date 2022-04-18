@@ -15,7 +15,7 @@ defmodule Noizu.AdvancedPool.V3.StandAloneServiceBehaviour do
 
   defmacro __using__(options) do
     options = Macro.expand(options, __ENV__)
-    implementation = Keyword.get(options || [], :implementation, Noizu.AdvancedPool.V3.PoolBehaviour.Default)
+    implementation = Keyword.get(options || [], :implementation, Noizu.AdvancedPool.PoolBehaviour.Default)
     option_settings = implementation.prepare_options_slim(options)
 
     # Set stand alone flag.
@@ -30,15 +30,15 @@ defmodule Noizu.AdvancedPool.V3.StandAloneServiceBehaviour do
     options = option_settings[:effective_options]
 
     default_modules = options[:default_modules]
-    message_processing_provider = Noizu.AdvancedPool.V3.MessageProcessingBehaviour.DefaultProvider
+    message_processing_provider = Noizu.AdvancedPool.MessageProcessingBehaviour.DefaultProvider
 
     quote do
       require Logger
-      @behaviour Noizu.AdvancedPool.V3.PoolBehaviour
+      @behaviour Noizu.AdvancedPool.PoolBehaviour
       @implementation unquote(implementation)
       @module __MODULE__
 
-      use Noizu.AdvancedPool.V3.SettingsBehaviour.Base, unquote([option_settings: option_settings, stand_alone: true])
+      use Noizu.AdvancedPool.SettingsBehaviour.Base, unquote([option_settings: option_settings, stand_alone: true])
       use unquote(message_processing_provider), unquote(option_settings)
 
       #--------------------------

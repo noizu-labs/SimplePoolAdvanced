@@ -6,7 +6,7 @@ defmodule Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.ServiceManage
   @moduledoc """
      The service monitor is responsible for monitoring health of a service spanning one or more nodes and coordinating rebalances, shutdowns and other activities.
   """
-  use Noizu.AdvancedPool.V3.PoolBehaviour,
+  use Noizu.AdvancedPool.PoolBehaviour,
       default_modules: [:pool_supervisor, :monitor],
       worker_state_entity: Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.ServiceManager.WorkerEntity,
       verbose: false

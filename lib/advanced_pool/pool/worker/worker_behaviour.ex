@@ -206,7 +206,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
     verbose = options[:verbose]
 
 
-    message_processing_provider = Noizu.AdvancedPool.V3.MessageProcessingBehaviour.DefaultProvider
+    message_processing_provider = Noizu.AdvancedPool.MessageProcessingBehaviour.DefaultProvider
     quote do
       import unquote(__MODULE__)
       require Logger
@@ -226,7 +226,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
       @options :override
       @pool_worker_state_entity :override
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
-      use Noizu.AdvancedPool.V3.SettingsBehaviour.Inherited, unquote([option_settings: option_settings])
+      use Noizu.AdvancedPool.SettingsBehaviour.Inherited, unquote([option_settings: option_settings])
       use unquote(message_processing_provider), unquote(option_settings)
       #--------------------------------------------
 
@@ -482,13 +482,13 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       # Delegate uncaught calls into inner state.
       def call_router_catchall(envelope, from, state) do
-        Noizu.AdvancedPool.V3.MessageProcessingBehaviour.Default.__delegate_call_handler(__MODULE__, envelope, from, state)
+        Noizu.AdvancedPool.MessageProcessingBehaviour.Default.__delegate_call_handler(__MODULE__, envelope, from, state)
       end
       def cast_router_catchall(envelope, state) do
-        Noizu.AdvancedPool.V3.MessageProcessingBehaviour.Default.__delegate_cast_handler(__MODULE__, envelope, state)
+        Noizu.AdvancedPool.MessageProcessingBehaviour.Default.__delegate_cast_handler(__MODULE__, envelope, state)
       end
       def info_router_catchall(envelope, state) do
-        Noizu.AdvancedPool.V3.MessageProcessingBehaviour.Default.__delegate_info_handler(__MODULE__, envelope, state)
+        Noizu.AdvancedPool.MessageProcessingBehaviour.Default.__delegate_info_handler(__MODULE__, envelope, state)
       end
 
 

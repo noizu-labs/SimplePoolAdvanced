@@ -198,7 +198,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerManagement.WorkerManagementProvider do
     lock = dispatch_prepare_lock(pool_server, options)
 
     # @TODO use raw tuple for smaller table, faster execution.
-    %Noizu.AdvancedPool.V3.DispatchEntity{identifier: ref, server: server, state: state, lock: lock}
+    %Noizu.AdvancedPool.DispatchEntity{identifier: ref, server: server, state: state, lock: lock}
   end
 
   @doc """

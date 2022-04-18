@@ -79,7 +79,7 @@ defmodule Noizu.AdvancedPool.V3.InnerStateBehaviour do
     options = option_settings[:effective_options]
     #required = options.required
     pool = options[:pool]
-    message_processing_provider = Noizu.AdvancedPool.V3.MessageProcessingBehaviour.DefaultProvider
+    message_processing_provider = Noizu.AdvancedPool.MessageProcessingBehaviour.DefaultProvider
     quote do
       import unquote(__MODULE__)
       @behaviour Noizu.AdvancedPool.V3.InnerStateBehaviour
