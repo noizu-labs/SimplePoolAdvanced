@@ -300,35 +300,27 @@ defmodule Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.ServiceManage
     #------------------------------------------------------------------------
     # call router
     #------------------------------------------------------------------------
-    def call_router_user({:spawn, envelope}, from, state), do: call_router_user(envelope, from, state)
-    def call_router_user({:passive, envelope}, from, state), do: call_router_user(envelope, from, state)
-    def call_router_user(envelope, _from, state) do
-      case envelope do
-        {:s, {:lock_service,  service, instructions}, context} -> call__lock_service(state,  service, instructions, context)
-        {:s, {:release_service,  service, instructions}, context} -> call__release_service(state,  service, instructions, context)
-        {:s, {:register_service,  service, service_definition, instructions}, context} -> call__register_service(state,  service, service_definition, instructions, context)
-        {:s, {:bring_service_online,  service, instructions}, context} -> call__bring_service_online(state,  service, instructions, context)
-        {:s, {:take_service_offline,  service, instructions}, context} -> call__take_service_offline(state,  service, instructions, context)
-        {:s, {:rebalance_service,  service, instructions}, context} -> call__rebalance_service(state,  service, instructions, context)
-        {:s, {:lock_service_instance,  instance, instructions}, context} -> call__lock_service_instance(state,  instance, instructions, context)
-        {:s, {:release_service_instance,  instance, instructions}, context} -> call__release_service_instance(state,  instance, instructions, context)
-        {:s, {:bring_service_instance_online,  instance, instructions}, context} -> call__bring_service_instance_online(state,  instance, instructions, context)
-        {:s, {:take_service_instance_offline,  instance, instructions}, context} -> call__take_service_instance_offline(state,  instance, instructions, context)
-        _ -> nil
-      end
-    end
+    def __handle_call__({:spawn, envelope}, from, state), do: __handle_call__(envelope, from, state)
+    def __handle_call__({:passive, envelope}, from, state), do: __handle_call__(envelope, from, state)
+    def __handle_call__({:s, {:lock_service,  service, instructions}, context}, _from, state), do: call__lock_service(state,  service, instructions, context)
+    def __handle_call__({:s, {:release_service,  service, instructions}, context}, _from, state), do: call__release_service(state,  service, instructions, context)
+    def __handle_call__({:s, {:register_service,  service, service_definition, instructions}, context}, _from, state), do: call__register_service(state,  service, service_definition, instructions, context)
+    def __handle_call__({:s, {:bring_service_online,  service, instructions}, context}, _from, state), do: call__bring_service_online(state,  service, instructions, context)
+    def __handle_call__({:s, {:take_service_offline,  service, instructions}, context}, _from, state), do: call__take_service_offline(state,  service, instructions, context)
+    def __handle_call__({:s, {:rebalance_service,  service, instructions}, context}, _from, state), do: call__rebalance_service(state,  service, instructions, context)
+    def __handle_call__({:s, {:lock_service_instance,  instance, instructions}, context}, _from, state), do: call__lock_service_instance(state,  instance, instructions, context)
+    def __handle_call__({:s, {:release_service_instance,  instance, instructions}, context}, _from, state), do: call__release_service_instance(state,  instance, instructions, context)
+    def __handle_call__({:s, {:bring_service_instance_online,  instance, instructions}, context}, _from, state), do: call__bring_service_instance_online(state,  instance, instructions, context)
+    def __handle_call__({:s, {:take_service_instance_offline,  instance, instructions}, context}, _from, state), do: call__take_service_instance_offline(state,  instance, instructions, context)
+    def __handle_call__(call, from, state), do: super(call, from, state)
 
     #------------------------------------------------------------------------
     # info router
     #------------------------------------------------------------------------
-    def info_router_user(envelope, state) do
-      case envelope do
-        {:DOWN, reference, :process, process, reason} -> info__process_service_down_event(reference, process, reason, state)
-        _ -> nil
-      end
-    end
-
-
+    def __handle_info__({:spawn, envelope}, state), do: __handle_info__(envelope, state)
+    def __handle_info__({:passive, envelope}, state), do: __handle_info__(envelope, state)
+    def __handle_info__({:DOWN, reference, :process, process, reason}, state), do: info__process_service_down_event(reference, process, reason, state)
+    def __handle_info__(call, state), do: super(call, state)
 
   end # end defmodule Server
 end

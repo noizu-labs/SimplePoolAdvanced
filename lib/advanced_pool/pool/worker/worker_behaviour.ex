@@ -404,93 +404,103 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
       # Infrastructure provided call router
       #------------------------------------------------------------------------
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
-      def call_router_internal__default({:passive, envelope}, from, state), do: call_router_internal__default(envelope, from, state)
-      def call_router_internal__default({:spawn, envelope}, from, state), do: call_router_internal__default(envelope, from, state)
-      def call_router_internal__default(envelope, from, state) do
-        case envelope do
-          # fetch
-          {:s, {:fetch!, args}, context} -> fetch!(state, args, from, context)
-          {:s, {:fetch!, args, opts}, context} -> fetch!(state, args, from, context, opts)
 
-          # ping!
-          {:s, {:ping, args}, context} -> ping(state, args, from, context)
-          {:s, {:ping, args, opts}, context} -> ping(state, args, from, context, opts)
 
-          # health_check!
-          {:s, {:health_check!, args}, context} -> health_check!(state, args, from, context)
-          {:s, {:health_check!, args, opts}, context} -> health_check!(state, args, from, context, opts)
+      def __handle_call__({:passive, envelope}, from, state), do: __handle_call__(envelope, from, state)
+      def __handle_call__({:spawn, envelope}, from, state), do: __handle_call__(envelope, from, state)
 
-          # kill!
-          {:s, {:kill!, args}, context} -> kill!(state, args, from, context)
-          {:s, {:kill!, args, opts}, context} -> kill!(state, args, from, context, opts)
+      # fetch
+      def __handle_call__({:s, {:fetch!, args}, context}, from, state), do: fetch!(state, args, from, context)
+      def __handle_call__({:s, {:fetch!, args, opts}, context}, from, state), do: fetch!(state, args, from, context, opts)
 
-          # crash!
-          {:s, {:crash!, args}, context} -> crash!(state, args, from, context)
-          {:s, {:crash!, args, opts}, context} -> crash!(state, args, from, context, opts)
+      # ping!
+      def __handle_call__({:s, {:ping, args}, context}, from, state), do: ping(state, args, from, context)
+      def __handle_call__({:s, {:ping, args, opts}, context}, from, state), do: ping(state, args, from, context, opts)
 
-          # save!
-          {:s, {:save!, args}, context} -> save!(state, args, from, context)
-          {:s, {:save!, args, opts}, context} -> save!(state, args, from, context, opts)
+      # health_check!
+      def __handle_call__({:s, {:health_check!, args}, context}, from, state), do: health_check!(state, args, from, context)
+      def __handle_call__({:s, {:health_check!, args, opts}, context}, from, state), do: health_check!(state, args, from, context, opts)
 
-          # reload!
-          {:s, {:reload!, args}, context} -> reload!(state, args, from, context)
-          {:s, {:reload!, args, opts}, context} -> reload!(state, args, from, context, opts)
+      # kill!
+      def __handle_call__({:s, {:kill!, args}, context}, from, state), do: kill!(state, args, from, context)
+      def __handle_call__({:s, {:kill!, args, opts}, context}, from, state), do: kill!(state, args, from, context, opts)
 
-          # load!
-          {:s, {:load!, args}, context} -> load!(state, args, from, context)
-          {:s, {:load!, args, opts}, context} -> load!(state, args, from, context, opts)
+      # crash!
+      def __handle_call__({:s, {:crash!, args}, context}, from, state), do: crash!(state, args, from, context)
+      def __handle_call__({:s, {:crash!, args, opts}, context}, from, state), do: crash!(state, args, from, context, opts)
 
-          # shutdown
-          {:s, {:shutdown!, args}, context} -> shutdown!(state, args, from, context)
-          {:s, {:shutdown!, args, opts}, context} -> shutdown!(state, args, from, context, opts)
+      # save!
+      def __handle_call__({:s, {:save!, args}, context}, from, state), do: save!(state, args, from, context)
+      def __handle_call__({:s, {:save!, args, opts}, context}, from, state), do: save!(state, args, from, context, opts)
 
-          # migrate
-          {:s, {:migrate!, args}, context} -> migrate!(state, args, from, context)
-          {:s, {:migrate!, args, opts}, context} -> migrate!(state, args, from, context, opts)
+      # reload!
+      def __handle_call__({:s, {:reload!, args}, context}, from, state), do: reload!(state, args, from, context)
+      def __handle_call__({:s, {:reload!, args, opts}, context}, from, state), do: reload!(state, args, from, context, opts)
 
-          _ -> nil
-        end
-      end
-      def call_router_internal(envelope, from, state), do: call_router_internal__default(envelope, from, state)
+      # load!
+      def __handle_call__({:s, {:load!, args}, context}, from, state), do: load!(state, args, from, context)
+      def __handle_call__({:s, {:load!, args, opts}, context}, from, state), do: load!(state, args, from, context, opts)
 
+      # shutdown
+      def __handle_call__({:s, {:shutdown!, args}, context}, from, state), do: shutdown!(state, args, from, context)
+      def __handle_call__({:s, {:shutdown!, args, opts}, context}, from, state), do: shutdown!(state, args, from, context, opts)
+
+      # migrate
+      def __handle_call__({:s, {:migrate!, args}, context}, from, state), do: migrate!(state, args, from, context)
+      def __handle_call__({:s, {:migrate!, args, opts}, context}, from, state), do: migrate!(state, args, from, context, opts)
+
+      def __handle_call__(call, from, state), do: __delegate_handle_call__(call, from ,state)
+
+      #----------------------------
+      #
+      #----------------------------
+      def __handle_cast__({:passive, envelope}, state), do: __handle_cast__(envelope, state)
+      def __handle_cast__({:spawn, envelope}, state), do: __handle_cast__(envelope, state)
+
+      # health_check!
+      def __handle_cast__({:s, {:health_check!, args}, context}, state), do: health_check!(state, args, :cast, context)
+      def __handle_cast__({:s, {:health_check!, args, opts}, context}, state), do: health_check!(state, args, :cast, context, opts)
+
+      # kill!
+      def __handle_cast__({:s, {:kill!, args}, context}, state), do: kill!(state, args, :cast, context)
+      def __handle_cast__({:s, {:kill!, args, opts}, context}, state), do: kill!(state, args, :cast, context, opts)
+
+      # crash!
+      def __handle_cast__({:s, {:crash!, args}, context}, state), do: crash!(state, args, :cast, context)
+      def __handle_cast__({:s, {:crash!, args, opts}, context}, state), do: crash!(state, args, :cast, context, opts)
+
+      # save!
+      def __handle_cast__({:s, {:save!, args}, context}, state), do: save!(state, args, :cast, context)
+      def __handle_cast__({:s, {:save!, args, opts}, context}, state), do: save!(state, args, :cast, context, opts)
+
+      # reload!
+      def __handle_cast__({:s, {:reload!, args}, context}, state), do: reload!(state, args, :cast, context)
+      def __handle_cast__({:s, {:reload!, args, opts}, context}, state), do: reload!(state, args, :cast, context, opts)
+
+      # load!
+      def __handle_cast__({:s, {:load!, args}, context}, state), do: load!(state, args, :cast, context)
+      def __handle_cast__({:s, {:load!, args, opts}, context}, state), do: load!(state, args, :cast, context, opts)
+
+      # shutdown
+      def __handle_cast__({:s, {:shutdown!, args}, context}, state), do: shutdown!(state, args, :cast, context)
+      def __handle_cast__({:s, {:shutdown!, args, opts}, context}, state), do: shutdown!(state, args, :cast, context, opts)
+
+      # migrate
+      def __handle_cast__({:s, {:migrate!, args}, context}, state), do: migrate!(state, args, :cast, context)
+      def __handle_cast__({:s, {:migrate!, args, opts}, context}, state), do: migrate!(state, args, :cast, context, opts)
+
+      # Catch all
+      def __handle_cast__(call, state), do: __delegate_handle_cast__(call, state)
 
       #----------------------------
       #
       #----------------------------
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
-      def cast_router_internal__default(envelope, state) do
-        r = call_router_internal(envelope, :cast, state)
-        r && as_cast(r)
-      end
-      def cast_router_internal(envelope, state), do: cast_router_internal__default(envelope, state)
-
-      #----------------------------
-      #
-      #----------------------------
-      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
-      def info_router_internal__default({:passive, envelope}, state), do: info_router_internal__default(envelope, state)
-      def info_router_internal__default({:spawn, envelope}, state), do: info_router_internal__default(envelope, state)
-      def info_router_internal__default(envelope, state) do
-        case envelope do
-          {:i, {:inactivity_check, args}, context} -> inactivity_check(state, args, :info, context) |> as_cast()
-          {:i, {:inactivity_check, args, opts}, context} -> inactivity_check(state, args, :info, context, opts) |> as_cast()
-          _ -> nil
-        end
-      end
-      def info_router_internal(envelope, state), do: info_router_internal__default(envelope, state)
-
-      @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
-      # Delegate uncaught calls into inner state.
-      def call_router_catchall(envelope, from, state) do
-        Noizu.AdvancedPool.MessageProcessingBehaviour.Default.__delegate_call_handler(__MODULE__, envelope, from, state)
-      end
-      def cast_router_catchall(envelope, state) do
-        Noizu.AdvancedPool.MessageProcessingBehaviour.Default.__delegate_cast_handler(__MODULE__, envelope, state)
-      end
-      def info_router_catchall(envelope, state) do
-        Noizu.AdvancedPool.MessageProcessingBehaviour.Default.__delegate_info_handler(__MODULE__, envelope, state)
-      end
-
+      def __handle_info__({:passive, envelope}, state), do: __handle_info__(envelope, state)
+      def __handle_info__({:spawn, envelope}, state), do: __handle_info__(envelope, state)
+      def __handle_info__({:i, {:inactivity_check, args}, context}, state), do: inactivity_check(state, args, :info, context) |> as_cast()
+      def __handle_info__({:i, {:inactivity_check, args, opts}, context}, state), do: inactivity_check(state, args, :info, context, opts) |> as_cast()
+      def __handle_info__(call, state), do: __delegate_handle_info__(call, state)
 
       #===============================================================================================================
       # Overridable
@@ -522,14 +532,10 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
         inactivity_check: 5,
 
         # Routing for Infrastructure Provided Worker Methods
-        call_router_internal: 3,
-        info_router_internal: 2,
-        cast_router_internal: 2,
+        __handle_call__: 3,
+        __handle_cast__: 2,
+        __handle_info__: 2,
 
-        # Catch All (For worker delegates to inner_state entity)
-        call_router_catchall: 3,
-        cast_router_catchall: 2,
-        info_router_catchall: 2,
       ]
 
     end # end quote

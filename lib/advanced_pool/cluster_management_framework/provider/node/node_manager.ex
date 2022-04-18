@@ -340,20 +340,17 @@ defmodule Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.NodeManager d
     #------------------------------------------------------------------------
     # call router
     #------------------------------------------------------------------------
-    def call_router_user({:spawn, envelope}, from, state), do: call_router_user(envelope, from, state)
-    def call_router_user({:passive, envelope}, from, state), do: call_router_user(envelope, from, state)
-    def call_router_user(envelope, _from, state) do
-      case envelope do
-        {:m, {:bring_node_online, instructions}, context} -> call__bring_node_online(state, instructions, context)
-        {:m, {:take_node_offline, instructions}, context} -> call__take_node_offline(state, instructions, context)
-        {:m, {:lock_service_instance,  service, instructions}, context} -> call__lock_service_instance(state,  service, instructions, context)
-        {:m, {:release_service_instance,  service, instructions}, context} -> call__release_service_instance(state,  service, instructions, context)
-        {:m, {:bring_service_instance_online,  service, instructions}, context} -> call__bring_service_instance_online(state,  service, instructions, context)
-        {:m, {:take_service_instance_offline,  service, instructions}, context} -> call__take_service_instance_offline(state,  service, instructions, context)
-        {:m, {:lock_node,  instructions}, context} -> call__lock_node(state,  instructions, context)
-        {:m, {:release_node,  instructions}, context} -> call__release_node(state,  instructions, context)
-        _ -> nil
-      end
-    end
+    def __handle_call__({:spawn, envelope}, from, state), do: __handle_call__(envelope, from, state)
+    def __handle_call__({:passive, envelope}, from, state), do: __handle_call__(envelope, from, state)
+    def __handle_call__({:m, {:bring_node_online, instructions}, context}, from, state), do: call__bring_node_online(state, instructions, context)
+    def __handle_call__({:m, {:take_node_offline, instructions}, context}, from, state), do: call__take_node_offline(state, instructions, context)
+    def __handle_call__({:m, {:lock_service_instance,  service, instructions}, context}, from, state), do: call__lock_service_instance(state,  service, instructions, context)
+    def __handle_call__({:m, {:release_service_instance,  service, instructions}, context}, from, state), do: call__release_service_instance(state,  service, instructions, context)
+    def __handle_call__({:m, {:bring_service_instance_online,  service, instructions}, context}, from, state), do: call__bring_service_instance_online(state,  service, instructions, context)
+    def __handle_call__({:m, {:take_service_instance_offline,  service, instructions}, context}, from, state), do: call__take_service_instance_offline(state,  service, instructions, context)
+    def __handle_call__({:m, {:lock_node,  instructions}, context}, from, state), do: call__lock_node(state,  instructions, context)
+    def __handle_call__({:m, {:release_node,  instructions}, context}, from, state), do: call__release_node(state,  instructions, context)
+    def __handle_call__(call, from, state), do: super(call, from, state)
+
   end # end defmodule Server
 end

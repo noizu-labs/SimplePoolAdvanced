@@ -310,9 +310,11 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour do
       Initial Meta Information for Module.
       """
       def meta_init(), do: Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour.Default.meta_init(__MODULE__)
-      def supervisor_by_index(index), do: meta()[:supervisor_by_index][index]
-      def available_supervisors(), do: meta()[:available_supervisors]
-      def active_supervisors(), do: meta()[:active_supervisors]
+      def __meta_init__(), do: Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour.Default.meta_init(__MODULE__)
+
+      def supervisor_by_index(index), do: __meta__()[:supervisor_by_index][index]
+      def available_supervisors(), do: __meta__()[:available_supervisors]
+      def active_supervisors(), do: __meta__()[:active_supervisors]
 
       def group_children(group_fn), do: Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour.Default.group_children(__MODULE__, group_fn)
       def count_children(), do: Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour.Default.count_children(__MODULE__)

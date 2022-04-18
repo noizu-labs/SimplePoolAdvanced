@@ -309,6 +309,7 @@ defmodule Noizu.AdvancedPool.V3.ServerBehaviour do
       Initialize meta data for this pool. (override default provided by SettingsBehaviour)
       """
       def meta_init(), do: @implementation.meta_init(__MODULE__)
+      def __meta_init__(), do: @implementation.meta_init(__MODULE__)
 
       #---------------
       # start_link
@@ -613,47 +614,40 @@ defmodule Noizu.AdvancedPool.V3.ServerBehaviour do
       #------------------------------------------------------------------------
       # Infrastructure provided call router
       #------------------------------------------------------------------------
-      def call_router_internal__default({:passive, envelope}, from, state), do: call_router_internal__default(envelope, from, state)
-      def call_router_internal__default({:spawn, envelope}, from, state), do: call_router_internal__default(envelope, from, state)
-      def call_router_internal__default(envelope, from, state) do
-        case envelope do
-          {:i, {:status, args}, context} -> handle_status(state, args, from, context)
-          {:i, {:status, args, options}, context} -> handle_status(state, args, from, context, options)
+      def __handle_call__({:passive, envelope}, from, state), do: __handle_call__(envelope, from, state)
+      def __handle_call__({:spawn, envelope}, from, state), do: __handle_call__(envelope, from, state)
 
-          {:m, {:load_pool, args}, context} -> handle_load_pool(state, args, from, context)
-          {:m, {:load_pool, args, opts}, context} -> handle_load_pool(state, args, from, context, opts)
+      def __handle_call__({:i, {:status, args}, context}, from, state), do: handle_status(state, args, from, context)
+      def __handle_call__({:i, {:status, args, options}, context}, from, state), do: handle_status(state, args, from, context, options)
 
-          {:m, {:release!, args}, context} -> handle_release!(state, args, from, context)
-          {:m, {:release!, args, opts}, context} -> handle_release!(state, args, from, context, opts)
+      def __handle_call__({:m, {:load_pool, args}, context}, from, state), do: handle_load_pool(state, args, from, context)
+      def __handle_call__({:m, {:load_pool, args, opts}, context}, from, state), do: handle_load_pool(state, args, from, context, opts)
 
-          {:m, {:lock!, args}, context} -> handle_lock!(state, args, from, context)
-          {:m, {:lock!, args, opts}, context} -> handle_lock!(state, args, from, context, opts)
+      def __handle_call__({:m, {:release!, args}, context}, from, state), do: handle_release!(state, args, from, context)
+      def __handle_call__({:m, {:release!, args, opts}, context}, from, state), do: handle_release!(state, args, from, context, opts)
 
-          {:m, {:health_check!, args}, context} -> handle_health_check!(state, args, from, context)
-          {:m, {:health_check!, args, opts}, context} -> handle_health_check!(state, args, from, context, opts)
-          _ -> nil
-        end
-      end
-      def call_router_internal(envelope, from, state), do: call_router_internal__default(envelope, from, state)
+      def __handle_call__({:m, {:lock!, args}, context}, from, state), do: handle_lock!(state, args, from, context)
+      def __handle_call__({:m, {:lock!, args, opts}, context}, from, state), do: handle_lock!(state, args, from, context, opts)
 
+      def __handle_call__({:m, {:health_check!, args}, context}, from, state), do: handle_health_check!(state, args, from, context)
+      def __handle_call__({:m, {:health_check!, args, opts}, context}, from, state), do: handle_health_check!(state, args, from, context, opts)
+
+      def __handle_call__(call, from, state), do: super(call, from ,state)
 
       #----------------------------
       #
       #----------------------------
-      def cast_router_internal__default({:passive, envelope}, state), do: cast_router_internal__default(envelope, state)
-      def cast_router_internal__default({:spawn, envelope}, state), do: cast_router_internal__default(envelope, state)
-      def cast_router_internal__default(envelope, state) do
-        r = case envelope do
-              {:i, {:server_kill!, args}, context} -> handle_server_kill!(state, args, :cast, context)
-              {:i, {:server_kill!, args, options}, context} -> handle_server_kill!(state, args, :cast, context, options)
-              {:m, {:load_complete, args}, context} -> handle_load_complete(state, args, :cast, context)
-              {:m, {:load_complete, args, opts}, context} -> handle_load_complete(state, args, :cast, context, opts)
-              _ ->
-                call_router_internal(envelope, :cast, state)
-            end
-        r && as_cast(r)
-      end
-      def cast_router_internal(envelope, state), do: cast_router_internal__default(envelope, state)
+      def __handle_cast__({:passive, envelope}, state), do: __handle_cast__(envelope, state)
+      def __handle_cast__({:spawn, envelope}, state), do: __handle_cast__(envelope, state)
+
+      def __handle_cast__({:i, {:server_kill!, args}, context}, state), do: handle_server_kill!(state, args, :cast, context)  |> as_cast()
+      def __handle_cast__({:i, {:server_kill!, args, options}, context}, state), do: handle_server_kill!(state, args, :cast, context, options)  |> as_cast()
+
+      def __handle_cast__({:m, {:load_complete, args}, context}, state), do: handle_load_complete(state, args, :cast, context)  |> as_cast()
+      def __handle_cast__({:m, {:load_complete, args, opts}, context}, state), do: handle_load_complete(state, args, :cast, context, opts)  |> as_cast()
+
+      # Pass any other cast calls to any available call handlers.
+      def __handle_cast__(call, state), do: __handle_call__(call, :cast ,state) |> as_cast()
 
       #----------------------------
       #
@@ -690,8 +684,8 @@ defmodule Noizu.AdvancedPool.V3.ServerBehaviour do
         handle_release!: 5,
         handle_lock!: 5,
         handle_health_check!: 5,
-        call_router_internal: 3,
-        cast_router_internal: 2,
+        __handle_call__: 3,
+        __handle_cast__: 2,
 
         fetch!: 4,
         wake!: 4,

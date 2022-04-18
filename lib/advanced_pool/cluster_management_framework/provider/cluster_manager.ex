@@ -349,33 +349,26 @@ defmodule Noizu.AdvancedPool.V3.ClusterManagementFramework.ClusterManager do
     #------------------------------------------------------------------------
     # call router
     #------------------------------------------------------------------------
-    def call_router_user({:spawn, envelope}, from, state), do: call_router_user(envelope, from, state)
-    def call_router_user({:passive, envelope}, from, state), do: call_router_user(envelope, from, state)
-    def call_router_user(envelope, _from, state) do
-      case envelope do
-        {:m, {:lock_cluster,  instructions}, context} -> call__lock_cluster(state,  instructions, context)
-        {:m, {:release_cluster,  instructions}, context} -> call__release_cluster(state,  instructions, context)
-        {:m, {:bring_cluster_online,  instructions}, context} -> call__bring_cluster_online(state,  instructions, context)
-        {:m, {:take_cluster_offline,  instructions}, context} -> call__take_cluster_offline(state,  instructions, context)
-        {:m, {:rebalance_cluster,  instructions}, context} -> call__rebalance_cluster(state,  instructions, context)
-        {:m, {:lock_service,  service, instructions}, context} -> call__lock_service(state,  service, instructions, context)
-        {:m, {:release_service,  service, instructions}, context} -> call__release_service(state,  service, instructions, context)
-        {:m, {:register_service,  service, service_definition, instructions}, context} -> call__register_service(state,  service, service_definition, instructions, context)
-        {:m, {:bring_service_online,  service, instructions}, context} -> call__bring_service_online(state,  service, instructions, context)
-        {:m, {:take_service_offline,  service, instructions}, context} -> call__take_service_offline(state,  service, instructions, context)
-        {:m, {:rebalance_service,  service, instructions}, context} -> call__rebalance_service(state,  service, instructions, context)
-        _ -> nil
-      end
-    end
+    def __handle_call__({:spawn, envelope}, from, state), do: __handle_call__(envelope, from, state)
+    def __handle_call__({:passive, envelope}, from, state), do: __handle_call__(envelope, from, state)
+    def __handle_call__({:m, {:lock_cluster,  instructions}, context}, _from, state), do: call__lock_cluster(state,  instructions, context)
+    def __handle_call__({:m, {:release_cluster,  instructions}, context}, _from, state), do: call__release_cluster(state,  instructions, context)
+    def __handle_call__({:m, {:bring_cluster_online,  instructions}, context}, _from, state), do: call__bring_cluster_online(state,  instructions, context)
+    def __handle_call__({:m, {:take_cluster_offline,  instructions}, context}, _from, state), do: call__take_cluster_offline(state,  instructions, context)
+    def __handle_call__({:m, {:rebalance_cluster,  instructions}, context}, _from, state), do: call__rebalance_cluster(state,  instructions, context)
+    def __handle_call__({:m, {:lock_service,  service, instructions}, context}, _from, state), do: call__lock_service(state,  service, instructions, context)
+    def __handle_call__({:m, {:release_service,  service, instructions}, context}, _from, state), do: call__release_service(state,  service, instructions, context)
+    def __handle_call__({:m, {:register_service,  service, service_definition, instructions}, context}, _from, state), do: call__register_service(state,  service, service_definition, instructions, context)
+    def __handle_call__({:m, {:bring_service_online,  service, instructions}, context}, _from, state), do: call__bring_service_online(state,  service, instructions, context)
+    def __handle_call__({:m, {:take_service_offline,  service, instructions}, context}, _from, state), do: call__take_service_offline(state,  service, instructions, context)
+    def __handle_call__({:m, {:rebalance_service,  service, instructions}, context}, _from, state), do: call__rebalance_service(state,  service, instructions, context)
+    def __handle_call__(call, from, state), do: super(call, from, state)
 
-    def info_router_user({:spawn, envelope}, state), do: info_router_user(envelope, state)
-    def info_router_user({:passive, envelope}, state), do: info_router_user(envelope, state)
-    def info_router_user(envelope, state) do
-      case envelope do
-        {:i, {:cluster_heart_beat}, context} -> info__cluster_heart_beat(state,  context)
-        _ -> nil
-      end
-    end
+
+    def __handle_info__({:spawn, envelope}, state), do: __handle_info__(envelope, state)
+    def __handle_info__({:passive, envelope}, state), do: __handle_info__(envelope, state)
+    def __handle_info__({:i, {:cluster_heart_beat}, context}, state), do: info__cluster_heart_beat(state,  context)
+    def __handle_info__(call, state), do: super(call, state)
 
   end # end defmodule Server
 end

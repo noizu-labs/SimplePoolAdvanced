@@ -4,18 +4,16 @@
 #-------------------------------------------------------------------------------
 
 defmodule Noizu.AdvancedPool.Support.TestV3WorkerThree do
-  use Noizu.DomainObject
+  use Noizu.AdvancedPool.ServiceWorker
   @vsn 1.0
   @sref "noizu-test-3"
   defmodule Entity do
-    Noizu.DomainObject.noizu_entity() do
+    @pool Noizu.AdvancedPool.Support.TestV3Pool
+    Noizu.AdvancedPool.ServiceWorker.service_worker_entity() do
       identifier :integer
       public_field :data, %{}
     end
 
-    use Noizu.AdvancedPool.V3.InnerStateBehaviour,
-        pool: Noizu.AdvancedPool.Support.TestV3Pool,
-        override: [:load, :supervisor_hint]
 
 
     def supervisor_hint(ref) do
@@ -162,7 +160,7 @@ defmodule Noizu.AdvancedPool.Support.TestV3WorkerThree do
   end
 
   defmodule Repo do
-    Noizu.DomainObject.noizu_repo() do
+    Noizu.AdvancedPool.ServiceWorker.service_worker_repo() do
 
     end
   end

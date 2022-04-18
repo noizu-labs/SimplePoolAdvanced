@@ -156,51 +156,27 @@ defmodule Noizu.AdvancedPool.V3.InnerStateBehaviour do
       #---------------------------------
       #
       #---------------------------------
-      def call_router_internal__default({:passive, envelope}, from, state), do: call_router_internal__default(envelope, from, state)
-      def call_router_internal__default({:spawn, envelope}, from, state), do: call_router_internal__default(envelope, from, state)
-      def call_router_internal__default(envelope, from, state) do
-        case envelope do
-          # fetch!
-          {:s, {:fetch!, args}, context} -> fetch!(state, args, from, context)
-          {:s, {:fetch!, args, opts}, context} -> fetch!(state, args, from, context, opts)
+      def __handle_call__({:passive, envelope}, from, state), do: __handle_call__(envelope, from, state)
+      def __handle_call__({:spawn, envelope}, from, state), do: __handle_call__(envelope, from, state)
 
-          # wake!
-          {:s, {:wake!, args}, context} -> wake!(state, args, from, context)
-          {:s, {:wake!, args, opts}, context} -> wake!(state, args, from, context, opts)
+      # fetch
+      def __handle_call__({:s, {:fetch!, args}, context}, from, state), do: fetch!(state, args, from, context)
+      def __handle_call__({:s, {:fetch!, args, opts}, context}, from, state), do: fetch!(state, args, from, context, opts)
 
-          _ -> nil
-        end
-      end
+      def __handle_call__({:s, {:wake!, args}, context}, from, state), do: wake!(state, args, from, context)
+      def __handle_call__({:s, {:wake!, args, opts}, context}, from, state), do: wake!(state, args, from, context, opts)
 
-      #---------------------------------
-      #
-      #---------------------------------
-      def call_router_internal(envelope, from, state), do: call_router_internal__default(envelope, from, state)
-
+      def __handle_call__(call, from, state), do: super(call, from, state)
 
       #----------------------------
       #
       #----------------------------
-      def cast_router_internal__default(envelope, state) do
-        r = call_router_internal(envelope, :cast, state)
-        r && as_cast(r)
-      end
+      def __handle_cast__(call, state), do: __handle_call__(call, :cast, state) |> as_cast()
 
       #----------------------------
       #
       #----------------------------
-      def cast_router_internal(envelope, state), do: cast_router_internal__default(envelope, state)
-
-      #----------------------------
-      #
-      #----------------------------
-      def info_router_internal__default(envelope, state) do
-        nil
-      end
-      #----------------------------
-      #
-      #----------------------------
-      def info_router_internal(envelope, state), do: info_router_internal__default(envelope, state)
+      def __handle_info__(call, state), do: __handle_cast__(call, state) |> as_cast()
 
       #----------------------------------
       #
@@ -247,12 +223,9 @@ defmodule Noizu.AdvancedPool.V3.InnerStateBehaviour do
         wake!: 4,
         wake!: 5,
 
-        call_router_internal__default: 3,
-        call_router_internal: 3,
-        cast_router_internal__default: 2,
-        cast_router_internal: 2,
-        info_router_internal__default: 2,
-        info_router_internal: 2,
+        __handle_call__: 3,
+        __handle_cast__: 2,
+        __handle_info__: 2,
 
         shutdown: 1,
         shutdown: 2,
