@@ -45,7 +45,7 @@ defmodule Noizu.AdvancedPool.V3.ServerBehaviour do
 
     @default_timeout 15_000
     @default_shutdown_timeout 30_000
-
+    def prepare_options_slim(options), do: Noizu.ElixirCore.SlimOptions.slim(prepare_options(options))
     def prepare_options(options) do
       settings = %OptionSettings{
         option_settings: %{
@@ -160,7 +160,7 @@ defmodule Noizu.AdvancedPool.V3.ServerBehaviour do
 
 
     defp meta_init_verbose(module, options) do
-      options.verbose == :auto && module.pool().verbose() || options.verbose
+      if options[:verbose] == :auto, do: module.pool().verbose(), else: options[:verbose]
     end
 
     defp meta_init_default_definition(module, options) do
@@ -176,7 +176,7 @@ defmodule Noizu.AdvancedPool.V3.ServerBehaviour do
         target: 0,
       }
 
-      _default_definition = case options.default_definition do
+      _default_definition = case options[:default_definition] do
                               :auto ->
                                 case a_s[module.pool()] || a_s[:default] do
                                   d = %Noizu.AdvancedPool.MonitoringFramework.Service.Definition{} ->
@@ -236,7 +236,7 @@ defmodule Noizu.AdvancedPool.V3.ServerBehaviour do
   defmacro __using__(options) do
     options = Macro.expand(options, __ENV__)
     implementation = Keyword.get(options || [], :implementation, Noizu.AdvancedPool.V3.ServerBehaviour.Default)
-    option_settings = implementation.prepare_options(options)
+    option_settings = implementation.prepare_options_slim(options)
 
     # Temporary Hardcoding
     router_provider = Noizu.AdvancedPool.V3.RouterBehaviour.DefaultProvider

@@ -16,20 +16,20 @@ defmodule Noizu.AdvancedPool.V3.StandAloneServiceBehaviour do
   defmacro __using__(options) do
     options = Macro.expand(options, __ENV__)
     implementation = Keyword.get(options || [], :implementation, Noizu.AdvancedPool.V3.PoolBehaviour.Default)
-    option_settings = implementation.prepare_options(options)
+    option_settings = implementation.prepare_options_slim(options)
 
     # Set stand alone flag.
     option_settings = option_settings
-                      |> put_in([Access.key(:effective_options), :stand_alone], true)
-                      |> put_in([Access.key(:effective_options), :monitor_options, :stand_alone], true)
-                      |> put_in([Access.key(:effective_options), :worker_options, :stand_alone], true)
-                      |> put_in([Access.key(:effective_options), :server_options, :stand_alone], true)
-                      |> put_in([Access.key(:effective_options), :worker_supervisor_options, :stand_alone], true)
-                      |> put_in([Access.key(:effective_options), :pool_supervisor_options, :stand_alone], true)
+                      |> put_in([:effective_options, :stand_alone], true)
+                      |> put_in([:effective_options, :monitor_options, :stand_alone], true)
+                      |> put_in([:effective_options, :worker_options, :stand_alone], true)
+                      |> put_in([:effective_options, :server_options, :stand_alone], true)
+                      |> put_in([:effective_options, :worker_supervisor_options, :stand_alone], true)
+                      |> put_in([:effective_options, :pool_supervisor_options, :stand_alone], true)
 
-    options = option_settings.effective_options
+    options = option_settings[:effective_options]
 
-    default_modules = options.default_modules
+    default_modules = options[:default_modules]
     message_processing_provider = Noizu.AdvancedPool.V3.MessageProcessingBehaviour.DefaultProvider
 
     quote do
@@ -108,15 +108,15 @@ defmodule Noizu.AdvancedPool.V3.StandAloneServiceBehaviour do
 
       # Note, no WorkerSupervisor as this is a stand alone service with no children.
 
-      if (unquote(default_modules.pool_supervisor)) do
+      if (unquote(default_modules[:pool_supervisor])) do
         defmodule PoolSupervisor do
-          use Noizu.AdvancedPool.V3.PoolSupervisorBehaviour, unquote(options.pool_supervisor_options)
+          use Noizu.AdvancedPool.V3.PoolSupervisorBehaviour, unquote(options[:pool_supervisor_options])
         end
       end
 
-      if (unquote(default_modules.monitor)) do
+      if (unquote(default_modules[:monitor])) do
         defmodule Monitor do
-          use Noizu.AdvancedPool.V3.MonitorBehaviour, unquote(options.monitor_options)
+          use Noizu.AdvancedPool.V3.MonitorBehaviour, unquote(options[:monitor_options])
         end
       end
 

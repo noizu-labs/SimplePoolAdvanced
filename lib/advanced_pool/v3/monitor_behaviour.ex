@@ -21,7 +21,7 @@ defmodule Noizu.AdvancedPool.V3.MonitorBehaviour do
 
     @default_timeout 15_000
     @default_shutdown_timeout 30_000
-
+    def prepare_options_slim(options), do: Noizu.ElixirCore.SlimOptions.slim(prepare_options(options))
     def prepare_options(options) do
       settings = %OptionSettings{
         option_settings: %{
@@ -57,7 +57,7 @@ defmodule Noizu.AdvancedPool.V3.MonitorBehaviour do
   defmacro __using__(options) do
     options = Macro.expand(options, __ENV__)
     implementation = Keyword.get(options || [], :implementation, Noizu.AdvancedPool.V3.ServerBehaviour.Default)
-    option_settings = implementation.prepare_options(options)
+    option_settings = implementation.prepare_options_slim(options)
 
     # Temporary Hardcoding
     message_processing_provider = Noizu.AdvancedPool.V3.MessageProcessingBehaviour.DefaultProvider

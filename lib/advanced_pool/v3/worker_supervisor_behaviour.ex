@@ -33,7 +33,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour do
     @default_max_seconds (5)
     @default_max_restarts (1000)
     @default_strategy (:one_for_one)
-
+    def prepare_options_slim(options), do: Noizu.ElixirCore.SlimOptions.slim(prepare_options(options))
     def prepare_options(options) do
 
 
@@ -252,12 +252,12 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour do
   defmacro __using__(options) do
     options = Macro.expand(options, __ENV__)
     implementation = Keyword.get(options || [], :implementation, Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour.Default)
-    option_settings = implementation.prepare_options(options)
-    options = option_settings.effective_options
+    option_settings = implementation.prepare_options_slim(options)
+    options = option_settings[:effective_options]
 
     # @Todo Temporary Hard Code
-    max_supervisors = options.max_supervisors
-    layer2_provider = options.layer2_provider
+    max_supervisors = options[:max_supervisors]
+    layer2_provider = options[:layer2_provider]
 
     message_processing_provider = Noizu.AdvancedPool.V3.MessageProcessingBehaviour.DefaultProvider
     quote do

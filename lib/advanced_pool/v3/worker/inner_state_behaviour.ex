@@ -37,6 +37,7 @@ defmodule Noizu.AdvancedPool.V3.InnerStateBehaviour do
   @features ([:auto_identifier, :lazy_load, :inactivitiy_check, :s_redirect])
   @default_features ([:lazy_load, :s_redirect, :inactivity_check])
 
+  def prepare_options_slim(options), do: Noizu.ElixirCore.SlimOptions.slim(prepare_options(options))
   def prepare_options(options) do
     settings = %OptionSettings{
       option_settings: %{
@@ -74,10 +75,10 @@ defmodule Noizu.AdvancedPool.V3.InnerStateBehaviour do
   end
 
   defmacro __using__(options) do
-    option_settings = prepare_options(options)
-    options = option_settings.effective_options
+    option_settings = prepare_options_slim(options)
+    options = option_settings[:effective_options]
     #required = options.required
-    pool = options.pool
+    pool = options[:pool]
     message_processing_provider = Noizu.AdvancedPool.V3.MessageProcessingBehaviour.DefaultProvider
     quote do
       import unquote(__MODULE__)

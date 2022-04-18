@@ -8,7 +8,7 @@ defmodule Noizu.AdvancedPool.V3.RecordKeeperBehaviour do
   defmacro __using__(options) do
     options = Macro.expand(options, __ENV__)
     implementation = Keyword.get(options || [], :implementation, Noizu.AdvancedPool.V3.ServerBehaviour.Default)
-    option_settings = implementation.prepare_options(options)
+    option_settings = implementation.prepare_options_slim(options)
 
     quote do
       use Agent

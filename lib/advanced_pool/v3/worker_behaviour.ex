@@ -30,6 +30,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
     @default_features ([:lazy_load, :s_redirect, :s_redirect_handle, :inactivity_check, :call_forwarding, :graceful_stop, :crash_protection, :migrate_shutdown])
     @default_check_interval_ms (1000 * 60 * 5)
     @default_kill_interval_ms (1000 * 60 * 15)
+    def prepare_options_slim(options), do: Noizu.ElixirCore.SlimOptions.slim(prepare_options(options))
     def prepare_options(options) do
       settings = %OptionSettings{
         option_settings: %{
@@ -199,10 +200,10 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
   defmacro __using__(options) do
     options = Macro.expand(options, __ENV__)
     implementation = Keyword.get(options || [], :implementation, Noizu.AdvancedPool.V3.WorkerBehaviour.Default)
-    option_settings = implementation.prepare_options(options)
-    options = option_settings.effective_options
-    features = MapSet.new(options.features)
-    verbose = options.verbose
+    option_settings = implementation.prepare_options_slim(options)
+    options = option_settings[:effective_options]
+    features = MapSet.new(options[:features])
+    verbose = options[:verbose]
 
 
     message_processing_provider = Noizu.AdvancedPool.V3.MessageProcessingBehaviour.DefaultProvider
@@ -213,8 +214,8 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       use GenServer
 
-      @check_interval_ms (unquote(options.check_interval_ms))
-      @kill_interval_s (unquote(options.kill_interval_ms)/1000)
+      @check_interval_ms (unquote(options[:check_interval_ms]))
+      @kill_interval_s (unquote(options[:kill_interval_ms])/1000)
       @migrate_shutdown_interval_ms (5_000)
       @migrate_shutdown unquote(MapSet.member?(features, :migrate_shutdown))
       @inactivity_check unquote(MapSet.member?(features, :inactivity_check))

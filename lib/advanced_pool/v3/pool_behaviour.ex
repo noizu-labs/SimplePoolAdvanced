@@ -34,6 +34,8 @@ defmodule Noizu.AdvancedPool.V3.PoolBehaviour do
     #---------
     #
     #---------
+    def prepare_options_slim(options), do: Noizu.ElixirCore.SlimOptions.slim(prepare_options(options))
+
     def prepare_options(options) do
       settings = %OptionSettings{
         option_settings: %{
@@ -77,10 +79,10 @@ defmodule Noizu.AdvancedPool.V3.PoolBehaviour do
   defmacro __using__(options) do
     options = Macro.expand(options, __ENV__)
     implementation = Keyword.get(options || [], :implementation, Noizu.AdvancedPool.V3.PoolBehaviour.Default)
-    option_settings = implementation.prepare_options(options)
-    options = option_settings.effective_options
-    default_modules = options.default_modules
-    max_supervisors = options.max_supervisors
+    option_settings = implementation.prepare_options_slim(options)
+    options = option_settings[:effective_options]
+    default_modules = options[:default_modules]
+    max_supervisors = options[:max_supervisors]
 
     message_processing_provider = Noizu.AdvancedPool.V3.MessageProcessingBehaviour.DefaultProvider
 
@@ -182,40 +184,40 @@ defmodule Noizu.AdvancedPool.V3.PoolBehaviour do
       #--------------------------
       # Sub Modules
       #--------------------------
-      if (unquote(default_modules.worker)) do
+      if (unquote(default_modules[:worker])) do
         defmodule Worker do
-          use Noizu.AdvancedPool.V3.WorkerBehaviour, unquote(options.worker_options)
+          use Noizu.AdvancedPool.V3.WorkerBehaviour, unquote(options[:worker_options])
         end
       end
 
-      if (unquote(default_modules.server)) do
+      if (unquote(default_modules[:server])) do
         defmodule Server do
-          use Noizu.AdvancedPool.V3.ServerBehaviour, unquote(options.server_options)
+          use Noizu.AdvancedPool.V3.ServerBehaviour, unquote(options[:server_options])
           def lazy_load(state), do: state
         end
       end
 
-      if (unquote(default_modules.worker_supervisor)) do
+      if (unquote(default_modules[:worker_supervisor])) do
         defmodule WorkerSupervisor do
-          use Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour, unquote(options.worker_supervisor_options)
+          use Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour, unquote(options[:worker_supervisor_options])
         end
       end
 
-      if (unquote(default_modules.pool_supervisor)) do
+      if (unquote(default_modules[:pool_supervisor])) do
         defmodule PoolSupervisor do
-          use Noizu.AdvancedPool.V3.PoolSupervisorBehaviour, unquote(options.pool_supervisor_options)
+          use Noizu.AdvancedPool.V3.PoolSupervisorBehaviour, unquote(options[:pool_supervisor_options])
         end
       end
 
-      if (unquote(default_modules.monitor)) do
+      if (unquote(default_modules[:monitor])) do
         defmodule Monitor do
-          use Noizu.AdvancedPool.V3.MonitorBehaviour, unquote(options.monitor_options)
+          use Noizu.AdvancedPool.V3.MonitorBehaviour, unquote(options[:monitor_options])
         end
       end
 
-      if (unquote(default_modules.record_keeper)) do
+      if (unquote(default_modules[:record_keeper])) do
         defmodule RecordKeeper do
-          use Noizu.AdvancedPool.V3.RecordKeeperBehaviour, unquote(options.record_keeper_options)
+          use Noizu.AdvancedPool.V3.RecordKeeperBehaviour, unquote(options[:record_keeper_options])
         end
       end
 
