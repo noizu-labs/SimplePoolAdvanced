@@ -14,8 +14,9 @@ defmodule Noizu.AdvancedPool.V3.StandAloneServiceBehaviour do
   """
 
   defmacro __using__(options) do
+    options = Macro.expand(options, __ENV__)
     implementation = Keyword.get(options || [], :implementation, Noizu.AdvancedPool.V3.PoolBehaviour.Default)
-    option_settings = implementation.prepare_options(Macro.expand(options, __CALLER__))
+    option_settings = implementation.prepare_options(options)
 
     # Set stand alone flag.
     option_settings = option_settings

@@ -237,7 +237,7 @@ defmodule Noizu.AdvancedPool.V3.SettingsBehaviour do
 
   defmodule Base do
     defmacro __using__(opts) do
-      option_settings = Macro.expand(opts[:option_settings], __ENV__)
+      option_settings = Macro.expand(opts[:option_settings], __CALLER__)
       options = option_settings.effective_options
       pool_worker_state_entity = Map.get(options, :worker_state_entity, :auto)
       stand_alone = opts[:stand_alone] || false
@@ -273,7 +273,7 @@ defmodule Noizu.AdvancedPool.V3.SettingsBehaviour do
 
         @pool_dispatch_table Noizu.AdvancedPool.V3.SettingsBehaviour.Default.expand_table(@pool, unquote(options.dispatch_table), DispatchTable)
 
-        @options unquote(Macro.escape(Macro.expand(options, __CALLER__)))
+        @options unquote(Macro.escape(options))
         @option_settings unquote(Macro.escape(option_settings))
 
         @pool_worker_state_entity Noizu.AdvancedPool.V3.SettingsBehaviour.Default.pool_worker_state_entity(@pool, unquote(pool_worker_state_entity))
@@ -376,7 +376,7 @@ defmodule Noizu.AdvancedPool.V3.SettingsBehaviour do
   defmodule Inherited do
     defmacro __using__(opts) do
       depth = opts[:depth] || 1
-      option_settings = Macro.expand(opts[:option_settings], __ENV__)
+      option_settings = Macro.expand(opts[:option_settings], __CALLER__)
       options = option_settings.effective_options
 
       pool_worker_state_entity = Map.get(options, :worker_state_entity, :auto)
@@ -391,7 +391,7 @@ defmodule Noizu.AdvancedPool.V3.SettingsBehaviour do
         @module_str "#{@module}"
         @meta_key Module.concat(@module, Meta)
         @stand_alone unquote(stand_alone)
-        @options unquote(Macro.escape(Macro.expand(options, __CALLER__)))
+        @options unquote(Macro.escape(options))
         @option_settings unquote(Macro.escape(option_settings))
 
         # may not match pool_worker_state_entity

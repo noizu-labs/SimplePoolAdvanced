@@ -234,8 +234,9 @@ defmodule Noizu.AdvancedPool.V3.ServerBehaviour do
   #=================================================================
   #=================================================================
   defmacro __using__(options) do
+    options = Macro.expand(options, __ENV__)
     implementation = Keyword.get(options || [], :implementation, Noizu.AdvancedPool.V3.ServerBehaviour.Default)
-    option_settings = implementation.prepare_options(Macro.expand(options, __ENV__))
+    option_settings = implementation.prepare_options(options)
 
     # Temporary Hardcoding
     router_provider = Noizu.AdvancedPool.V3.RouterBehaviour.DefaultProvider

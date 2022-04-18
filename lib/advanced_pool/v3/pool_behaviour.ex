@@ -75,8 +75,9 @@ defmodule Noizu.AdvancedPool.V3.PoolBehaviour do
   end
 
   defmacro __using__(options) do
+    options = Macro.expand(options, __ENV__)
     implementation = Keyword.get(options || [], :implementation, Noizu.AdvancedPool.V3.PoolBehaviour.Default)
-    option_settings = implementation.prepare_options(Macro.expand(options, __CALLER__))
+    option_settings = implementation.prepare_options(options)
     options = option_settings.effective_options
     default_modules = options.default_modules
     max_supervisors = options.max_supervisors

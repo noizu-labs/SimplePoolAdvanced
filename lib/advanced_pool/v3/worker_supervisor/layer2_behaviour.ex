@@ -51,6 +51,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour do
   end
 
   defmacro __using__(options) do
+    options = Macro.expand(options, __ENV__)
     implementation = Keyword.get(options || [], :implementation, Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour.Default)
     option_settings = implementation.prepare_options(options)
     _options = option_settings.effective_options
