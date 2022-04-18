@@ -273,7 +273,7 @@ defmodule Noizu.AdvancedPool.V3.SettingsBehaviour do
 
         @pool_dispatch_table Noizu.AdvancedPool.V3.SettingsBehaviour.Default.expand_table(@pool, unquote(options.dispatch_table), DispatchTable)
 
-        @options unquote(Macro.escape(options))
+        @options unquote(Macro.escape(Macro.expand(options, __CALLER__)))
         @option_settings unquote(Macro.escape(option_settings))
 
         @pool_worker_state_entity Noizu.AdvancedPool.V3.SettingsBehaviour.Default.pool_worker_state_entity(@pool, unquote(pool_worker_state_entity))
@@ -391,7 +391,7 @@ defmodule Noizu.AdvancedPool.V3.SettingsBehaviour do
         @module_str "#{@module}"
         @meta_key Module.concat(@module, Meta)
         @stand_alone unquote(stand_alone)
-        @options unquote(Macro.escape(options))
+        @options unquote(Macro.escape(Macro.expand(options, __CALLER__)))
         @option_settings unquote(Macro.escape(option_settings))
 
         # may not match pool_worker_state_entity
