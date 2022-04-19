@@ -30,7 +30,6 @@ defmodule Noizu.AdvancedPool.V3.AcceptanceTest do
     assert Enum.member?([:"first@127.0.0.1"], host)  == true
     assert is_pid(pid)
     p_info = Process.info(pid)
-    IO.inspect p_info
     assert p_info[:dictionary][:"$initial_call"] == {Noizu.AdvancedPool.Support.TestV3ThreePool.Worker, :init, 1}
   end
 
@@ -83,13 +82,11 @@ defmodule Noizu.AdvancedPool.V3.AcceptanceTest do
     Noizu.AdvancedPool.Support.TestV3Pool.test_s_cast(ref, :bannana, @context)
     Noizu.AdvancedPool.Support.TestV3Pool.Server.wake!(ref, :state, @context)
     process = Noizu.AdvancedPool.Support.TestV3Pool.fetch!(ref, :process, @context)
-    IO.inspect process, pretty: true,  limit: :infinity
     sut = Noizu.AdvancedPool.Support.TestV3Pool.fetch!(ref, :inner_state, @context)
     assert sut.data[:s_cast] == nil
 
     Noizu.AdvancedPool.Support.TestV3Pool.test_s_cast(ref, :bannana, @context)
     process = Noizu.AdvancedPool.Support.TestV3Pool.fetch!(ref, :process, @context)
-    IO.inspect process, pretty: true,  limit: :infinity
     sut = Noizu.AdvancedPool.Support.TestV3Pool.fetch!(ref, :inner_state, @context)
     assert sut.data[:s_cast] == :bannana
   end

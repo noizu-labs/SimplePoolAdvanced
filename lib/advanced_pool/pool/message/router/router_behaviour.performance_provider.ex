@@ -24,12 +24,12 @@ defmodule Noizu.AdvancedPool.RouterBehaviour.PerformanceProvider do
       def option(option, :option_not_found), do: Map.get(@options, option, {:option_not_found, option})
       def option(option, default), do: Map.get(@options, option, default)
 
-      def run_on_host(ref, mfa, context, options \\ nil, timeout \\ @default_timeout) do
-        RouterProvider.run_on_host(@pool_server, ref, mfa, context, options, timeout)
+      def __run_on_host__(ref, mfa, context, options \\ nil, timeout \\ @default_timeout) do
+        RouterProvider.__run_on_host__(@pool_server, ref, mfa, context, options, timeout)
       end
 
-      def cast_to_host(ref, mfa, context, options \\ nil) do
-        RouterProvider.cast_to_host(@pool_server, ref, mfa, context, options)
+      def __cast_to_host__(ref, mfa, context, options \\ nil) do
+        RouterProvider.__cast_to_host__(@pool_server, ref, mfa, context, options)
       end
 
       def self_call(call, context \\ nil, options \\ nil) do
@@ -78,12 +78,12 @@ defmodule Noizu.AdvancedPool.RouterBehaviour.PerformanceProvider do
 
 
 
-      def s_call_unsafe(ref, extended_call, context, options, timeout) do
-        RouterProvider.s_call_unsafe(@pool_server, ref, extended_call, context, options, timeout)
+      def __s_call_unsafe__(ref, extended_call, context, options, timeout) do
+        RouterProvider.__s_call_unsafe__(@pool_server, ref, extended_call, context, options, timeout)
       end
 
-      def s_cast_unsafe(ref, extended_call, context, options) do
-        RouterProvider.s_cast_unsafe(@pool_server, ref, extended_call, context, options)
+      def __s_cast_unsafe__(ref, extended_call, context, options) do
+        RouterProvider.__s_cast_unsafe__(@pool_server, ref, extended_call, context, options)
       end
 
 
@@ -91,40 +91,40 @@ defmodule Noizu.AdvancedPool.RouterBehaviour.PerformanceProvider do
         RouterProvider.s_call_no_crash_protection!(@pool_server, identifier, call, context, options, timeout)
       end
 
-      def rs_call!(identifier, call, context, options \\ nil, timeout \\ nil) do
-        RouterProvider.rs_call_no_crash_protection!(@pool_server, identifier, call, context, options, timeout)
+      def __rs_call__!(identifier, call, context, options \\ nil, timeout \\ nil) do
+        RouterProvider.__rs_call_no_crash_protection__!(@pool_server, identifier, call, context, options, timeout)
       end
 
       def s_call(identifier, call, context, options \\ nil, timeout \\ nil) do
-        RouterProvider.s_call_no_crash_protection(@pool_server, identifier, call, context, options, timeout)
+        RouterProvider.__s_call_no_crash_protection__(@pool_server, identifier, call, context, options, timeout)
       end
 
-      def rs_call(identifier, call, context, options \\ nil, timeout \\ nil) do
-        RouterProvider.rs_call_no_crash_protection(@pool_server, identifier, call, context, options, timeout)
+      def __rs_call__(identifier, call, context, options \\ nil, timeout \\ nil) do
+        RouterProvider.__rs_call_no_crash_protection__(@pool_server, identifier, call, context, options, timeout)
       end
 
       def s_cast!(identifier, call, context, options \\ nil) do
-        RouterProvider.s_cast_no_crash_protection!(@pool_server, identifier, call, context, options)
+        RouterProvider.__s_cast_no_crash_protection__!(@pool_server, identifier, call, context, options)
       end
 
-      def rs_cast!(identifier, call, context, options \\ nil) do
-        RouterProvider.rs_cast_no_crash_protection!(@pool_server, identifier, call, context, options)
+      def __rs_cast__!(identifier, call, context, options \\ nil) do
+        RouterProvider.__rs_cast_no_crash_protection__!(@pool_server, identifier, call, context, options)
       end
 
       def s_cast(identifier, call, context, options \\ nil) do
-        RouterProvider.s_cast_no_crash_protection(@pool_server, identifier, call, context, options)
+        RouterProvider.__s_cast_no_crash_protection__(@pool_server, identifier, call, context, options)
       end
 
-      def rs_cast(identifier, call, context, options \\ nil) do
-        RouterProvider.rs_cast_no_crash_protection(@pool_server, identifier, call, context, options)
+      def __rs_cast__(identifier, call, context, options \\ nil) do
+        RouterProvider.__rs_cast_no_crash_protection__(@pool_server, identifier, call, context, options)
       end
 
       def link_forward!(link, call, context, options \\ nil) do
         RouterProvider.link_forward!(@pool_server, link, call, context, options)
       end
 
-      def extended_call(s_type, ref, call, context, options, timeout) do
-        RouterProvider.extended_call_without_redirect_support(@pool_server, s_type, ref, call, context, options, timeout)
+      def __extended_call__(s_type, ref, call, context, options, timeout) do
+        RouterProvider.__extended_call_without_redirect_support__(@pool_server, s_type, ref, call, context, options, timeout)
       end
 
       def get_direct_link!(ref, context, options) do
@@ -148,7 +148,7 @@ defmodule Noizu.AdvancedPool.RouterBehaviour.PerformanceProvider do
         options: 0,
         options: 2,
 
-        extended_call: 6,
+        __extended_call__: 6,
 
         self_call: 3,
         self_cast: 3,
@@ -166,25 +166,25 @@ defmodule Noizu.AdvancedPool.RouterBehaviour.PerformanceProvider do
         remote_cast: 4,
 
         get_direct_link!: 3,
-        s_call_unsafe: 5,
-        s_cast_unsafe: 4,
+        __s_call_unsafe__: 5,
+        __s_cast_unsafe__: 4,
 
         s_call!: 5,
-        rs_call!: 5,
+        __rs_call__!: 5,
 
         s_call: 5,
-        rs_call: 5,
+        __rs_call__: 5,
 
         s_cast!: 4,
-        rs_cast!: 4,
+        __rs_cast__!: 4,
 
         s_cast: 4,
-        rs_cast: 4,
+        __rs_cast__: 4,
 
         link_forward!: 4,
 
-        run_on_host: 5,
-        cast_to_host: 4,
+        __run_on_host__: 5,
+        __cast_to_host__: 4,
       ]
     end
   end

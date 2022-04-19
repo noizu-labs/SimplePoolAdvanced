@@ -4,7 +4,6 @@
 #-------------------------------------------------------------------------------
 
 defmodule Noizu.AdvancedPool.RouterBehaviour do
-
   @callback options() :: any
   @callback option(any, any) :: any
 
@@ -27,25 +26,11 @@ defmodule Noizu.AdvancedPool.RouterBehaviour do
 
   @callback get_direct_link!(any, any, any) :: any
 
-  @callback s_call_unsafe(any, any, any, any, any) :: any
-  @callback s_cast_unsafe(any, any, any, any) :: any
-
   @callback s_call!(any, any, any, any) :: any
-  @callback rs_call!(any, any, any, any) :: any
-
   @callback s_call(any, any, any, any) :: any
-  @callback rs_call(any, any, any, any) :: any
-
   @callback s_cast!(any, any, any, any) :: any
-  @callback rs_cast!(any, any, any, any) :: any
-
   @callback s_cast(any, any, any, any) :: any
-  @callback rs_cast(any, any, any, any) :: any
-
 
   @callback link_forward!(any, any, any, any) :: any
-
-  @callback run_on_host(any, any, any, any, any) :: any
-  @callback cast_to_host(any, any, any, any) :: any
 
 end

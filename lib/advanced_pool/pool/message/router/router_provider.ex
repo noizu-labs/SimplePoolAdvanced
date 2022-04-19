@@ -20,9 +20,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
 
     If already on the host apply will be used, otherwise an :rpc.call will be made to execute the method remotely.
   """
-  def run_on_host(pool_server, ref, {m, f, a}, context, options \\ nil, timeout \\ 30_000) do
+  def __run_on_host__(pool_server, ref, {m, f, a}, context, options \\ nil, timeout \\ 30_000) do
     timeout = timeout || options[:timeout] || 30_000
-    case pool_server.worker_management().host!(ref, context, options) do
+    case pool_server.__worker_management__().host!(ref, context, options) do
       {:ack, host} ->
         if host == node() do
           apply(m,f,a)
@@ -39,8 +39,8 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     If already on the host a process will be spawned and apply called,
     otherwise an :rpc.cast will be made to execute the method remotely.
   """
-  def cast_to_host(pool_server, ref, {m, f, a}, context, options \\ nil) do
-    case pool_server.worker_management().host!(ref, context, options) do
+  def __cast_to_host__(pool_server, ref, {m, f, a}, context, options \\ nil) do
+    case pool_server.__worker_management__().host!(ref, context, options) do
       {:ack, host} ->
         if host == node() do
           spawn fn -> apply(m,f,a) end
@@ -58,13 +58,13 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   @doc """
     Perform a bare s_call with out exception handling.
   """
-  def s_call_unsafe(pool_server, ref, extended_call, context, options, timeout) do
+  def __s_call_unsafe__(pool_server, ref, extended_call, context, options, timeout) do
     timeout = options[:timeout] || timeout || pool_server.router().option(:defaul_timeout, @default_timeout)
-    case pool_server.worker_management().process!(ref, context, options) do
+    case pool_server.__worker_management__().process!(ref, context, options) do
       {:ack, pid} ->
         case GenServer.call(pid, extended_call, timeout) do
           :s_retry ->
-            case pool_server.worker_management().process!(ref, context, options) do
+            case pool_server.__worker_management__().process!(ref, context, options) do
               {:ack, pid} ->
                 GenServer.call(pid, extended_call, timeout)
               error -> error
@@ -78,8 +78,8 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   @doc """
     Perform a bare s_cast with out exception handling.
   """
-  def s_cast_unsafe(pool_server, ref, extended_call, context, options) do
-    case pool_server.worker_management().process!(ref, context, options) do
+  def __s_cast_unsafe__(pool_server, ref, extended_call, context, options) do
+    case pool_server.__worker_management__().process!(ref, context, options) do
       {:ack, pid} -> GenServer.cast(pid, extended_call)
       error -> error
     end
@@ -93,20 +93,20 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   @doc """
     Forward a call to appropriate worker host node, where rs_call will be invoked. Spawn worker if not currently active.
   """
-  def s_call_crash_protection!(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
+  def __s_call_crash_protection__!(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
     timeout = timeout || 30_000 #@TODO final logic
     if pool_server.pool().stand_alone() do
       {:error, {pool_server, :stand_alone_server}}
     else
-      case pool_server.worker_management().worker_ref!(identifier, context) do
+      case pool_server.__worker_management__().worker_ref!(identifier, context) do
         e = {:error, _details} -> e
         ref ->
           try do
             options_b = put_in(options || %{}, [:spawn], true)
-            m = pool_server.router()
-            f = :rs_call!
+            m = pool_server.__router__()
+            f = :__rs_call__!
             a = [ref, call, context, options_b, timeout]
-            pool_server.router().run_on_host(ref, {m, f, a}, context, options_b, timeout)
+            pool_server.__router__().__run_on_host__(ref, {m, f, a}, context, options_b, timeout)
           catch
             :exit, e -> {:error, {:exit, e}}
           end
@@ -117,31 +117,30 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   @doc """
     Version of s_call! that will be invoked on a worker process' host node.
   """
-  def rs_call_crash_protection!(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
-    extended_call = pool_server.router().extended_call(:s_call!, identifier, call, context, options, timeout)
+  def __rs_call_crash_protection__!(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
+    extended_call = pool_server.__router__().__extended_call__(:s_call!, identifier, call, context, options, timeout)
     try do
-          Logger.error "rs_call_crash_protection! -> #{node()} -> #{inspect identifier} -> #{inspect extended_call}"
-      pool_server.router().s_call_unsafe(identifier, extended_call, context, options, timeout)
+      pool_server.__router__().__s_call_unsafe__(identifier, extended_call, context, options, timeout)
     catch
-      :rescue, e -> handle_s_exception(e, :s_call!, pool_server, identifier, extended_call, timeout, context, options)
-      :exit, e -> handle_s_exception(e, :s_call!, pool_server, identifier, extended_call, timeout, context, options)
-             e -> handle_s_exception(e, :s_call!, pool_server, identifier, extended_call, timeout, context, options)
+      :rescue, e -> __handle_s_exception__(e, :s_call!, pool_server, identifier, extended_call, timeout, context, options)
+      :exit, e -> __handle_s_exception__(e, :s_call!, pool_server, identifier, extended_call, timeout, context, options)
+             e -> __handle_s_exception__(e, :s_call!, pool_server, identifier, extended_call, timeout, context, options)
     end # end try
   end
 
   @doc """
     Forward a call to appropriate worker host node, where rs_call will be invoked. No action taken if node does not exist.
   """
-  def s_call_crash_protection(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
-    case pool_server.worker_management().worker_ref!(identifier, context) do
+  def __s_call_crash_protection__(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
+    case pool_server.__worker_management__().worker_ref!(identifier, context) do
       e = {:error, _details} -> e
       ref ->
         try do
           options_b = put_in(options || %{}, [:spawn], false)
-          m = pool_server.router()
-          f = :rs_call
+          m = pool_server.__router__()
+          f = :__rs_call__
           a = [ref, call, context, options_b, timeout]
-          pool_server.router().run_on_host(ref, {m, f, a}, context, options_b, timeout)
+          pool_server.__router__().__run_on_host__(ref, {m, f, a}, context, options_b, timeout)
         catch
           :exit, e -> {:error, {:exit, e}}
         end
@@ -151,30 +150,30 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   @doc """
     Version of s_call that will be invoked on a worker process' host node.
   """
-  def rs_call_crash_protection(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
-    extended_call = pool_server.router().extended_call(:s_call, identifier, call, context, options, timeout)
+  def __rs_call_crash_protection__(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
+    extended_call = pool_server.__router__().__extended_call__(:s_call, identifier, call, context, options, timeout)
     try do
-      pool_server.router().s_call_unsafe(identifier, extended_call, context, options, timeout)
+      pool_server.__router__().__s_call_unsafe__(identifier, extended_call, context, options, timeout)
     catch
-      :rescue, e -> handle_s_exception(e, :s_call, pool_server, identifier, extended_call, timeout, context, options)
-      :exit, e -> handle_s_exception(e, :s_call, pool_server, identifier, extended_call, timeout, context, options)
-      e -> handle_s_exception(e, :s_call, pool_server, identifier, extended_call, timeout, context, options)
+      :rescue, e -> __handle_s_exception__(e, :s_call, pool_server, identifier, extended_call, timeout, context, options)
+      :exit, e -> __handle_s_exception__(e, :s_call, pool_server, identifier, extended_call, timeout, context, options)
+      e -> __handle_s_exception__(e, :s_call, pool_server, identifier, extended_call, timeout, context, options)
     end # end try
   end
 
   @doc """
   Forward s_cast to worker's host node. Spawn process if not found.
   """
-  def s_cast_crash_protection!(pool_server, identifier, call, context, options \\ nil) do
-    case pool_server.worker_management().worker_ref!(identifier, context) do
+  def __s_cast_crash_protection__!(pool_server, identifier, call, context, options \\ nil) do
+    case pool_server.__worker_management__().worker_ref!(identifier, context) do
       e = {:error, _details} -> e
       ref ->
         try do
           options_b = put_in(options || %{}, [:spawn], true)
-          m = pool_server.router()
-          f = :rs_cast!
+          m = pool_server.__router__()
+          f = :__rs_cast__!
           a = [ref, call, context, options_b]
-          pool_server.router().cast_to_host(ref, {m, f, a}, context, options_b)
+          pool_server.__router__().__cast_to_host__(ref, {m, f, a}, context, options_b)
         catch
           :exit, e -> {:error, {:exit, e}}
         end
@@ -184,31 +183,31 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   @doc """
     Version of s_cast! that will be invoked on a worker process' host node.
   """
-  def rs_cast_crash_protection!(pool_server, identifier, call, context, options \\ nil) do
+  def __rs_cast_crash_protection__!(pool_server, identifier, call, context, options \\ nil) do
     timeout = nil
-    extended_call = pool_server.router().extended_call(:s_cast!, identifier, call, context, options, timeout)
+    extended_call = pool_server.__router__().__extended_call__(:s_cast!, identifier, call, context, options, timeout)
     try do
-      pool_server.router().s_cast_unsafe(identifier, extended_call, context, options)
+      pool_server.__router__().__s_cast_unsafe__(identifier, extended_call, context, options)
     catch
-      :rescue, e -> handle_s_exception(e, :s_cast!, pool_server, identifier, extended_call, timeout, context, options)
-      :exit, e -> handle_s_exception(e, :s_cast!, pool_server, identifier, extended_call, timeout, context, options)
-      e -> handle_s_exception(e, :s_cast!, pool_server, identifier, extended_call, timeout, context, options)
+      :rescue, e -> __handle_s_exception__(e, :s_cast!, pool_server, identifier, extended_call, timeout, context, options)
+      :exit, e -> __handle_s_exception__(e, :s_cast!, pool_server, identifier, extended_call, timeout, context, options)
+      e -> __handle_s_exception__(e, :s_cast!, pool_server, identifier, extended_call, timeout, context, options)
     end # end try
   end
 
   @doc """
   Forward s_cast to worker's host node.
   """
-  def s_cast_crash_protection(pool_server, identifier, call, context, options \\ nil) do
-    case pool_server.worker_management().worker_ref!(identifier, context) do
+  def __s_cast_crash_protection__(pool_server, identifier, call, context, options \\ nil) do
+    case pool_server.__worker_management__().worker_ref!(identifier, context) do
       e = {:error, _details} -> e
       ref ->
         try do
           options_b = put_in(options || %{}, [:spawn], false)
-          m = pool_server.router()
-          f = :rs_cast!
+          m = pool_server.__router__()
+          f = :__rs_cast__!
           a = [ref, call, context, options_b]
-          pool_server.router().cast_to_host(ref, {m, f, a}, context, options_b)
+          pool_server.__router__().__cast_to_host__(ref, {m, f, a}, context, options_b)
         catch
           :exit, e -> {:error, {:exit, e}}
         end
@@ -218,15 +217,15 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   @doc """
     Version of s_cast that will be invoked on a worker process' host node.
   """
-  def rs_cast_crash_protection(pool_server, identifier, call, context, options \\ nil) do
+  def __rs_cast_crash_protection__(pool_server, identifier, call, context, options \\ nil) do
     timeout = nil
-    extended_call = pool_server.router().extended_call(:s_cast, identifier, call, context, options, timeout)
+    extended_call = pool_server.__router__().__extended_call__(:s_cast, identifier, call, context, options, timeout)
     try do
-      pool_server.router().s_cast_unsafe(identifier, extended_call, context, options)
+      pool_server.__router__().__s_cast_unsafe__(identifier, extended_call, context, options)
     catch
-      :rescue, e -> handle_s_exception(e, :s_cast, pool_server, identifier, extended_call, timeout, context, options)
-      :exit, e -> handle_s_exception(e, :s_cast, pool_server, identifier, extended_call, timeout, context, options)
-      e -> handle_s_exception(e, :s_cast, pool_server, identifier, extended_call, timeout, context, options)
+      :rescue, e -> __handle_s_exception__(e, :s_cast, pool_server, identifier, extended_call, timeout, context, options)
+      :exit, e -> __handle_s_exception__(e, :s_cast, pool_server, identifier, extended_call, timeout, context, options)
+      e -> __handle_s_exception__(e, :s_cast, pool_server, identifier, extended_call, timeout, context, options)
     end # end try
   end
 
@@ -237,92 +236,92 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   @doc """
     Forward a call to appropriate worker. Spawn worker if not currently active.
   """
-  def s_call_no_crash_protection!(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
-    case pool_server.worker_management().worker_ref!(identifier, context) do
+  def __s_call_no_crash_protection__!(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
+    case pool_server.__worker_management__().worker_ref!(identifier, context) do
       e = {:error, _details} -> e
       ref ->
         options_b = put_in(options || %{}, [:spawn], true)
-        m = pool_server.router()
-        f = :rs_call!
+        m = pool_server.__router__()
+        f = :__rs_call__!
         a = [ref, call, context, options_b, timeout]
-        pool_server.router().run_on_host(ref, {m, f, a}, context, options_b, timeout)
+        pool_server.__router__().__run_on_host__(ref, {m, f, a}, context, options_b, timeout)
     end
   end
 
   @doc """
     Version of s_call! that will be invoked on a worker process' host node.
   """
-  def rs_call_no_crash_protection!(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
-    extended_call = pool_server.router().extended_call(:s_call!, identifier, call, context, options, timeout)
-    pool_server.router().s_call_unsafe(identifier, extended_call, context, options, timeout)
+  def __rs_call_no_crash_protection__!(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
+    extended_call = pool_server.__router__().__extended_call__(:s_call!, identifier, call, context, options, timeout)
+    pool_server.__router__().__s_call_unsafe__(identifier, extended_call, context, options, timeout)
   end
 
   @doc """
   Forward s_call to node host, no crash protection.
   """
-  def s_call_no_crash_protection(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
-    case pool_server.worker_management().worker_ref!(identifier, context) do
+  def __s_call_no_crash_protection__(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
+    case pool_server.__worker_management__().worker_ref!(identifier, context) do
       e = {:error, _details} -> e
       ref ->
         options_b = put_in(options || %{}, [:spawn], false)
-        m = pool_server.router()
-        f = :rs_call
+        m = pool_server.__router__()
+        f = :__rs_call__
         a = [ref, call, context, options_b, timeout]
-        pool_server.router().run_on_host(ref, {m, f, a}, context, options_b, timeout)
+        pool_server.__router__().__run_on_host__(ref, {m, f, a}, context, options_b, timeout)
     end
   end
 
   @doc """
     Implementation of s_call invoked on host node.
   """
-  def rs_call_no_crash_protection(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
-    extended_call = pool_server.router().extended_call(:s_call, identifier, call, context, options, timeout)
-    pool_server.router().s_call_unsafe(identifier, extended_call, context, options, timeout)
+  def __rs_call_no_crash_protection__(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
+    extended_call = pool_server.__router__().__extended_call__(:s_call, identifier, call, context, options, timeout)
+    pool_server.__router__().__s_call_unsafe__(identifier, extended_call, context, options, timeout)
   end
 
   @doc """
     Forward s_cast to server node with no crash protection.
   """
-  def s_cast_no_crash_protection!(pool_server, identifier, call, context, options \\ nil) do
-    case pool_server.worker_management().worker_ref!(identifier, context) do
+  def __s_cast_no_crash_protection__!(pool_server, identifier, call, context, options \\ nil) do
+    case pool_server.__worker_management__().worker_ref!(identifier, context) do
       e = {:error, _details} -> e
       ref ->
         options_b = put_in(options || %{}, [:spawn], true)
-        m = pool_server.router()
-        f = :rs_cast!
+        m = pool_server.__router__()
+        f = :__rs_cast__!
         a = [ref, call, context, options_b]
-        pool_server.router().cast_to_host(ref, {m, f, a}, context, options_b)
+        pool_server.__router__().__cast_to_host__(ref, {m, f, a}, context, options_b)
     end
   end
 
   @doc """
     Implementation of s_cast invoked on host node.
   """
-  def rs_cast_no_crash_protection!(pool_server, identifier, call, context, options \\ nil) do
+  def __rs_cast_no_crash_protection__!(pool_server, identifier, call, context, options \\ nil) do
     timeout = nil
-    extended_call = pool_server.router().extended_call(:s_cast!, identifier, call, context, options, timeout)
-    pool_server.router().s_cast_unsafe(identifier, extended_call, context, options)
+    extended_call = pool_server.__router__().__extended_call__(:s_cast!, identifier, call, context, options, timeout)
+    pool_server.__router__().__s_cast_unsafe__(identifier, extended_call, context, options)
   end
 
-  def s_cast_no_crash_protection(pool_server, identifier, call, context, options \\ nil) do
-    case pool_server.worker_management().worker_ref!(identifier, context) do
+  def __s_cast_no_crash_protection__(pool_server, identifier, call, context, options \\ nil) do
+    case pool_server.__worker_management__().worker_ref!(identifier, context) do
       e = {:error, _details} -> e
       ref ->
         options_b = put_in(options || %{}, [:spawn], false)
-        m = pool_server.router()
-        f = :rs_cast!
+        m = pool_server.__router__()
+        f = :__rs_cast__!
         a = [ref, call, context, options_b]
-        pool_server.router().cast_to_host(ref, {m, f, a}, context, options_b)
+        pool_server.__router__().__cast_to_host__(ref, {m, f, a}, context, options_b)
     end
   end
 
   @doc """
     Implementation of s_cast invoked on host node.
   """
-  def rs_cast_no_crash_protection(pool_server, identifier, call, context, options \\ nil) do
+  def __rs_cast_no_crash_protection__(pool_server, identifier, call, context, options \\ nil) do
     timeout = nil
-    extended_call = pool_server.router().extended_call(:s_cast, identifier, call, context, options, timeout)
-    pool_server.router().s_cast_unsafe(identifier, extended_call, context, options)
+    extended_call = pool_server.__router__().__extended_call__(:s_cast, identifier, call, context, options, timeout)
+    pool_server.__router__().__s_cast_unsafe__(identifier, extended_call, context, options)
   end
 
   #----------------------------------------
@@ -331,15 +330,15 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   @doc """
     Prepare extended call tuple.
   """
-  def extended_call_with_redirect_support(pool_server, s_type, ref, call, context, options, timeout \\ nil) do
-    call = extended_call_without_redirect_support(pool_server, s_type, ref, call, context, options, timeout)
-    {:msg_envelope, {pool_server.pool_worker(), {s_type, ref, timeout}}, call}
+  def __extended_call_with_redirect_support__(pool_server, s_type, ref, call, context, options, timeout \\ nil) do
+    call = __extended_call_without_redirect_support__(pool_server, s_type, ref, call, context, options, timeout)
+    {:msg_envelope, {pool_server.__worker__(), {s_type, ref, timeout}}, call}
   end
 
   @doc """
     Prepare extended call tuple.
   """
-  def extended_call_without_redirect_support(_pool_server, s_type, _ref, call, context, _options, _timeout \\ nil) do
+  def __extended_call_without_redirect_support__(_pool_server, s_type, _ref, call, context, _options, _timeout \\ nil) do
     {msg_prefix, spawn_type} = case s_type do
       # Standard Message
       :s_call! -> {:s, :spawn}
@@ -397,7 +396,8 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   #
   #----------------------------------------
   @doc """
-    Make internal system call to pool server ( se lf)
+    Make internal system call to pool server (self).
+    Use for System Messages like system going offline.
   """
   def internal_system_call(pool_server, call, context \\ nil, options \\ nil) do
     extended_call = {:m, call, context}
@@ -406,7 +406,8 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   end
 
   @doc """
-    Make internal system cast to pool server ( se lf)
+    Make internal system cast to pool server (self)
+    Use for System Messages like system going offline.
   """
   def internal_system_cast(pool_server, call, context \\ nil, _options \\ nil) do
     extended_call = {:m, call, context}
@@ -418,6 +419,7 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   #----------------------------------------
   @doc """
     Make remote call to pool server (redirecting to hose if appropriate.
+  User for System Messages like system going offline.
   """
   def remote_system_call(pool_server, remote_node, call, context \\ nil, options \\ nil) do
     extended_call = {:m, call, context}
@@ -431,6 +433,7 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
 
   @doc """
     Make remote cast to pool server (redirecting to hose if appropriate.
+  User for System Messages like system going offline.
   """
   def remote_system_cast(pool_server, remote_node, call, context \\ nil, _options \\ nil) do
     extended_call = {:m, call, context}
@@ -446,6 +449,7 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   #----------------------------------------
   @doc """
     Make internal call to pool server.
+    Use for heartbeats, internal timers, background processing, etc.
   """
   def internal_call(pool_server, call, context \\ nil, options \\ nil) do
     extended_call = {:i, call, context}
@@ -455,6 +459,7 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
 
   @doc """
     Make internal cast to pool server.
+  Use for heartbeats, internal timers, background processing, etc.
   """
   def internal_cast(pool_server, call, context \\ nil, _options \\ nil) do
     extended_call = {:i, call, context}
@@ -466,6 +471,7 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   #----------------------------------------
   @doc """
     Make remote call to pool server.
+  Use for heartbeats, internal timers, background processing, etc.
   """
   def remote_call(pool_server, remote_node, call, context \\ nil, options \\ nil) do
     extended_call = {:i, call, context}
@@ -479,6 +485,7 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
 
   @doc """
     Make remote cast to pool server.
+  Use for heartbeats, internal timers, background processing, etc.
   """
   def remote_cast(pool_server, remote_node, call, context \\ nil, _options \\ nil) do
     extended_call = {:i, call, context}
@@ -497,7 +504,7 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   """
   def link_forward!(pool_server, %Link{} = link, call, context, options \\ nil) do
     timeout = nil
-    extended_call = pool_server.router().extended_call(:s_cast, link.ref, call, context, options, timeout)
+    extended_call = pool_server.__router__().__extended_call__(:s_cast, link.ref, call, context, options, timeout)
     now_ts = options[:time] || :os.system_time(:seconds)
     options_b = options #put_in(options, [:spawn], true)
     try do
@@ -505,7 +512,7 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
         GenServer.cast(link.handle, extended_call)
         {:ok, link}
       else
-        case pool_server.worker_management().process!(link.ref, context, options_b) do
+        case pool_server.__worker_management__().process!(link.ref, context, options_b) do
           {:ack, pid} ->
             GenServer.cast(pid, extended_call)
             rc = if link.update_after == :infinity, do: :infinity, else: now_ts + link.update_after + :rand.uniform(div(link.update_after, 2))
@@ -517,13 +524,13 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
       end # end if else
     catch
       :rescue, e ->
-        handle_s_exception(e, :link_forward!, pool_server, link.ref, extended_call, timeout, context, options)
+        __handle_s_exception__(e, :link_forward!, pool_server, link.ref, extended_call, timeout, context, options)
         {:error, %Link{link| handle: nil, state: {:error, {:exit, e}}}}
       :exit, e ->
-        handle_s_exception(e, :link_forward!, pool_server, link.ref, extended_call, timeout, context, options)
+        __handle_s_exception__(e, :link_forward!, pool_server, link.ref, extended_call, timeout, context, options)
         {:error, %Link{link| handle: nil, state: {:error, {:exit, e}}}}
       e ->
-        handle_s_exception(e, :link_forward!, pool_server, link.ref, extended_call, timeout, context, options)
+        __handle_s_exception__(e, :link_forward!, pool_server, link.ref, extended_call, timeout, context, options)
         {:error, %Link{link| handle: nil, state: {:error, {:exit, e}}}}
     end # end try
   end
@@ -536,7 +543,7 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   """
   def get_direct_link!(pool_server, ref, context, options \\ %{}) do
     options = options || %{}
-    case pool_server.pool_worker_state_entity().ref(ref) do
+    case pool_server.__worker_state_entity__().ref(ref) do
       nil ->
         %Link{ref: ref, handler: pool_server, handle: nil, state: {:error, :no_ref}}
       {:error, details} ->
@@ -546,7 +553,7 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
           Map.has_key?(options, :spawn) -> options
           true -> put_in(options, [:spawn], false)
         end
-        case pool_server.worker_management().process!(ref, context, options_b) do
+        case pool_server.__worker_management__().process!(ref, context, options_b) do
           {:ack, pid} -> %Link{ref: ref, handler: pool_server, handle: pid, state: :valid}
           {:error, details} -> %Link{ref: ref, handler: pool_server, handle: nil, state: {:error, details}}
           error -> %Link{ref: ref, handler: pool_server, handle: nil, state: {:error, error}}
@@ -578,13 +585,13 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   @doc """
     Deal with s_call/s_cast exception
   """
-  defp handle_s_exception(exception, s_type, pool_server, identifier, extended_call, timeout, context, options) do
+  defp __handle_s_exception__(exception, s_type, pool_server, identifier, extended_call, timeout, context, options) do
     case exception do
       {:timeout, c} ->
         try do
           Logger.warn fn -> {pool_server.banner("#{pool_server}.#{s_type} - timeout.\n call: #{inspect extended_call}"), Noizu.ElixirCore.CallingContext.metadata(context)} end
-          if pool_server.router().option(:record_timeout, false) == true do
-            pool_server.worker_management().record_event!(identifier, :timeout, %{timeout: timeout, call: extended_call}, context, options)
+          if pool_server.__router__().option(:record_timeout, false) == true do
+            pool_server.__worker_management__().record_event!(identifier, :timeout, %{timeout: timeout, call: extended_call}, context, options)
           end
           {:error, {:timeout, c}}
         catch
@@ -593,8 +600,8 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
       o  ->
         try do
           Logger.warn fn -> {pool_server.banner("#{pool_server}.#{s_type} - exit raised.\n call: #{inspect extended_call}\nraise: #{inspect o}"), Noizu.ElixirCore.CallingContext.metadata(context)} end
-          if pool_server.router().option(:record_timeout, false) == true do
-            pool_server.worker_management().record_event!(identifier, :exit, %{exit: o, call: extended_call}, context, options)
+          if pool_server.__router__().option(:record_timeout, false) == true do
+            pool_server.__worker_management__().record_event!(identifier, :exit, %{exit: o, call: extended_call}, context, options)
           end
           {:error, {:exit, o}}
         catch

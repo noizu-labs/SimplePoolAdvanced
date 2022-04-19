@@ -449,9 +449,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerManagement.WorkerManagementProvider do
   """
   def register!(pool_server, ref, _context, _options \\ %{}) do
     #Logger.warn("[V2] New register!() Implementation Needed")
-    register = Registry.register(pool_server.__registry__(), {:worker, ref}, :process)
-    Logger.error "----> Register! #{node()}.#{pool_server}(#{inspect ref})@#{inspect self()} -> #{inspect register}"
-    register
+    Registry.register(pool_server.__registry__(), {:worker, ref}, :process)
   end
 
   @doc """
@@ -461,10 +459,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerManagement.WorkerManagementProvider do
     #Logger.warn("[V2] New unregister!() Implementation Needed")
 
     #Registry.unregister(pool_server.pool_registry(), ref)
-    unregister = Registry.unregister(pool_server.__registry__(), {:worker, ref})
-    Logger.error "----> Unregister! #{node()}.#{pool_server}(#{inspect ref})@#{inspect self()} -> #{inspect unregister}"
-    unregister
-
+    Registry.unregister(pool_server.__registry__(), {:worker, ref})
   end
 
   @doc """

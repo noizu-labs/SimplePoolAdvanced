@@ -32,13 +32,13 @@ defmodule Noizu.AdvancedPool.RouterBehaviour.DefaultProvider do
       def skinny_banner(contents), do: " |> [#{@pool_server.base()}:Worker] #{inspect self()} - #{contents}"
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
-      def run_on_host(ref, mfa, context, options \\ nil, timeout \\ @default_timeout) do
-        RouterProvider.run_on_host(@pool_server, ref, mfa, context, options, timeout)
+      def __run_on_host__(ref, mfa, context, options \\ nil, timeout \\ @default_timeout) do
+        RouterProvider.__run_on_host__(@pool_server, ref, mfa, context, options, timeout)
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
-      def cast_to_host(ref, mfa, context, options \\ nil) do
-        RouterProvider.cast_to_host(@pool_server, ref, mfa, context, options)
+      def __cast_to_host__(ref, mfa, context, options \\ nil) do
+        RouterProvider.__cast_to_host__(@pool_server, ref, mfa, context, options)
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
@@ -92,53 +92,53 @@ defmodule Noizu.AdvancedPool.RouterBehaviour.DefaultProvider do
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
-      def s_call_unsafe(ref, extended_call, context, options, timeout) do
-        RouterProvider.s_call_unsafe(@pool_server, ref, extended_call, context, options, timeout)
+      def __s_call_unsafe__(ref, extended_call, context, options, timeout) do
+        RouterProvider.__s_call_unsafe__(@pool_server, ref, extended_call, context, options, timeout)
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
-      def s_cast_unsafe(ref, extended_call, context, options) do
-        RouterProvider.s_cast_unsafe(@pool_server, ref, extended_call, context, options)
+      def __s_cast_unsafe__(ref, extended_call, context, options) do
+        RouterProvider.__s_cast_unsafe__(@pool_server, ref, extended_call, context, options)
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def s_call!(identifier, call, context, options \\ nil, timeout \\ nil) do
-        RouterProvider.s_call_crash_protection!(@pool_server, identifier, call, context, options, timeout)
+        RouterProvider.__s_call_crash_protection__!(@pool_server, identifier, call, context, options, timeout)
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
-      def rs_call!(identifier, call, context, options \\ nil, timeout \\ nil) do
-        RouterProvider.rs_call_crash_protection!(@pool_server, identifier, call, context, options, timeout)
+      def __rs_call__!(identifier, call, context, options \\ nil, timeout \\ nil) do
+        RouterProvider.__rs_call_crash_protection__!(@pool_server, identifier, call, context, options, timeout)
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def s_call(identifier, call, context, options \\ nil, timeout \\ nil) do
-        RouterProvider.s_call_crash_protection(@pool_server, identifier, call, context, options, timeout)
+        RouterProvider.__s_call_crash_protection__(@pool_server, identifier, call, context, options, timeout)
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
-      def rs_call(identifier, call, context, options \\ nil, timeout \\ nil) do
-        RouterProvider.rs_call_crash_protection(@pool_server, identifier, call, context, options, timeout)
+      def __rs_call__(identifier, call, context, options \\ nil, timeout \\ nil) do
+        RouterProvider.__rs_call_crash_protection__(@pool_server, identifier, call, context, options, timeout)
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def s_cast!(identifier, call, context, options \\ nil) do
-        RouterProvider.s_cast_crash_protection!(@pool_server, identifier, call, context, options)
+        RouterProvider.__s_cast_crash_protection__!(@pool_server, identifier, call, context, options)
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
-      def rs_cast!(identifier, call, context, options \\ nil) do
-        RouterProvider.rs_cast_crash_protection!(@pool_server, identifier, call, context, options)
+      def __rs_cast__!(identifier, call, context, options \\ nil) do
+        RouterProvider.__rs_cast_crash_protection__!(@pool_server, identifier, call, context, options)
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def s_cast(identifier, call, context, options \\ nil) do
-        RouterProvider.s_cast_crash_protection(@pool_server, identifier, call, context, options)
+        RouterProvider.__s_cast_crash_protection__(@pool_server, identifier, call, context, options)
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
-      def rs_cast(identifier, call, context, options \\ nil) do
-        RouterProvider.rs_cast_crash_protection(@pool_server, identifier, call, context, options)
+      def __rs_cast__(identifier, call, context, options \\ nil) do
+        RouterProvider.__rs_cast_crash_protection__(@pool_server, identifier, call, context, options)
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
@@ -147,8 +147,8 @@ defmodule Noizu.AdvancedPool.RouterBehaviour.DefaultProvider do
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
-      def extended_call(s_type, ref, call, context, options, timeout) do
-        RouterProvider.extended_call_with_redirect_support(@pool_server, s_type, ref, call, context, options, timeout)
+      def __extended_call__(s_type, ref, call, context, options, timeout) do
+        RouterProvider.__extended_call_with_redirect_support__(@pool_server, s_type, ref, call, context, options, timeout)
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
@@ -177,7 +177,7 @@ defmodule Noizu.AdvancedPool.RouterBehaviour.DefaultProvider do
         options: 0,
         option: 2,
 
-        extended_call: 6,
+        __extended_call__: 6,
 
         self_call: 3,
         self_cast: 3,
@@ -195,29 +195,29 @@ defmodule Noizu.AdvancedPool.RouterBehaviour.DefaultProvider do
         remote_cast: 4,
 
         get_direct_link!: 3,
-        s_call_unsafe: 5,
-        s_cast_unsafe: 4,
+        __s_call_unsafe__: 5,
+        __s_cast_unsafe__: 4,
 
         #route_call: 3,
         #route_cast: 2,
         #route_info: 2,
 
         s_call!: 5,
-        rs_call!: 5,
+        __rs_call__!: 5,
 
         s_call: 5,
-        rs_call: 5,
+        __rs_call__: 5,
 
         s_cast!: 4,
-        rs_cast!: 4,
+        __rs_cast__!: 4,
 
         s_cast: 4,
-        rs_cast: 4,
+        __rs_cast__: 4,
 
         link_forward!: 4,
 
-        run_on_host: 5,
-        cast_to_host: 4,
+        __run_on_host__: 5,
+        __cast_to_host__: 4,
       ]
     end
   end

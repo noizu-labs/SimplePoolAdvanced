@@ -305,20 +305,4 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour.Default do
     end
   end
 
-  defp start_children_banner(module, sup, definition, context) do
-    Logger.debug(fn -> {
-                         module.banner("#{module}.start_children",
-                           """
-                           sup: #{inspect sup}
-                           -------
-                           worker_supervisor: #{module.pool_worker_supervisor()}
-                           worker_server: #{module.pool_server()}
-                           -------
-                           definition: #{inspect definition}
-                           Options: #{inspect module.options(), limit: 10}
-                           """),
-                         Noizu.ElixirCore.CallingContext.metadata(context)
-                       }
-    end)
-  end
 end
