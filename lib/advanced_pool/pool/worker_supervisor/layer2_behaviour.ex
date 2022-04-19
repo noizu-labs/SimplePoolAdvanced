@@ -50,11 +50,11 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour do
     end
   end
 
-  defmacro __using__(options) do
-    options = Macro.expand(options, __ENV__)
-    implementation = Keyword.get(options || [], :implementation, Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour.Default)
-    option_settings = implementation.prepare_options_slim(options)
-    _options = option_settings[:effective_options]
+  defmacro __using__(option_settings) do
+    #options = Macro.expand(options, __ENV__)
+    implementation = Keyword.get(option_settings || [], :implementation, Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour.Default)
+    #option_settings = implementation.prepare_options_slim(options)
+    #_options = option_settings[:effective_options]
     #@TODO - use real options.
     message_processing_provider = Noizu.AdvancedPool.MessageProcessingBehaviour.DefaultProvider
 
@@ -81,7 +81,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour do
       def child(ref, context) do
         %{
           id: ref,
-          start: {pool_worker(), :start_link, [ref, context]},
+          start: {__worker__(), :start_link, [ref, context]},
           restart: @options.restart_type,
         }
       end
@@ -92,7 +92,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour do
       def child(ref, params, context) do
         %{
           id: ref,
-          start: {pool_worker(), :start_link, [ref, params, context]},
+          start: {__worker__(), :start_link, [ref, params, context]},
           restart: @options.restart_type,
         }
       end
@@ -103,7 +103,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour do
       def child(ref, params, context, options) do
         %{
           id: ref,
-          start: {pool_worker(), :start_link, [ref, params, context]},
+          start: {__worker__(), :start_link, [ref, params, context]},
           restart: (options.restart || @options.restart_type),
         }
       end
@@ -140,4 +140,23 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour do
 
     end # end quote
   end #end __using__
+
+  defmacro __generate__(max_supervisors, options) do
+    options = Macro.expand(options, __ENV__)
+    implementation = Keyword.get(options || [], :implementation, Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour.Default)
+    option_settings = implementation.prepare_options_slim(options)
+
+    quote do
+      module = __MODULE__
+      leading = round(:math.floor(:math.log10(unquote(max_supervisors)))) + 1
+      for i <- 1 .. unquote(max_supervisors) do
+        IO.puts "GENERATING: #{module}.Seg#{String.pad_leading("#{i}", leading, "0")}"
+        defmodule :"#{module}.Seg#{String.pad_leading("#{i}", leading, "0")}" do
+          use Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour, unquote(option_settings)
+          #use unquote(layer2_provider), @l2o
+        end
+      end
+    end
+  end
+
 end

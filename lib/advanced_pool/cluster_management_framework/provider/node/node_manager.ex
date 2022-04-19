@@ -7,7 +7,7 @@ defmodule Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.NodeManager d
   use Noizu.AdvancedPool.V3.StandAloneServiceBehaviour,
       default_modules: [:pool_supervisor, :monitor],
       worker_state_entity: Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.State.Entity,
-      verbose: false
+      verbose: true
 
 
   #--------------------------
@@ -213,7 +213,6 @@ defmodule Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.NodeManager d
           |> Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.State.Repo.update!(context)
         _ -> %Noizu.AdvancedPool.V3.ClusterManagement.Cluster.Node.State.Entity{identifier: node_name}
       end
-      IO.puts "NODE STATE = #{inspect node_state}"
       # @TODO setup heart beat for background processing.
 
       %State{
@@ -251,13 +250,12 @@ defmodule Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.NodeManager d
                             fn({service, _definition})->
                               # checks for online status, etc.
                               service.service_manager().service_instance_definition(service, state.entity.identifier, context, options)
-                            end)
-                          |> Enum.filter(fn(node_instance) -> (node_instance != nil) end)
+                            end) |> Enum.filter(fn(node_instance) -> (node_instance != nil) end)
 
       updated_statuses = Enum.reduce(service_instances || %{}, state.entity.service_instances_statuses || %{},
         fn(v, acc) ->
           # todo pass in options v.pool_settings
-          case pool_supervisor().add_child_supervisor(v.service.pool_supervisor(), v.launch_parameters, context) do
+          case __supervisor__().add_child_supervisor(v.service.__supervisor__(), v.launch_parameters, context) do
             {:ok, pid} ->
               cond do
                 acc[v.service] ->
@@ -278,7 +276,7 @@ defmodule Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.NodeManager d
                   |> put_in([v.service, Access.key(:pending_state)], :online)
               end
             e ->
-              Logger.error("Problem starting Node Manager - #{inspect e}", Noizu.ElixirCore.CallingContext.metadata(context))
+              Logger.error("Problem Starting Node Manager #{v.service.__supervisor__()}| #{inspect v.launch_parameters, pretty: true} - #{inspect e}", Noizu.ElixirCore.CallingContext.metadata(context))
               cond do
                 acc[v.service] ->
                   acc

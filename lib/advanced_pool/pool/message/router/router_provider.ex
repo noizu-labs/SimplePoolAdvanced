@@ -25,8 +25,10 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     case pool_server.worker_management().host!(ref, context, options) do
       {:ack, host} ->
         if host == node() do
+          IO.puts "RUN ON HOST(LOCAL: #{host}) #{inspect {m,f,a}}"
           apply(m,f,a)
         else
+          IO.puts "RUN ON HOST(Forward: #{host}) #{inspect {m,f,a}}"
           :rpc.call(host, m,f,a, timeout)
         end
       o -> o
@@ -124,6 +126,7 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     catch
       :rescue, e -> handle_s_exception(e, :s_call!, pool_server, identifier, extended_call, timeout, context, options)
       :exit, e -> handle_s_exception(e, :s_call!, pool_server, identifier, extended_call, timeout, context, options)
+             e -> handle_s_exception(e, :s_call!, pool_server, identifier, extended_call, timeout, context, options)
     end # end try
   end
 
@@ -156,6 +159,7 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     catch
       :rescue, e -> handle_s_exception(e, :s_call, pool_server, identifier, extended_call, timeout, context, options)
       :exit, e -> handle_s_exception(e, :s_call, pool_server, identifier, extended_call, timeout, context, options)
+      e -> handle_s_exception(e, :s_call, pool_server, identifier, extended_call, timeout, context, options)
     end # end try
   end
 
@@ -189,6 +193,7 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     catch
       :rescue, e -> handle_s_exception(e, :s_cast!, pool_server, identifier, extended_call, timeout, context, options)
       :exit, e -> handle_s_exception(e, :s_cast!, pool_server, identifier, extended_call, timeout, context, options)
+      e -> handle_s_exception(e, :s_cast!, pool_server, identifier, extended_call, timeout, context, options)
     end # end try
   end
 
@@ -222,6 +227,7 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     catch
       :rescue, e -> handle_s_exception(e, :s_cast, pool_server, identifier, extended_call, timeout, context, options)
       :exit, e -> handle_s_exception(e, :s_cast, pool_server, identifier, extended_call, timeout, context, options)
+      e -> handle_s_exception(e, :s_cast, pool_server, identifier, extended_call, timeout, context, options)
     end # end try
   end
 
@@ -515,6 +521,9 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
         handle_s_exception(e, :link_forward!, pool_server, link.ref, extended_call, timeout, context, options)
         {:error, %Link{link| handle: nil, state: {:error, {:exit, e}}}}
       :exit, e ->
+        handle_s_exception(e, :link_forward!, pool_server, link.ref, extended_call, timeout, context, options)
+        {:error, %Link{link| handle: nil, state: {:error, {:exit, e}}}}
+      e ->
         handle_s_exception(e, :link_forward!, pool_server, link.ref, extended_call, timeout, context, options)
         {:error, %Link{link| handle: nil, state: {:error, {:exit, e}}}}
     end # end try

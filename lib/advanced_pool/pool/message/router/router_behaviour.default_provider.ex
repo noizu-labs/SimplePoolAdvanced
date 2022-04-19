@@ -11,19 +11,23 @@ defmodule Noizu.AdvancedPool.RouterBehaviour.DefaultProvider do
   """
 
 
-  defmacro __using__(_options) do
+  defmacro __using__(options) do
     #options = options || %{}
     # @TODO use provided options
-    options = %{}
+    options = options[:effective_options]
     quote do
       alias Noizu.AdvancedPool.V3.Router.RouterProvider
-      @options unquote(Macro.escape(options))
+      @options Map.new(unquote(Macro.escape(options)) || [])
       @pool_server Module.split(__MODULE__) |> Enum.slice(0..-2) |> Module.concat()
       @default_timeout 30_000
       @behaviour Noizu.AdvancedPool.RouterBehaviour
 
       def options(), do: @options
-      def option(option, default \\ :not_found), do: Map.get(@options, option, default)
+      def option(option, default \\ :option_not_found)
+      def option(option, :option_not_found), do: Map.get(@options, option, {:option_not_found, option})
+      def option(option, default), do: Map.get(@options, option, default)
+
+
 
       def run_on_host(ref, mfa, context, options \\ nil, timeout \\ @default_timeout) do
         RouterProvider.run_on_host(@pool_server, ref, mfa, context, options, timeout)

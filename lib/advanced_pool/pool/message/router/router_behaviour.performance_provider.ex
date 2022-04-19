@@ -20,7 +20,9 @@ defmodule Noizu.AdvancedPool.RouterBehaviour.PerformanceProvider do
       @behaviour Noizu.AdvancedPool.RouterBehaviour
 
       def options(), do: @options
-      def option(option, default \\ :not_found), do: Map.get(@options, option, default)
+      def option(option, default \\ :option_not_found)
+      def option(option, :option_not_found), do: Map.get(@options, option, {:option_not_found, option})
+      def option(option, default), do: Map.get(@options, option, default)
 
       def run_on_host(ref, mfa, context, options \\ nil, timeout \\ @default_timeout) do
         RouterProvider.run_on_host(@pool_server, ref, mfa, context, options, timeout)

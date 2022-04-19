@@ -35,7 +35,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerManagement.WorkerManagementProvider do
   @doc """
    Return supervisor responsible for a specific worker.
   """
-  def current_supervisor(pool_server, ref), do: pool_server.pool_worker_supervisor().current_supervisors(ref)
+  def current_supervisor(pool_server, ref), do: pool_server.pool_worker_supervisor().current_supervisor(ref)
 
   @doc """
   Start worker with transfer.
@@ -449,7 +449,9 @@ defmodule Noizu.AdvancedPool.V3.WorkerManagement.WorkerManagementProvider do
   """
   def register!(pool_server, ref, _context, _options \\ %{}) do
     #Logger.warn("[V2] New register!() Implementation Needed")
-    Registry.register(pool_server.pool_registry(), {:worker, ref}, :process)
+    register = Registry.register(pool_server.__registry__(), {:worker, ref}, :process)
+    IO.puts "Register! #{node()}.#{pool_server}(#{inspect ref})@#{inspect self()} -> #{inspect register}"
+    register
   end
 
   @doc """
@@ -459,7 +461,10 @@ defmodule Noizu.AdvancedPool.V3.WorkerManagement.WorkerManagementProvider do
     #Logger.warn("[V2] New unregister!() Implementation Needed")
 
     #Registry.unregister(pool_server.pool_registry(), ref)
-    Registry.unregister(pool_server.pool_registry(), {:worker, ref})
+    unregister = Registry.unregister(pool_server.__registry__(), {:worker, ref})
+    IO.puts "Unregister! #{node()}.#{pool_server}(#{inspect ref})@#{inspect self()} -> #{inspect unregister}"
+    unregister
+
   end
 
   @doc """
@@ -488,8 +493,8 @@ defmodule Noizu.AdvancedPool.V3.WorkerManagement.WorkerManagementProvider do
     # @TODO load from meta or pool.options
     server = pool_server
     #base = pool_server.pool()
-    wm = pool_server.worker_management()
-    r = pool_server.pool_registry()
+    wm = pool_server.__worker_management__()
+    r = pool_server.__registry__()
 
     record = options[:dispatch_record] || dispatch_get!(ref, pool_server, context, options)
 

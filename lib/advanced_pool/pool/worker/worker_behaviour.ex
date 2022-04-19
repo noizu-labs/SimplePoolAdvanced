@@ -71,12 +71,12 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
     end
 
     def init(pool_worker, {ref, context}) do
-      wm = pool_worker.pool_server().worker_management()
+      wm = pool_worker.__server__().__worker_management__()
       #server = pool_worker.pool_server()
       #base = pool_worker.pool()
 
       br = :os.system_time(:millisecond)
-      wm.register!(ref, context)
+      register = wm.register!(ref, context)
       task = wm.set_node!(ref, context)
       r = Task.yield(task, 75)
       ar = :os.system_time(:millisecond)
@@ -114,14 +114,14 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
                        Logger.info(fn -> {base.banner("INIT/1.stale_transfer#{__MODULE__} (#{inspect ref }"), Noizu.ElixirCore.CallingContext.metadata(context) } end)
                      end
                      #PRI-0 - disabled until rate limit available - spawn fn -> server.worker_lookup_handler().record_event!(ref, :start, :normal, context, %{}) end
-                     {initialized, inner_state} = if lazy_load do
-                                                    case worker_state_entity.load(ref, context) do
-                                                      nil -> {false, nil}
-                                                      inner_state -> {true, inner_state}
-                                                    end
-                     else
-                       {false, nil}
-                                                  end
+                     {initialized, inner_state} = (if lazy_load do
+                                                     case worker_state_entity.load(ref, context) do
+                                                       nil -> {false, nil}
+                                                       inner_state -> {true, inner_state}
+                                                     end
+                                                   else
+                                                     {false, nil}
+                                                   end)
                      %Noizu.AdvancedPool.Worker.State{initialized: initialized, worker_ref: ref, inner_state: inner_state}
                    else
                      if (mod.verbose()) do
@@ -144,23 +144,21 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
                      Logger.info(fn -> {base.banner("INIT/1 #{__MODULE__} (#{inspect ref }"), Noizu.ElixirCore.CallingContext.metadata(context) } end)
                    end
                    #PRI-0 - disabled until rate limit available - spawn fn -> server.worker_lookup_handler().record_event!(ref, :start, :normal, context, %{}) end
-                   {initialized, inner_state} = if lazy_load do
-                                                  case worker_state_entity.load(ref, context) do
-                                                    nil -> {false, nil}
-                                                    inner_state -> {true, inner_state}
-                                                  end
-                   else
-                     {false, nil}
-                                                end
+                   {initialized, inner_state} = (if lazy_load do
+                                                   case worker_state_entity.load(ref, context) do
+                                                     nil -> {false, nil}
+                                                     inner_state -> {true, inner_state}
+                                                   end
+                                                 else
+                                                   {false, nil}
+                                                 end)
                    %Noizu.AdvancedPool.Worker.State{initialized: initialized, worker_ref: ref, inner_state: inner_state}
                end
 
 
 
       if inactivity_check do
-        ustate = %Noizu.AdvancedPool.Worker.State{ustate| last_activity: :os.system_time(:seconds)}
-        ustate = mod.schedule_inactivity_check(nil, ustate)
-        ustate
+        mod.schedule_inactivity_check(nil, %Noizu.AdvancedPool.Worker.State{ustate| last_activity: :os.system_time(:seconds)})
       else
         ustate
       end
@@ -233,13 +231,13 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def start_link(ref, context) do
-        verbose() && Logger.info(fn -> {banner("START_LINK/2 #{__MODULE__} (#{inspect ref})"), Noizu.ElixirCore.CallingContext.metadata(context)} end)
+        verbose() && Logger.info(fn -> {banner("START_LINK/2 #{__MODULE__}@#{inspect self()} (#{inspect ref})"), Noizu.ElixirCore.CallingContext.metadata(context)} end)
         GenServer.start_link(__MODULE__, {ref, context}, [{:name, __MODULE__}, {:restart, :permanent}])
       end
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def start_link(ref, migrate_args, context) do
-        verbose() && Logger.info(fn -> {banner("START_LINK/3 #{__MODULE__} (#{inspect migrate_args})"), Noizu.ElixirCore.CallingContext.metadata(context)} end)
+        verbose() && Logger.info(fn -> {banner("START_LINK/3 #{__MODULE__}@#{inspect self()} (#{inspect migrate_args})"), Noizu.ElixirCore.CallingContext.metadata(context)} end)
         GenServer.start_link(__MODULE__, {:migrate, ref, migrate_args, context}, [{:name, __MODULE__}, {:restart, :permanent}])
       end
 
@@ -251,6 +249,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def init(arg) do
+        verbose() && Logger.info(fn -> banner("init #{__MODULE__} (#{inspect arg}") end)
         Noizu.AdvancedPool.V3.WorkerBehaviour.Default.init(__MODULE__, arg)
       end
 
@@ -406,101 +405,108 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
 
 
-      def __handle_call__({:passive, envelope}, from, state), do: __handle_call__(envelope, from, state)
-      def __handle_call__({:spawn, envelope}, from, state), do: __handle_call__(envelope, from, state)
+      #def __handle_call__({type, _call, _context} = call, from, state) when type in [:s, :i, :m, :r], do: __handle_call__({:passive, call}, from, state)
 
       # fetch
-      def __handle_call__({:s, {:fetch!, args}, context}, from, state), do: fetch!(state, args, from, context)
-      def __handle_call__({:s, {:fetch!, args, opts}, context}, from, state), do: fetch!(state, args, from, context, opts)
+      def __handle_call__({_,{:s, {:fetch!, args}, context}}, from, state), do: fetch!(state, args, from, context)
+      def __handle_call__({_,{:s, {:fetch!, args, opts}, context}}, from, state), do: fetch!(state, args, from, context, opts)
 
       # ping!
-      def __handle_call__({:s, {:ping, args}, context}, from, state), do: ping(state, args, from, context)
-      def __handle_call__({:s, {:ping, args, opts}, context}, from, state), do: ping(state, args, from, context, opts)
+      def __handle_call__({_,{:s, {:ping, args}, context}}, from, state), do: ping(state, args, from, context)
+      def __handle_call__({_,{:s, {:ping, args, opts}, context}}, from, state), do: ping(state, args, from, context, opts)
 
       # health_check!
-      def __handle_call__({:s, {:health_check!, args}, context}, from, state), do: health_check!(state, args, from, context)
-      def __handle_call__({:s, {:health_check!, args, opts}, context}, from, state), do: health_check!(state, args, from, context, opts)
+      def __handle_call__({_,{:s, {:health_check!, args}, context}}, from, state), do: health_check!(state, args, from, context)
+      def __handle_call__({_,{:s, {:health_check!, args, opts}, context}}, from, state), do: health_check!(state, args, from, context, opts)
 
       # kill!
-      def __handle_call__({:s, {:kill!, args}, context}, from, state), do: kill!(state, args, from, context)
-      def __handle_call__({:s, {:kill!, args, opts}, context}, from, state), do: kill!(state, args, from, context, opts)
+      def __handle_call__({_,{:s, {:kill!, args}, context}}, from, state), do: kill!(state, args, from, context)
+      def __handle_call__({_,{:s, {:kill!, args, opts}, context}}, from, state), do: kill!(state, args, from, context, opts)
 
       # crash!
-      def __handle_call__({:s, {:crash!, args}, context}, from, state), do: crash!(state, args, from, context)
-      def __handle_call__({:s, {:crash!, args, opts}, context}, from, state), do: crash!(state, args, from, context, opts)
+      def __handle_call__({_,{:s, {:crash!, args}, context}}, from, state), do: crash!(state, args, from, context)
+      def __handle_call__({_,{:s, {:crash!, args, opts}, context}}, from, state), do: crash!(state, args, from, context, opts)
 
       # save!
-      def __handle_call__({:s, {:save!, args}, context}, from, state), do: save!(state, args, from, context)
-      def __handle_call__({:s, {:save!, args, opts}, context}, from, state), do: save!(state, args, from, context, opts)
+      def __handle_call__({_,{:s, {:save!, args}, context}}, from, state), do: save!(state, args, from, context)
+      def __handle_call__({_,{:s, {:save!, args, opts}, context}}, from, state), do: save!(state, args, from, context, opts)
 
       # reload!
-      def __handle_call__({:s, {:reload!, args}, context}, from, state), do: reload!(state, args, from, context)
-      def __handle_call__({:s, {:reload!, args, opts}, context}, from, state), do: reload!(state, args, from, context, opts)
+      def __handle_call__({_,{:s, {:reload!, args}, context}}, from, state), do: reload!(state, args, from, context)
+      def __handle_call__({_,{:s, {:reload!, args, opts}, context}}, from, state), do: reload!(state, args, from, context, opts)
 
       # load!
-      def __handle_call__({:s, {:load!, args}, context}, from, state), do: load!(state, args, from, context)
-      def __handle_call__({:s, {:load!, args, opts}, context}, from, state), do: load!(state, args, from, context, opts)
+      def __handle_call__({_,{:s, {:load!, args}, context}}, from, state), do: load!(state, args, from, context)
+      def __handle_call__({_,{:s, {:load!, args, opts}, context}}, from, state), do: load!(state, args, from, context, opts)
 
       # shutdown
-      def __handle_call__({:s, {:shutdown!, args}, context}, from, state), do: shutdown!(state, args, from, context)
-      def __handle_call__({:s, {:shutdown!, args, opts}, context}, from, state), do: shutdown!(state, args, from, context, opts)
+      def __handle_call__({_,{:s, {:shutdown!, args}, context}}, from, state), do: shutdown!(state, args, from, context)
+      def __handle_call__({_,{:s, {:shutdown!, args, opts}, context}}, from, state), do: shutdown!(state, args, from, context, opts)
 
       # migrate
-      def __handle_call__({:s, {:migrate!, args}, context}, from, state), do: migrate!(state, args, from, context)
-      def __handle_call__({:s, {:migrate!, args, opts}, context}, from, state), do: migrate!(state, args, from, context, opts)
+      def __handle_call__({_,{:s, {:migrate!, args}, context}}, from, state), do: migrate!(state, args, from, context)
+      def __handle_call__({_,{:s, {:migrate!, args, opts}, context}}, from, state), do: migrate!(state, args, from, context, opts)
 
-      def __handle_call__(call, from, state), do: __delegate_handle_call__(call, from ,state)
+      def __handle_call__({spawn? = :spawn, envelope}, from, state), do: __delegate_handle_call__({spawn?, envelope}, from, state)
+      def __handle_call__({spawn? = :passive, envelope}, from, state), do: __delegate_handle_call__({spawn?, envelope}, from, state)
+
+
 
       #----------------------------
       #
       #----------------------------
-      def __handle_cast__({:passive, envelope}, state), do: __handle_cast__(envelope, state)
-      def __handle_cast__({:spawn, envelope}, state), do: __handle_cast__(envelope, state)
+      #def __handle_cast__({type, _call, _context} = call, state) when type in [:s, :i, :m, :r], do: __handle_cast__({:passive, call}, state)
 
       # health_check!
-      def __handle_cast__({:s, {:health_check!, args}, context}, state), do: health_check!(state, args, :cast, context)
-      def __handle_cast__({:s, {:health_check!, args, opts}, context}, state), do: health_check!(state, args, :cast, context, opts)
+      def __handle_cast__({_,{:s, {:health_check!, args}, context}}, state), do: health_check!(state, args, :cast, context)
+      def __handle_cast__({_,{:s, {:health_check!, args, opts}, context}}, state), do: health_check!(state, args, :cast, context, opts)
 
       # kill!
-      def __handle_cast__({:s, {:kill!, args}, context}, state), do: kill!(state, args, :cast, context)
-      def __handle_cast__({:s, {:kill!, args, opts}, context}, state), do: kill!(state, args, :cast, context, opts)
+      def __handle_cast__({_,{:s, {:kill!, args}, context}}, state), do: kill!(state, args, :cast, context)
+      def __handle_cast__({_,{:s, {:kill!, args, opts}, context}}, state), do: kill!(state, args, :cast, context, opts)
 
       # crash!
-      def __handle_cast__({:s, {:crash!, args}, context}, state), do: crash!(state, args, :cast, context)
-      def __handle_cast__({:s, {:crash!, args, opts}, context}, state), do: crash!(state, args, :cast, context, opts)
+      def __handle_cast__({_,{:s, {:crash!, args}, context}}, state), do: crash!(state, args, :cast, context)
+      def __handle_cast__({_,{:s, {:crash!, args, opts}, context}}, state), do: crash!(state, args, :cast, context, opts)
 
       # save!
-      def __handle_cast__({:s, {:save!, args}, context}, state), do: save!(state, args, :cast, context)
-      def __handle_cast__({:s, {:save!, args, opts}, context}, state), do: save!(state, args, :cast, context, opts)
+      def __handle_cast__({_,{:s, {:save!, args}, context}}, state), do: save!(state, args, :cast, context)
+      def __handle_cast__({_,{:s, {:save!, args, opts}, context}}, state), do: save!(state, args, :cast, context, opts)
 
       # reload!
-      def __handle_cast__({:s, {:reload!, args}, context}, state), do: reload!(state, args, :cast, context)
-      def __handle_cast__({:s, {:reload!, args, opts}, context}, state), do: reload!(state, args, :cast, context, opts)
+      def __handle_cast__({_,{:s, {:reload!, args}, context}}, state), do: reload!(state, args, :cast, context)
+      def __handle_cast__({_,{:s, {:reload!, args, opts}, context}}, state), do: reload!(state, args, :cast, context, opts)
 
       # load!
-      def __handle_cast__({:s, {:load!, args}, context}, state), do: load!(state, args, :cast, context)
-      def __handle_cast__({:s, {:load!, args, opts}, context}, state), do: load!(state, args, :cast, context, opts)
+      def __handle_cast__({_,{:s, {:load!, args}, context}}, state), do: load!(state, args, :cast, context)
+      def __handle_cast__({_,{:s, {:load!, args, opts}, context}}, state), do: load!(state, args, :cast, context, opts)
 
       # shutdown
-      def __handle_cast__({:s, {:shutdown!, args}, context}, state), do: shutdown!(state, args, :cast, context)
-      def __handle_cast__({:s, {:shutdown!, args, opts}, context}, state), do: shutdown!(state, args, :cast, context, opts)
+      def __handle_cast__({_,{:s, {:shutdown!, args}, context}}, state), do: shutdown!(state, args, :cast, context)
+      def __handle_cast__({_,{:s, {:shutdown!, args, opts}, context}}, state), do: shutdown!(state, args, :cast, context, opts)
 
       # migrate
-      def __handle_cast__({:s, {:migrate!, args}, context}, state), do: migrate!(state, args, :cast, context)
-      def __handle_cast__({:s, {:migrate!, args, opts}, context}, state), do: migrate!(state, args, :cast, context, opts)
+      def __handle_cast__({_,{:s, {:migrate!, args}, context}}, state), do: migrate!(state, args, :cast, context)
+      def __handle_cast__({_,{:s, {:migrate!, args, opts}, context}}, state), do: migrate!(state, args, :cast, context, opts)
 
       # Catch all
-      def __handle_cast__(call, state), do: __delegate_handle_cast__(call, state)
+      def __handle_cast__({spawn? = :spawn, envelope}, state), do: __delegate_handle_cast__({spawn?, envelope}, state)
+      def __handle_cast__({spawn? = :passive, envelope}, state), do: __delegate_handle_cast__({spawn?, envelope}, state)
+
 
       #----------------------------
       #
       #----------------------------
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
-      def __handle_info__({:passive, envelope}, state), do: __handle_info__(envelope, state)
-      def __handle_info__({:spawn, envelope}, state), do: __handle_info__(envelope, state)
-      def __handle_info__({:i, {:inactivity_check, args}, context}, state), do: inactivity_check(state, args, :info, context) |> as_cast()
-      def __handle_info__({:i, {:inactivity_check, args, opts}, context}, state), do: inactivity_check(state, args, :info, context, opts) |> as_cast()
-      def __handle_info__(call, state), do: __delegate_handle_info__(call, state)
+      #def __handle_info__({:passive, envelope}, state), do: __handle_info__(envelope, state)
+      #def __handle_info__({:spawn, envelope}, state), do: __handle_info__(envelope, state)
+
+      def __handle_info__({_,{:i, {:inactivity_check, args}, context}}, state), do: inactivity_check(state, args, :info, context) |> as_cast()
+      def __handle_info__({_,{:i, {:inactivity_check, args, opts}, context}}, state), do: inactivity_check(state, args, :info, context, opts) |> as_cast()
+
+      def __handle_cast__({spawn? = :spawn, envelope}, state), do: __delegate_handle_cast__({spawn?, envelope}, state)
+      def __handle_cast__({spawn? = :passive, envelope}, state), do: __delegate_handle_cast__({spawn?, envelope}, state)
+
 
       #===============================================================================================================
       # Overridable

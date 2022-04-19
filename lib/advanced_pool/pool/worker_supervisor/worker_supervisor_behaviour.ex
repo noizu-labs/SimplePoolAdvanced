@@ -38,7 +38,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour do
 
 
       default_restart_type = (Application.get_env(:noizu_advanced_pool, :worker_pool_restart_type, nil)
-                              || Application.get_env(:noizu_advanced_pool, :restart_type, :transient))
+                              || Application.get_env(:noizu_advanced_pool, :restart_type, :permanent))
 
       default_max_restarts = (Application.get_env(:noizu_advanced_pool, :worker_pool_max_restarts, nil)
                               || Application.get_env(:noizu_advanced_pool, :max_restarts, @default_max_restarts))
@@ -214,6 +214,16 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour do
           GenServer.cast(pid, extended_call)
           Logger.warn(fn -> {"#{module} attempted a worker_transfer on an already running instance. #{inspect ref} -> #{inspect node()}@#{inspect pid}", Noizu.ElixirCore.CallingContext.metadata(context)} end)
           {:ack, pid}
+
+        {:error, {{:already_started, pid}, _}} ->
+          #timeout = 60_000 #@timeout
+          call = {:transfer_state, {:state, transfer_state, time: :os.system_time(:second)}}
+          extended_call = module.pool_server().router().extended_call(:s_call!, ref, call, context, %{}, nil)
+          #if @s_redirect_feature, do: {:s_call!, {__MODULE__, ref, timeout}, {:s, call, context}}, else: {:s, call, context}
+          GenServer.cast(pid, extended_call)
+          Logger.warn(fn -> {"#{module} attempted a worker_transfer on an already running instance. #{inspect ref} -> #{inspect node()}@#{inspect pid}", Noizu.ElixirCore.CallingContext.metadata(context)} end)
+          {:ack, pid}
+
         {:error, :already_present} ->
           # We may no longer simply restart child as it may have been initilized
           # With transfer_state and must be restarted with the correct context.
@@ -221,6 +231,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour do
           case Supervisor.start_child(worker_sup, childSpec) do
             {:ok, pid} -> {:ack, pid}
             {:error, {:already_started, pid}} -> {:ack, pid}
+            {:error, {{:already_started, pid}, _}} -> {:ack, pid}
             error -> error
           end
         error -> error
@@ -232,8 +243,8 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour do
       childSpec = worker_sup.child(ref, context)
       case Supervisor.start_child(worker_sup, childSpec) do
         {:ok, pid} -> {:ack, pid}
-        {:error, {:already_started, pid}} ->
-          {:ack, pid}
+        {:error, {:already_started, pid}} -> {:ack, pid}
+        {:error, {{:already_started, pid}, _}} -> {:ack, pid}
         {:error, :already_present} ->
           # We may no longer simply restart child as it may have been initialized
           # With transfer_state and must be restarted with the correct context.
@@ -241,9 +252,12 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour do
           case Supervisor.start_child(worker_sup, childSpec) do
             {:ok, pid} -> {:ack, pid}
             {:error, {:already_started, pid}} -> {:ack, pid}
+            {:error, {{:already_started, pid}, _}} -> {:ack, pid}
             error -> error
           end
-        error -> error
+        error ->
+          Logger.info fn -> "Worker Start Error #{module}.worker_start(#{inspect ref}) -> #{inspect error}" end
+          error
       end # end case
     end
 
@@ -340,13 +354,20 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour do
       #==================================================
       # Generate Sub Supervisors
       #==================================================
-      module = __MODULE__
-      leading = round(:math.floor(:math.log10(@max_supervisors))) + 1
-      for i <- 1 .. @max_supervisors do
-        defmodule :"#{module}.Seg#{String.pad_leading("#{i}", leading, "0")}" do
-          use unquote(layer2_provider), unquote(options[:layer2_options] || [])
-        end
-      end
+#      module = __MODULE__
+#      leading = round(:math.floor(:math.log10(@max_supervisors))) + 1
+#      for i <- 1 .. @max_supervisors do
+#        defmodule :"#{module}.Seg#{String.pad_leading("#{i}", leading, "0")}" do
+#          use unquote(layer2_provider), unquote(options[:layer2_options] || [])
+#          #use unquote(layer2_provider), @l2o
+#        end
+#      end
+#
+      require unquote(layer2_provider)
+      unquote(layer2_provider).__generate__(@max_supervisors, unquote(options[:layer2_options] || []))
+
+
+
     end # end quote
   end #end __using__
 end

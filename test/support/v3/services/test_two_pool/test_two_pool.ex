@@ -9,7 +9,10 @@ defmodule Noizu.AdvancedPool.Support.TestV3TwoPool do
       default_modules: [:pool_supervisor, :worker_supervisor, :monitor],
       worker_state_entity: Noizu.AdvancedPool.Support.TestV3WorkerTwo.Entity,
       dispatch_table: Noizu.AdvancedPool.TestDatabase.TestV3TwoPool.Dispatch.Table,
-      verbose: false
+      worker_supervisor_options: [
+        max_supervisors: 5,
+      ],
+      verbose: true
 
   def banner(_header, _msg) do
     :succesful_override

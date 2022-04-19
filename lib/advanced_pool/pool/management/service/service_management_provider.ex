@@ -150,7 +150,7 @@ defmodule Noizu.AdvancedPool.V3.ServiceManagement.ServiceManagementProvider do
   Record Service Event
   """
   def record_service_event!(pool_server, event, details, context, _options) do
-    Logger.error("Service Manager V2 record_service_event NYI| #{inspect pool_server}, #{inspect event}, #{inspect details}", Noizu.ElixirCore.CallingContext.metadata(context))
+    Logger.debug("Service Manager V2 record_service_event NYI| #{inspect pool_server}, #{inspect event}", Noizu.ElixirCore.CallingContext.metadata(context))
     :ok
   end
 

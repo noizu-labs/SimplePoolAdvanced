@@ -188,8 +188,8 @@ defmodule Noizu.AdvancedPool.MessageProcessingBehaviour.Default do
     end
   end
 
-  def __delegate_handle_call__(_m, call, _from, state) do
-    {:reply, {:uncaught, call}, state}
+  def __delegate_handle_call__(m, call, from, state) do
+    {:reply, {:uncaught, {m,call,from}}, state}
   end
 
 

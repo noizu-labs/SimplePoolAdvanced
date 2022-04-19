@@ -57,25 +57,19 @@ defmodule Noizu.AdvancedPool.Support.TestV3WorkerTwo do
     #------------------------------------------------------------------------
     # call router
     #------------------------------------------------------------------------
-    def call_router_user({:spawn, envelope}, from, state), do: call_router_user(envelope, from, state)
-    def call_router_user({:passive, envelope}, from, state), do: call_router_user(envelope, from, state)
-    def call_router_user(envelope, _from, state) do
-      case envelope do
-        {:s, {:test_s_call!, value}, context} -> test_s_call!(state, value, context)
-        {:s, {:test_s_call, value}, context} -> test_s_call(state, value, context)
-        _ -> nil
-      end
-    end
+    def __handle_call__({:spawn, envelope}, from, state), do: __handle_call__(envelope, from, state)
+    def __handle_call__({:passive, envelope}, from, state), do: __handle_call__(envelope, from, state)
+    def __handle_call__({:s, {:test_s_call!, value}, context}, _from, state), do: test_s_call!(state, value, context)
+    def __handle_call__({:s, {:test_s_call, value}, context}, _from, state), do: test_s_call(state, value, context)
+    def __handle_call__(call, from, state), do: super(call, from, state)
 
-    def cast_router_user({:spawn, envelope}, state), do: cast_router_user(envelope, state)
-    def cast_router_user({:passive, envelope}, state), do: cast_router_user(envelope, state)
-    def cast_router_user(envelope, state) do
-      case envelope do
-        {:s, {:test_s_cast!, value}, context} -> test_s_cast!(state, value, context)
-        {:s, {:test_s_cast, value}, context} -> test_s_cast(state, value, context)
-        _ -> nil
-      end
-    end
+
+    def __handle_cast__({:spawn, envelope}, state), do: __handle_cast__(envelope, state)
+    def __handle_cast__({:passive, envelope}, state), do: __handle_cast__(envelope, state)
+    def __handle_cast__({:s, {:test_s_cast!, value}, context}, state), do: test_s_cast!(state, value, context)
+    def __handle_cast__({:s, {:test_s_cast, value}, context}, state), do: test_s_cast(state, value, context)
+    def __handle_cast__(call, state), do: super(call, state)
+
 
     #-------------------
     # id/1

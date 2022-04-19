@@ -48,7 +48,7 @@ defmodule Noizu.AdvancedPool.V3.StandAloneServiceBehaviour do
       # Methods
       #--------------------------
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
-      def start(definition \\ :default, context \\ nil), do: __supervisor__.start_link(definition, context)
+      def start(definition \\ :default, context \\ nil), do: __supervisor__().start_link(definition, context)
 
       @file unquote(__ENV__.file) <> ":#{unquote(__ENV__.line)}" <> "(via #{__ENV__.file}:#{__ENV__.line})"
       def stand_alone(), do: true

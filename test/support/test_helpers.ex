@@ -4,9 +4,9 @@
 #-------------------------------------------------------------------------------
 
 defmodule Noizu.AdvancedPool.TestHelpers do
-  def unique_ref_v2(:one), do: {:ref, Noizu.AdvancedPool.Support.TestV3Worker.Entity, "test_#{inspect :os.system_time(:microsecond)}"}
-  def unique_ref_v2(:two), do: {:ref, Noizu.AdvancedPool.Support.TestV3WorkerTwo.Entity, "test_#{inspect :os.system_time(:microsecond)}"}
-  def unique_ref_v2(:three), do: {:ref, Noizu.AdvancedPool.Support.TestV3WorkerThree.Entity, "test_#{inspect :os.system_time(:microsecond)}"}
+  def unique_ref_v2(:one), do: Process.sleep(5) && {:ref, Noizu.AdvancedPool.Support.TestV3Worker.Entity, "test_#{inspect :os.system_time(:microsecond)}"}
+  def unique_ref_v2(:two), do: Process.sleep(5) && {:ref, Noizu.AdvancedPool.Support.TestV3WorkerTwo.Entity, "test_#{inspect :os.system_time(:microsecond)}"}
+  def unique_ref_v2(:three), do: Process.sleep(5) && {:ref, Noizu.AdvancedPool.Support.TestV3WorkerThree.Entity, "test_#{inspect :os.system_time(:microsecond)}"}
 
   require Logger
   @pool_options %{hard_limit: 250, soft_limit: 150, target: 100}
@@ -240,7 +240,6 @@ defmodule Noizu.AdvancedPool.TestHelpers do
     Noizu.AdvancedPool.V3.ClusterManagementFramework.ClusterManager.start(%{}, context)
     Noizu.AdvancedPool.V3.ClusterManagementFramework.ClusterManager.bring_cluster_online(%{}, context)
 
-
     # Bring Node (And Appropriate Services) Online - this will spawn actual Service Instances, ClusterManager will bring on service managers if not already online.
     Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.NodeManager.start({:"first@127.0.0.1", %{}}, context)
     Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.NodeManager.bring_node_online(:"first@127.0.0.1", %{}, context)
@@ -249,18 +248,22 @@ defmodule Noizu.AdvancedPool.TestHelpers do
     Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.NodeManager.block_for_state(:"first@127.0.0.1", :online, context, 30_000)
     #Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.NodeManager.block_for_state(:"second@127.0.0.1", :online, context, 30_000)
     case Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.NodeManager.block_for_status(:"first@127.0.0.1", [:green, :degraded], context, 30_000) do
-      {:ok, _s} ->
+      {:ok, s} ->
         Logger.info("""
+
         ================================================================
-        !!! Test Cluster Services: :"first@126.0.0.1"  # {inspect s} !!!
+        !!! Test Cluster Services: :"first@126.0.0.1"  #{inspect s} !!!
         ================================================================
+
         """)
 
       e ->
       Logger.error("""
+
       ================================================================
-      !!! Unable to bring system fully online: :"first@126.0.0.1" # {inspect e} !!!
+      !!! Unable to bring system fully online: :"first@126.0.0.1" #{inspect e} !!!
       ================================================================
+
       """)
       e
     end
@@ -275,10 +278,12 @@ defmodule Noizu.AdvancedPool.TestHelpers do
     Application.ensure_all_started(:semaphore)
 
     IO.puts """
+
     =============== SETUP SECOND TEST NODE =====================
     node: #{node()}
     semaphore_test: #{inspect :rpc.call(node(), Semaphore, :acquire, [:test, 5])}
     ============================================================
+
     """
 
     p = spawn fn ->
@@ -299,16 +304,20 @@ defmodule Noizu.AdvancedPool.TestHelpers do
       case Noizu.AdvancedPool.V3.ClusterManagementFramework.Cluster.NodeManager.block_for_status(:"second@127.0.0.1", [:green, :degraded], context, 30_000) do
         {:ok, s} ->
           Logger.info("""
+
           ================================================================
           !!! Test Cluster Services:  #{inspect s} !!!
           ================================================================
+
           """)
 
         e ->
           Logger.error("""
+
           ================================================================
-          !!! Unable to bring system fully online:  # {inspect e} !!!
+          !!! Unable to bring system fully online:  #{inspect e} !!!
           ================================================================
+
           """)
           e
       end

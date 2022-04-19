@@ -40,9 +40,9 @@ defmodule Noizu.AdvancedPool.Mixfile do
       {:markdown, github: "devinus/markdown", only: [:dev], optional: true}, # Markdown processor for ex_doc
       {:amnesia, git: "https://github.com/noizu/amnesia.git", ref: "9266002"}, # Mnesia Wrapper
 
-      {:noizu_core, github: "noizu/ElixirCore", tag: "1.0.16", override: true},
+      {:noizu_core, github: "noizu/ElixirCore", tag: "1.0.17", override: true},
       {:noizu_advanced_scaffolding, github: "noizu-labs/advanced_elixir_scaffolding", branch: "master", override: true},
-      {:noizu_mnesia_versioning, github: "noizu/MnesiaVersioning", tag: "0.1.9"},
+      {:noizu_mnesia_versioning, github: "noizu/MnesiaVersioning", tag: "0.1.10", override: true},
       {:plug, "~> 1.11.1", optional: true},
       {:telemetry, "~> 1.1.0", optional: true, override: true},
       {:poison, "~> 3.1.0", override: true},

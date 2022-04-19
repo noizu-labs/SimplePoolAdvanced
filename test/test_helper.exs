@@ -4,13 +4,7 @@
 #-------------------------------------------------------------------------------
 
 require Logger
-Logger.info """
 
-  ----------------------------------
-  Test Start
-  ----------------------------------
-"""
-ExUnit.start()
 
 alias Noizu.AdvancedPool.Support.TestPool
 alias Noizu.AdvancedPool.Support.TestTwoPool
@@ -123,7 +117,11 @@ spawn_second = if !Enum.member?(Amnesia.info(:db_nodes),:"second@127.0.0.1") do
 # Registry and Environment Manager Setup - Local
 #-----------------------------------------------
 context = Noizu.ElixirCore.CallingContext.system(%{})
+
 Noizu.AdvancedPool.TestHelpers.setup_first()
+
+
+
 
 if spawn_second do
   IO.puts "Provision Second Node for Test"
@@ -162,9 +160,37 @@ if (node() == :"first@127.0.0.1") do
   [] = :rpc.call(:"second@127.0.0.1", Registry, :lookup, [Noizu.AdvancedPool.Support.TestV3TwoPool.Registry, {:worker, :aple}])
 
 
+  :ok = Noizu.AdvancedPool.TestHelpers.wait_for_condition(
+    fn() ->
+      Registry.lookup(Noizu.AdvancedPool.Support.TestV3Pool.Registry, {:worker, :aple}) == []
+    end,
+    60 * 5
+  )
+  [] = Registry.lookup(Noizu.AdvancedPool.Support.TestV3Pool.Registry, {:worker, :aple})
+
+
+  :ok = Noizu.AdvancedPool.TestHelpers.wait_for_condition(
+    fn() ->
+      Registry.lookup(Noizu.AdvancedPool.Support.TestV3ThreePool.Registry, {:worker, :aple}) == []
+    end,
+    60 * 5
+  )
+  [] = Registry.lookup(Noizu.AdvancedPool.Support.TestV3ThreePool.Registry, {:worker, :aple})
+
+
+
 
   IO.puts "//////////////////////////////////////////////////////"
   IO.puts "Proceed"
   IO.puts "//////////////////////////////////////////////////////"
 
 end
+
+
+Logger.info """
+
+  ----------------------------------
+  Test Start
+  ----------------------------------
+"""
+ExUnit.start()

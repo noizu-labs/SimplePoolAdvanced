@@ -57,13 +57,17 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour do
           {module.banner(header, body), metadata}
         end)
       end
-      case Supervisor.start_link(module, [definition, context], [{:name, module}, {:restart, :permanent}]) do
+      case Supervisor.start_link(module, [definition, context], [{:name, module}, {:restart, :permanent}, {:shutdown, :infinity}]) do
         {:ok, sup} ->
-          Logger.info(fn ->  {"#{module}.start_link Supervisor Not Started. #{inspect sup}", Noizu.ElixirCore.CallingContext.metadata(context)} end)
+          Logger.info(fn ->  {"#{module}.start_link Supervisor Initial Start. #{inspect sup}", Noizu.ElixirCore.CallingContext.metadata(context)} end)
           module.start_children(sup, definition, context)
           {:ok, sup}
         {:error, {:already_started, sup}} ->
           Logger.info(fn -> {"#{module}.start_link Supervisor Already Started. Handling Unexpected State.  #{inspect sup}" , Noizu.ElixirCore.CallingContext.metadata(context)} end)
+          module.start_children(sup, definition, context)
+          {:ok, sup}
+        {:error, {{:already_started, sup}, e}} ->
+          Logger.info(fn -> {"#{module}.start_link Supervisor Already Started. Handling Unexpected State.  #{inspect sup} (+) #{inspect e}" , Noizu.ElixirCore.CallingContext.metadata(context)} end)
           module.start_children(sup, definition, context)
           {:ok, sup}
       end
@@ -76,8 +80,17 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour do
       case Supervisor.start_child(module, module.pass_through_supervisor(child, [definition, context],  [restart: :permanent])) do
         {:ok, pid} ->
           {:ok, pid}
-        {:error, {:already_started, process2_id}} ->
-          Supervisor.restart_child(module, process2_id)
+        error = {:error, {:already_started, process2_id}} ->
+          r = Supervisor.restart_child(module, process2_id)
+          Logger.warn(fn ->
+            {
+              """
+
+              #{module}.add_child_supervisor #{inspect child} Already Started. Handling unexpected state.
+              #{inspect error} -> restart_child: #{inspect r}
+              """, Noizu.ElixirCore.CallingContext.metadata(context)}
+          end)
+          r
         error ->
           Logger.error(fn ->
             {
@@ -162,6 +175,12 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour do
         registry_process: registry_process
       }
 
+      IO.puts """
+
+            CHILDREN STARTED:
+            #{inspect {outcome, children_processes}}
+      """
+
       {outcome, children_processes}
     end # end start_children
 
@@ -177,7 +196,7 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour do
 
     defp start_registry_child(module, sup, context) do
       registry_options = (module.pool().options()[:registry_options] || [])
-                         |> put_in([:name], module.pool_registry())
+                         |> put_in([:name], module.__registry__())
                          |> update_in([:keys], &(&1 || :unique))
                          |> update_in([:partitions], &(&1 || 256)) # @TODO - processor count * 4
 
@@ -221,7 +240,7 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour do
       #max_seconds = module.meta()[:max_seconds]
       #max_restarts = module.meta()[:max_restarts]
 
-      case Supervisor.start_child(sup, module.pass_through_supervisor(module.pool_worker_supervisor(), [definition, context],  [restart: :permanent])) do
+      case Supervisor.start_child(sup, module.pass_through_supervisor(module.pool_worker_supervisor(), [definition, context],  [shutdown: :infinity, restart: :permanent])) do
         {:ok, pid} ->
           {:ok, pid}
         {:error, {:already_started, process2_id}} ->
@@ -243,7 +262,7 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour do
       #max_seconds = module.meta()[:max_seconds]
       #max_restarts = module.meta()[:max_restarts]
 
-      case Supervisor.start_child(sup, module.pass_through_worker(module.pool_server(), [definition, context], [restart: :permanent])) do
+      case Supervisor.start_child(sup, module.pass_through_worker(module.pool_server(), [definition, context], [shutdown: :infinity, restart: :permanent])) do
         {:ok, pid} ->
           {:ok, pid}
         {:error, {:already_started, process2_id}} ->
@@ -265,7 +284,7 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour do
       #max_seconds = module.meta()[:max_seconds]
       #max_restarts = module.meta()[:max_restarts]
 
-      case Supervisor.start_child(sup, module.pass_through_worker(module.pool_monitor(), [server_process, definition, context], [restart: :permanent])) do
+      case Supervisor.start_child(sup, module.pass_through_worker(module.pool_monitor(), [server_process, definition, context], [shutdown: :infinity, restart: :permanent])) do
         {:ok, pid} ->
           {:ok, pid}
         {:error, {:already_started, process2_id}} ->
@@ -283,12 +302,12 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour do
       end
     end
 
-    defp start_children_banner(module, _sup, definition, context) do
+    defp start_children_banner(module, sup, definition, context) do
       Logger.info(fn -> {
                           module.banner("#{module}.start_children",
                             """
 
-                            #{module} START_CHILDREN
+                            #{module} START_CHILDREN | sup: #{inspect sup}
                             Options: #{inspect module.options()}
                             worker_supervisor: #{module.pool_worker_supervisor()}
                             worker_server: #{module.pool_server()}
@@ -326,7 +345,7 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour do
       @doc """
       Auto load setting for pool.
       """
-      def auto_load(), do: meta()[:auto_load]
+      def auto_load(), do: __meta__()[:auto_load]
 
       @doc """
       start_link OTP entry point.
@@ -356,7 +375,7 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour do
           start: {definition, :start_link, arguments},
           restart: options[:restart] || :permanent,
           shutdown: options[:shutdown] || :infinity
-        }
+        } |> IO.inspect
       end
   #, do: supervisor(definition, arguments, options)
       def pass_through_worker(definition, arguments, options) do
@@ -365,7 +384,7 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour do
           start: {definition, :start_link, arguments},
           restart: options[:restart] || :permanent,
           shutdown: options[:shutdown] || 5_000,
-        }
+        } |> IO.inspect
       end
 
   #, do: worker(definition, arguments, options)

@@ -9,7 +9,10 @@ defmodule Noizu.AdvancedPool.Support.TestV3ThreePool do
       default_modules: [:pool_supervisor, :worker_supervisor, :monitor],
       worker_state_entity: Noizu.AdvancedPool.Support.TestV3WorkerThree.Entity,
       dispatch_table: Noizu.AdvancedPool.TestDatabase.TestV3ThreePool.Dispatch.Table,
-      verbose: Application.get_env(:noizu_advanced_pool, :verbose, false)
+      worker_supervisor_options: [
+        max_supervisors: 5,
+      ],
+      verbose: Application.get_env(:noizu_advanced_pool, :verbose, true)
 
   defmodule Worker do
     @vsn 1.0

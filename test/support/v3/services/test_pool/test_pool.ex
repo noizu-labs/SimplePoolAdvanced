@@ -9,13 +9,16 @@ defmodule Noizu.AdvancedPool.Support.TestV3Pool do
       default_modules: [:pool_supervisor, :worker_supervisor, :monitor],
       worker_state_entity: Noizu.AdvancedPool.Support.TestV3Worker.Entity,
       dispatch_table: Noizu.AdvancedPool.TestDatabase.TestV3Pool.Dispatch.Table,
-      verbose: false
+      worker_supervisor_options: [
+        max_supervisors: 5,
+      ],
+      verbose: true
 
   defmodule Worker do
     @vsn 1.0
     use Noizu.AdvancedPool.V3.WorkerBehaviour,
         worker_state_entity: Noizu.AdvancedPool.Support.TestV3Worker.Entity,
-        verbose: false
+        verbose: true
     require Logger
   end # end worker
 
@@ -26,7 +29,8 @@ defmodule Noizu.AdvancedPool.Support.TestV3Pool do
     @vsn 1.0
     use Noizu.AdvancedPool.V3.ServerBehaviour,
         worker_state_entity: Noizu.AdvancedPool.Support.TestV3Worker.Entity,
-        worker_lookup_handler: Noizu.AdvancedPool.WorkerLookupBehaviour.Dynamic
+        worker_lookup_handler: Noizu.AdvancedPool.WorkerLookupBehaviour.Dynamic,
+        verbose: true
   end # end defmodule GoldenRatio.Components.Gateway.Server
 
 
