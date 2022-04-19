@@ -32,6 +32,7 @@ defmodule Noizu.AdvancedPool.SettingsBehaviour.Inherited do
       #
       #---------------------------------------
       def short_name(), do: @short_name
+      def __short_name__(), do: @short_name
 
       #---------------------------------------
       #

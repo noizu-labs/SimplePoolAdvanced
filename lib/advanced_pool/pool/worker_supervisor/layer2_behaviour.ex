@@ -62,7 +62,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour do
       @behaviour Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour
       use Supervisor
       require Logger
-
+      alias Noizu.ElixirCore.CallingContext, as: Context
       @implementation unquote(implementation)
 
       #----------------------------------------
@@ -71,6 +71,9 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour do
       use Noizu.AdvancedPool.SettingsBehaviour.Inherited, unquote([option_settings: option_settings, depth: 2])
       use unquote(message_processing_provider), unquote(option_settings)
       #----------------------------------------
+
+      def skinny_banner(contents), do: "   |> [#{base()}:WorkerSupervisor.#{@seg}] #{inspect self()} - #{contents}"
+
 
       #-----------
       #
@@ -115,7 +118,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour do
 
       """
       def start_link(definition, context) do
-        verbose() && Logger.info(fn -> {banner("#{__MODULE__}.start_link"), Noizu.ElixirCore.CallingContext.metadata(context)} end)
+        verbose() && Logger.debug(fn -> {skinny_banner("start_link: #{inspect definition, limit: 10}"), Context.metadata(context)} end)
         Supervisor.start_link(__MODULE__, [definition, context], [{:name, __MODULE__}])
       end
 
@@ -125,8 +128,8 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour do
       @doc """
 
       """
-      def init([_definition, context]) do
-        verbose() && Logger.info(fn -> {banner("#{__MODULE__} INIT", "args: #{inspect context}"), Noizu.ElixirCore.CallingContext.metadata(context) } end)
+      def init([definition, context]) do
+        verbose() && Logger.debug(fn -> {skinny_banner("init: #{inspect definition, limit: 10}"), Context.metadata(context)} end)
         Supervisor.init([], [{:strategy,  @options.strategy}, {:max_restarts, @options.max_restarts}, {:max_seconds, @options.max_seconds}])
       end
 
@@ -150,8 +153,8 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour do
       module = __MODULE__
       leading = round(:math.floor(:math.log10(unquote(max_supervisors)))) + 1
       for i <- 1 .. unquote(max_supervisors) do
-        IO.puts "GENERATING: #{module}.Seg#{String.pad_leading("#{i}", leading, "0")}"
         defmodule :"#{module}.Seg#{String.pad_leading("#{i}", leading, "0")}" do
+          @seg i
           use Noizu.AdvancedPool.V3.WorkerSupervisor.Layer2Behaviour, unquote(option_settings)
           #use unquote(layer2_provider), @l2o
         end

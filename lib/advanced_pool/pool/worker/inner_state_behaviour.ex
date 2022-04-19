@@ -95,8 +95,11 @@ defmodule Noizu.AdvancedPool.V3.InnerStateBehaviour do
       alias Noizu.AdvancedPool.Worker.Link
 
       #---------------------------------
-      #
+      # supervisor_hint/1
       #---------------------------------
+      @doc """
+      Node residency hint.
+      """
       def supervisor_hint(ref) do
         case id(ref) do
           v when is_integer(v) -> v
@@ -105,8 +108,11 @@ defmodule Noizu.AdvancedPool.V3.InnerStateBehaviour do
       end
 
       #---------------------------------
-      #
+      # get_direct_link!/2
       #---------------------------------
+      @doc """
+      Obtain a link structure that be used to call into a specific worker with cached pid caching to avoid unnecessary registry lookup.
+      """
       def get_direct_link!(ref, context), do: @server.router().get_direct_link!(ref, context)
 
 
@@ -122,7 +128,7 @@ defmodule Noizu.AdvancedPool.V3.InnerStateBehaviour do
       end
 
       #---------------------------------
-      #
+      # save!/3
       #---------------------------------
       def save!(outer_state, context, _options) do
         Logger.warn("#{__MODULE__}.save method not implemented.", Noizu.ElixirCore.CallingContext.metadata(context))

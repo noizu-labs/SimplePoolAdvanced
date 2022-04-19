@@ -495,10 +495,6 @@ defmodule Noizu.AdvancedPool.V3.ServerBehaviour do
       #
       #-----------------------------------------------------------------------------------------------------------------
 
-      def worker_sup_start(ref, context) do
-        Logger.warn("[V2] Server.worker_sup_start is deprecated | #{inspect ref}: #{unquote(__ENV__.file)}:#{unquote(__ENV__.line)}", Noizu.ElixirCore.CallingContext.metadata(context))
-        __MODULE__.WorkerManagement.worker_start(ref, context)
-      end
 
       def lock!(context, o) do
         Logger.warn("[V2] Server.lock! is deprecated", Noizu.ElixirCore.CallingContext.metadata(context))

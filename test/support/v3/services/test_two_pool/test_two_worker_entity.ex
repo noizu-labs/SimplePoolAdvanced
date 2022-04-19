@@ -10,7 +10,7 @@ defmodule Noizu.AdvancedPool.Support.TestV3WorkerTwo do
   defmodule Entity do
     @pool Noizu.AdvancedPool.Support.TestV3Pool
     Noizu.AdvancedPool.ServiceWorker.service_worker_entity() do
-      identifier :integer
+      identifier :string
       public_field :data, %{}
     end
 
@@ -91,8 +91,9 @@ defmodule Noizu.AdvancedPool.Support.TestV3WorkerTwo do
     #-------------------
     def sref({:ref, __MODULE__, identifier}), do: "ref.noizu-test-2.#{identifier}"
     def sref("ref.noizu-test-2." <> identifier), do: "ref.noizu-test-2.#{identifier}"
+    def sref("test_" <> _ = identifier), do: "ref.noizu-test-2.#{identifier}"
     def sref(%__MODULE__{} = entity), do: "ref.noizu-test-2.#{entity.identifier}"
-
+    def sref(_), do: nil
     #-------------------
     # entity/2
     #-------------------

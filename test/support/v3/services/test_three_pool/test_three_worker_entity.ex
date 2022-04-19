@@ -10,7 +10,7 @@ defmodule Noizu.AdvancedPool.Support.TestV3WorkerThree do
   defmodule Entity do
     @pool Noizu.AdvancedPool.Support.TestV3Pool
     Noizu.AdvancedPool.ServiceWorker.service_worker_entity() do
-      identifier :integer
+      identifier :string
       public_field :data, %{}
     end
 
@@ -77,7 +77,7 @@ defmodule Noizu.AdvancedPool.Support.TestV3WorkerThree do
     # id/1
     #-------------------
     def id({:ref, __MODULE__, identifier}), do: identifier
-    def id("ref.noizu-test." <> identifier), do: identifier
+    def id("ref.noizu-test-3." <> identifier), do: identifier
     def id(%__MODULE__{} = entity), do: entity.identifier
 
     #-------------------
@@ -85,22 +85,24 @@ defmodule Noizu.AdvancedPool.Support.TestV3WorkerThree do
     #-------------------
     def ref(identifier) when is_integer(identifier), do: {:ref, __MODULE__, identifier}
     def ref({:ref, __MODULE__, identifier}), do: {:ref, __MODULE__, identifier}
-    def ref("ref.noizu-test." <> identifier), do: {:ref, __MODULE__, identifier}
+    def ref("ref.noizu-test-3." <> identifier), do: {:ref, __MODULE__, identifier}
     def ref(%__MODULE__{} = entity), do: {:ref, __MODULE__, entity.identifier}
 
     #-------------------
     # sref/1
     #-------------------
-    def sref({:ref, __MODULE__, identifier}), do: "ref.noizu-test.#{identifier}"
-    def sref("ref.noizu-test." <> identifier), do: "ref.noizu-test.#{identifier}"
-    def sref(%__MODULE__{} = entity), do: "ref.noizu-test.#{entity.identifier}"
+    def sref({:ref, __MODULE__, identifier}), do: "ref.noizu-test-3.#{identifier}"
+    def sref("ref.noizu-test-3." <> identifier), do: "ref.noizu-test-3.#{identifier}"
+    def sref("test_" <> _ = identifier), do: "ref.noizu-test-3.#{identifier}"
+    def sref(%__MODULE__{} = entity), do: "ref.noizu-test-3.#{entity.identifier}"
+    def sref(_), do: nil
 
     #-------------------
     # entity/2
     #-------------------
     def entity(ref, options \\ %{})
     def entity({:ref, __MODULE__, identifier}, _options), do: %__MODULE__{identifier: identifier}
-    def entity("ref.noizu-test." <> identifier, _options), do: %__MODULE__{identifier: identifier}
+    def entity("ref.noizu-test-3." <> identifier, _options), do: %__MODULE__{identifier: identifier}
     def entity(%__MODULE__{} = entity, _options), do: entity
 
     #-------------------
@@ -108,7 +110,7 @@ defmodule Noizu.AdvancedPool.Support.TestV3WorkerThree do
     #-------------------
     def entity!(ref, options \\ %{})
     def entity!({:ref, __MODULE__, identifier}, _options), do: %__MODULE__{identifier: identifier}
-    def entity!("ref.noizu-test." <> identifier, _options), do: %__MODULE__{identifier: identifier}
+    def entity!("ref.noizu-test-3." <> identifier, _options), do: %__MODULE__{identifier: identifier}
     def entity!(%__MODULE__{} = entity, _options), do: entity
 
 
@@ -117,7 +119,7 @@ defmodule Noizu.AdvancedPool.Support.TestV3WorkerThree do
     #-------------------
     def record(ref, options \\ %{})
     def record({:ref, __MODULE__, identifier}, _options), do: %__MODULE__{identifier: identifier}
-    def record("ref.noizu-test." <> identifier, _options), do: %__MODULE__{identifier: identifier}
+    def record("ref.noizu-test-3." <> identifier, _options), do: %__MODULE__{identifier: identifier}
     def record(%__MODULE__{} = entity, _options), do: entity
 
     #-------------------
@@ -125,7 +127,7 @@ defmodule Noizu.AdvancedPool.Support.TestV3WorkerThree do
     #-------------------
     def record!(ref, options \\ %{})
     def record!({:ref, __MODULE__, identifier}, _options), do: %__MODULE__{identifier: identifier}
-    def record!("ref.noizu-test." <> identifier, _options), do: %__MODULE__{identifier: identifier}
+    def record!("ref.noizu-test-3." <> identifier, _options), do: %__MODULE__{identifier: identifier}
     def record!(%__MODULE__{} = entity, _options), do: entity
 
 
@@ -170,7 +172,7 @@ defimpl Noizu.ERP, for: Noizu.AdvancedPool.Support.TestV3WorkerThree.Entity do
   end # end ref/1
 
   def sref(obj) do
-    "ref.noizu-test.#{obj.identifier}"
+    "ref.noizu-test-3.#{obj.identifier}"
   end # end sref/1
 
   def record(obj, _options \\ nil) do

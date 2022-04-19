@@ -91,7 +91,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerManagement.WorkerManagementProvider do
   @doc """
   Get worker Ref
   """
-  def worker_ref!(pool_server, identifier, _context \\ nil), do: pool_server.pool_worker_state_entity().ref(identifier)
+  def worker_ref!(pool_server, identifier, _context \\ nil), do: pool_server.__worker_state_entity__().ref(identifier)
 
   @doc """
   Terminate Worker.
@@ -324,7 +324,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerManagement.WorkerManagementProvider do
   """
   def host!(pool_server, ref, context, options \\ %{spawn: true}) do
     # @TODO load from meta or pool.options
-    sm = pool_server.service_manager()
+    sm = pool_server.__service_manager__()
 
     case dispatch_get!(ref, pool_server, context, options) do
       nil ->
@@ -370,10 +370,10 @@ defmodule Noizu.AdvancedPool.V3.WorkerManagement.WorkerManagementProvider do
             end
           else
             case dispatch_obtain_lock!(ref, pool_server, context, options_b) do
-              {:ack, _lock} ->
+              {:ack, lock} ->
                 case sm.select_host(pool_server.pool(), ref, context, options_b) do
                   {:ack, host} ->
-                    entity = entity
+                    entity = lock
                              |> put_in([Access.key(:server)], host)
                              |> put_in([Access.key(:lock)], nil)
                              |> dispatch_update!(pool_server, context, options_b)
@@ -450,7 +450,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerManagement.WorkerManagementProvider do
   def register!(pool_server, ref, _context, _options \\ %{}) do
     #Logger.warn("[V2] New register!() Implementation Needed")
     register = Registry.register(pool_server.__registry__(), {:worker, ref}, :process)
-    IO.puts "Register! #{node()}.#{pool_server}(#{inspect ref})@#{inspect self()} -> #{inspect register}"
+    Logger.error "----> Register! #{node()}.#{pool_server}(#{inspect ref})@#{inspect self()} -> #{inspect register}"
     register
   end
 
@@ -462,7 +462,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerManagement.WorkerManagementProvider do
 
     #Registry.unregister(pool_server.pool_registry(), ref)
     unregister = Registry.unregister(pool_server.__registry__(), {:worker, ref})
-    IO.puts "Unregister! #{node()}.#{pool_server}(#{inspect ref})@#{inspect self()} -> #{inspect unregister}"
+    Logger.error "----> Unregister! #{node()}.#{pool_server}(#{inspect ref})@#{inspect self()} -> #{inspect unregister}"
     unregister
 
   end
@@ -507,7 +507,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerManagement.WorkerManagementProvider do
                 [] ->
                   if options[:spawn] do
                     if options[:dirty] do
-                      case server.worker_sup_start(ref, context) do
+                      case server.__worker_management__().worker_start(ref, context) do
                         {:ok, pid} -> {:ack, pid}
                         {:ack, pid} -> {:ack, pid}
                         o -> o
@@ -521,7 +521,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerManagement.WorkerManagementProvider do
                       end}
                       case wm.obtain_lock!(ref, context, options_b) do
                         {:ack, _lock} ->
-                          case server.worker_sup_start(ref, context) do
+                          case server.__worker_management__().worker_start(ref, context) do
                             {:ok, pid} -> {:ack, pid}
                             {:ack, pid} -> {:ack, pid}
                             o -> o
@@ -567,7 +567,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerManagement.WorkerManagementProvider do
                 end}
                 case wm.obtain_lock!(ref, context, options_b) do
                   {:ack, _lock} ->
-                    case server.worker_sup_start(ref, context) do
+                    case server.__worker_management__().worker_start(ref, context) do
                       {:ok, pid} -> {:ack, pid}
                       {:ack, pid} -> {:ack, pid}
                       o -> o
@@ -596,7 +596,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerManagement.WorkerManagementProvider do
                   end}
                   case wm.obtain_lock!(ref, context, options_b) do
                     {:ack, _lock} ->
-                      case server.worker_sup_start(ref, context) do
+                      case server.__worker_management__().worker_start(ref, context) do
                         {:ok, pid} -> {:ack, pid}
                         {:ack, pid} -> {:ack, pid}
                         o -> o

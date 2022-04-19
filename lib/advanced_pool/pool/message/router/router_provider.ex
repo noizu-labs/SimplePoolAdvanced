@@ -25,10 +25,8 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
     case pool_server.worker_management().host!(ref, context, options) do
       {:ack, host} ->
         if host == node() do
-          IO.puts "RUN ON HOST(LOCAL: #{host}) #{inspect {m,f,a}}"
           apply(m,f,a)
         else
-          IO.puts "RUN ON HOST(Forward: #{host}) #{inspect {m,f,a}}"
           :rpc.call(host, m,f,a, timeout)
         end
       o -> o
@@ -122,6 +120,7 @@ defmodule Noizu.AdvancedPool.V3.Router.RouterProvider do
   def rs_call_crash_protection!(pool_server, identifier, call, context, options \\ nil, timeout \\ nil) do
     extended_call = pool_server.router().extended_call(:s_call!, identifier, call, context, options, timeout)
     try do
+          Logger.error "rs_call_crash_protection! -> #{node()} -> #{inspect identifier} -> #{inspect extended_call}"
       pool_server.router().s_call_unsafe(identifier, extended_call, context, options, timeout)
     catch
       :rescue, e -> handle_s_exception(e, :s_call!, pool_server, identifier, extended_call, timeout, context, options)

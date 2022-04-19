@@ -64,6 +64,7 @@ defmodule Noizu.AdvancedPool.SettingsBehaviour.Base do
       @todo rename __short_name__
       """
       def short_name(), do: @short_name
+      def __short_name__(), do: @short_name
 
       #---------------------------------------
       #
