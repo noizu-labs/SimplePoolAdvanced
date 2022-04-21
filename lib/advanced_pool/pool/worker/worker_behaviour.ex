@@ -353,8 +353,8 @@ defmodule Noizu.AdvancedPool.V3.WorkerBehaviour do
       def __handle_info__({_,{:i, {:inactivity_check, args}, context}}, state), do: inactivity_check(state, args, :info, context) |> as_cast()
       def __handle_info__({_,{:i, {:inactivity_check, args, opts}, context}}, state), do: inactivity_check(state, args, :info, context, opts) |> as_cast()
 
-      def __handle_cast__({spawn? = :spawn, envelope}, state), do: __delegate_handle_cast__({spawn?, envelope}, state)
-      def __handle_cast__({spawn? = :passive, envelope}, state), do: __delegate_handle_cast__({spawn?, envelope}, state)
+      def __handle_info__({spawn? = :spawn, envelope}, state), do: __delegate_handle_cast__({spawn?, envelope}, state)
+      def __handle_info__({spawn? = :passive, envelope}, state), do: __delegate_handle_cast__({spawn?, envelope}, state)
 
 
       #===============================================================================================================
