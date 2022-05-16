@@ -9,6 +9,7 @@ defmodule Noizu.AdvancedPool.V3.WorkerSupervisorBehaviour.Default do
   """
   alias Noizu.ElixirCore.OptionSettings
   alias Noizu.ElixirCore.OptionValue
+  require Logger
   #alias Noizu.ElixirCore.OptionList
   @default_max_seconds (5)
   @default_max_restarts (1000)
