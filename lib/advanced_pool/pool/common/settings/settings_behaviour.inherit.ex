@@ -81,6 +81,11 @@ defmodule Noizu.AdvancedPool.SettingsBehaviour.Inherited do
       #---------------------------------------
       #
       #---------------------------------------
+      defdelegate __task_supervisor__, to: @pool
+      
+      #---------------------------------------
+      #
+      #---------------------------------------
       defdelegate pool_server(), to: @pool
       defdelegate __server__(), to: @pool
 
@@ -142,6 +147,7 @@ defmodule Noizu.AdvancedPool.SettingsBehaviour.Inherited do
       #---------------------------------------
       def __pool__() do
         [
+          task_supervisor: __task_supervisor__(),
           server: __server__(),
           router: __router__(),
           supervisor: __supervisor__(),
@@ -252,6 +258,7 @@ defmodule Noizu.AdvancedPool.SettingsBehaviour.Inherited do
         __worker_management__: 0,
         __service_management__: 0,
         __worker_supervisor__: 0,
+        __task_supervisor__: 0,
         __server__: 0,
         __router__: 0,
         __supervisor__: 0,

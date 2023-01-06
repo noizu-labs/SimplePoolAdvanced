@@ -115,6 +115,9 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour.Default do
   #
   #------------
   def start_children(module, sup, definition \\ :auto, context \\ nil) do
+    
+    start_task_supervisor(module, sup, context)
+    
     stand_alone = module.pool().stand_alone()
     registry_process = cond do
                          stand_alone -> {:ok, :offline}
@@ -128,7 +131,7 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour.Default do
     monitor_process = start_monitor_child(module, sup, server_process, definition, context)
 
     #------------------
-    # start server initilization process.
+    # start server initialization process.
     #------------------
     if server_process != :error && module.auto_load(), do: spawn fn -> module.pool_server().load_pool(context) end
 
@@ -178,13 +181,11 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour.Default do
     max_seconds = module.meta()[:max_seconds]
     max_restarts = module.meta()[:max_restarts]
     stand_alone = module.pool().stand_alone()
-
-
-
+    
     children = cond do
                  stand_alone -> []
                  !stand_alone ->
-                   # Registroy
+                   # Registry
                    registry_options = (module.pool().options()[:registry_options] || [])
                                       |> put_in([:name], module.__registry__())
                                       |> update_in([:keys], &(&1 || :unique))
@@ -195,13 +196,17 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour.Default do
                    worker_supervisor_child = module.pass_through_supervisor(module.__worker_supervisor__(), [definition, context],  [shutdown: :infinity, restart: :permanent])
                    [registry_child, worker_supervisor_child]
                end
-    children = children ++ [
+    children = [task_supervisor_spec(module, context)] ++ children ++ [
       module.pass_through_worker(module.pool_server(), [definition, context], [shutdown: :infinity, restart: :permanent]),
       module.pass_through_worker(module.pool_monitor(), [{module.pool_server(), node()}, definition, context], [shutdown: :infinity, restart: :permanent])
-    ]
-    module.pass_through_supervise(children, [{:strategy, strategy}, {:max_restarts, max_restarts}, {:max_seconds, max_seconds}, {:restart, :permanent}])
+    ] |> IO.inspect(label: "MODULE CHILDREN| #{module}")
+    module.pass_through_supervise(children, [{:strategy, strategy}, {:max_restarts, max_restarts}, {:max_seconds, max_seconds}, {:restart, :permanent}], [verbose: true])
   end
-
+  
+  def task_supervisor_spec(module, _) do
+    module.pass_through_supervisor(Task.Supervisor, [[name: module.__task_supervisor__()]], [id: module.__task_supervisor__()])
+  end
+  
   defp start_registry_child(module, sup, context) do
     registry_options = (module.pool().options()[:registry_options] || [])
                        |> put_in([:name], module.__registry__())
@@ -239,6 +244,26 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour.Default do
     end
   end
 
+  defp start_task_supervisor(module, sup, context) do
+    spec = task_supervisor_spec(module, context)
+    case Supervisor.start_child(sup, spec) do
+      {:ok, pid} ->
+        {:ok, pid}
+      {:error, {:already_started, process2_id}} ->
+        Supervisor.restart_child(module, process2_id)
+      error ->
+        Logger.error(fn ->
+          {
+            """
+        
+            #{module}.start_task_supervisor Error
+            #{inspect error}
+            """, Noizu.ElixirCore.CallingContext.metadata(context)}
+        end)
+        :error
+    end
+  end
+  
   defp start_worker_supervisor_child(module, sup, definition, context) do
     #max_seconds = module.meta()[:max_seconds]
     #max_restarts = module.meta()[:max_restarts]

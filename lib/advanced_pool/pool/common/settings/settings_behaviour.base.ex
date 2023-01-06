@@ -25,6 +25,7 @@ defmodule Noizu.AdvancedPool.SettingsBehaviour.Base do
       # Pool Components
       #---------------------
       @pool __MODULE__
+      @task_supervisor Module.concat([@pool, "TaskSupervisor"])
       @pool_server Module.concat([@pool, "Server"])
       @pool_router Module.concat([@pool, "Server.Router"])
       @pool_worker_management Module.concat([@pool, "Server.WorkerManagement"])
@@ -98,6 +99,9 @@ defmodule Noizu.AdvancedPool.SettingsBehaviour.Base do
       """
       def pool, do: @pool
 
+      
+      def __task_supervisor__, do: @task_supervisor
+      
       #---------------------------------------
       #
       #---------------------------------------
@@ -209,6 +213,7 @@ defmodule Noizu.AdvancedPool.SettingsBehaviour.Base do
       #---------------------------------------
       def __pool__() do
         [
+        task_supervisor: __task_supervisor__(),
         server: __server__(),
         router: __router__(),
         supervisor: __supervisor__(),
@@ -326,6 +331,7 @@ defmodule Noizu.AdvancedPool.SettingsBehaviour.Base do
         __worker_management__: 0,
         __service_management__: 0,
         __worker_supervisor__: 0,
+        __task_supervisor__: 0,
         __server__: 0,
         __router__: 0,
         __supervisor__: 0,

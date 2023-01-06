@@ -62,7 +62,10 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour do
       #-------------------
       #
       #-------------------
-      def pass_through_supervise(children,opts), do: Supervisor.init(children, opts)
+      def pass_through_supervise(children,opts,options) do
+        Supervisor.init(children, opts)
+        |> tap(&(options[:verbose] && IO.inspect(&1, label: "Start Service Supervisor: #{__MODULE__}")))
+      end
       def pass_through_supervisor(definition, arguments, options) do
         %{
           id: options[:id] || definition,
@@ -91,7 +94,7 @@ defmodule Noizu.AdvancedPool.V3.PoolSupervisorBehaviour do
         add_child_supervisor: 3,
         add_child_worker: 3,
 
-        pass_through_supervise: 2,
+        pass_through_supervise: 3,
         pass_through_supervisor: 3,
         pass_through_worker: 3,
       ]
