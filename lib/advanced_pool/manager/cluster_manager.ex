@@ -13,6 +13,7 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
   end
   
   def init({_context, _options}) do
+    :syn.add_node_to_scopes([Noizu.AdvancedPool.NodeManager])
     :syn.register(__pool__(), :master, self(), [node: node(), start: :os.system_time(:second)])
     :syn.register(__pool__(), {:ref, __MODULE__, node()}, self(), nil)
     {:ok, %Noizu.AdvancedPool.ClusterManager.Server{}}
@@ -102,6 +103,11 @@ defmodule Noizu.AdvancedPool.ClusterManager do
   #================================
   def health_report(context) do
     Noizu.AdvancedPool.Message.Dispatch.s_call!({:ref, Noizu.AdvancedPool.ClusterManager.Server, node()}, :health_report, context)
+  end
+
+
+  def register_pool(pid, attributes) do
+    :syn.join(Noizu.AdvancedPool.ClusterManager, :services, pid, attributes)
   end
   
 end

@@ -5,7 +5,15 @@ defmodule Noizu.AdvancedPool.DefaultSupervisor do
     Supervisor.start_link(supervisor, {id, pool, context, options}, name: id)
   end
   
+  def default_worker_target(), do: 50_000
+  
+  
   def init({_id, pool, context, options}) do
+    apply(pool, :join_cluster, [node(), self(), context, options])
+    
+    
+    
+    
     cond do
       apply(pool, :config, [])[:stand_alone] ->
         [
@@ -14,7 +22,7 @@ defmodule Noizu.AdvancedPool.DefaultSupervisor do
       :else ->
         [
           apply(pool, :__server__, []) |> apply(:server_spec, [context, options]),
-          Registry.child_spec(keys: :unique, name: apply(pool, :__registry__, []),  partitions: 256)
+          apply(pool, :__worker_supervisor__, []) |> apply(:spec, [:os.system_time(:millisecond), pool, context, options]),
         ]
     end
     |> Supervisor.init(strategy: :one_for_one)

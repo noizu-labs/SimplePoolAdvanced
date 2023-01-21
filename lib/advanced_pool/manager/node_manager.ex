@@ -12,6 +12,7 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
   end
   
   def init({_context, _options}) do
+    :syn.add_node_to_scopes([Noizu.AdvancedPool.NodeManager])
     :syn.register(Noizu.AdvancedPool.NodeManager, node(), self(), [node: node(), start: :os.system_time(:second)])
     :syn.join(Noizu.AdvancedPool.NodeManager, :managers, self(), [node: node(), start: :os.system_time(:second)])
     :syn.register(__pool__(), {:ref, __MODULE__, node()}, self(), nil)
@@ -100,6 +101,10 @@ defmodule Noizu.AdvancedPool.NodeManager do
   def health_report(context) do
     Noizu.AdvancedPool.Message.Dispatch.s_call!({:ref, Noizu.AdvancedPool.NodeManager.Server, node()}, :health_report, context)
   end
-  
+
+  def register_pool(node, pid, attributes) do
+    :syn.join(Noizu.AdvancedPool.NodeManager, {node, :services}, pid, attributes)
+  end
+
   
 end
