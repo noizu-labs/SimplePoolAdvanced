@@ -19,7 +19,6 @@ defmodule Noizu.AdvancedPool do
   defmacro __using__(_) do
     quote do
       require Noizu.AdvancedPool.Server
-      require Noizu.AdvancedPool.PoolSupervisor
       require Noizu.AdvancedPool.WorkerSupervisor
       require Noizu.AdvancedPool.Message
       
