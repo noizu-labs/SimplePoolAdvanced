@@ -17,8 +17,25 @@ defmodule Noizu.AdvancedPool.Message do
   Record.defrecord(:ref, module: nil, identifier: nil) # move to elixir core.
 
   # Settings
-  Record.defrecord(:settings, safe: nil, spawn?: nil, task: nil, ack?: nil, timeout: nil)
+  Record.defrecord(:settings, safe: nil, spawn?: nil, task: nil, ack?: nil, sticky?: nil, timeout: nil)
+  def sticky?(nil), do: false
+  def sticky?(settings(sticky?: v)), do: v
+  def spawn?(nil), do: false
+  def spawn?(settings(spawn?: v)), do: v
+  def ack?(nil), do: false
+  def ack?(settings(ack?: v)), do: v
+  def timeout(nil), do: nil
+  def timeout(settings(timeout: v)), do: v
+  def safe(nil), do: nil
+  def safe(settings(safe: v)), do: v
+  def task(nil), do: nil
+  def task(settings(task: v)), do: v
+  
 
+
+
+ 
+  
   # Msg
   Record.defrecord(:s, call: nil, context: nil)
   Record.defrecord(:msg_envelope,
@@ -29,6 +46,9 @@ defmodule Noizu.AdvancedPool.Message do
     msg: nil,
   )
 
-
+  def call_context(nil), do: nil
+  def call_context(s(context: v)), do: v
+  
+  
 
 end

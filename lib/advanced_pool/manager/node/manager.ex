@@ -3,6 +3,8 @@ defmodule Noizu.AdvancedPool.NodeManager do
   require Record
   require Noizu.AdvancedPool.Message
   Record.defrecord(:pool_status, status: :initializing, service: nil, health: nil, node: nil, worker_count: 0, worker_target: nil, updated_on: nil)
+
+  def __configuration_provider__(), do: Application.get_env(:noizu_advanced_pool, :configuration)
   
   def __task_supervisor__(), do: Noizu.AdvancedPool.NodeManager.Task
   def __pool__(), do: Noizu.AdvancedPool.NodeManager
@@ -18,7 +20,13 @@ defmodule Noizu.AdvancedPool.NodeManager do
   end
 
 
-
+  def service_available?(pool, node, context) do
+    case service_status(pool, node, context) do
+      {:ok, _} -> true
+      :else -> false
+    end
+  end
+  
   def service_status(pool, node, context) do
     with {pid, status} <- :syn.lookup(pool, {:node, node}) do
       {:ok, {pid, status}}
@@ -69,8 +77,8 @@ defmodule Noizu.AdvancedPool.NodeManager do
     :syn.add_node_to_scopes(apply(pool, :pool_scopes, []))
     :syn.join(pool, :nodes, pid, status)
     :syn.register(pool, {:node, node()}, pid, status) |> IO.inspect(label: :register)
-    :syn.lookup(Noizu.AdvancedPool.Support.TestPool, {:node, node()})
     :syn.join(Noizu.AdvancedPool.NodeManager, {node, :services}, pid, status)
+    :syn.register(Noizu.AdvancedPool.NodeManager, {node, pool}, pid, status)
     Noizu.AdvancedPool.ClusterManager.register_pool(pool, pid, status)
   end
   

@@ -17,6 +17,7 @@ defmodule Noizu.AdvancedPool.DefaultSupervisor do
         ]
       :else ->
         [
+          {Task.Supervisor, name: apply(pool, :__task_supervisor__, [])},
           apply(pool, :__server__, []) |> apply(:server_spec, [context, options]),
           apply(pool, :__worker_supervisor__, []) |> apply(:spec, [:os.system_time(:nanosecond), pool, context, options]),
         ]

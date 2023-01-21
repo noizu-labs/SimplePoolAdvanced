@@ -105,7 +105,7 @@ defmodule Noizu.AdvancedPool.Message.Dispatch do
   def __dispatch__inner__do(M.msg_envelope(type: :cast, recipient: recipient, settings: settings) = message) do
     case recipient_register(recipient) do
       {:dynamic, dispatcher, terms} ->
-        apply(dispatcher, :__process__, [recipient, settings| (terms || [])])
+        apply(dispatcher, :__process__, [message| (terms || [])])
       {:ok, handle} -> {:ok, handle}
       M.link(process: pid) -> {:ok, pid}
       error -> error
@@ -122,7 +122,8 @@ defmodule Noizu.AdvancedPool.Message.Dispatch do
 
   def __dispatch__inner__do(M.msg_envelope(type: :call, recipient: recipient, settings: settings) = message) do
     case recipient_register(recipient) do
-      {:dynamic, dispatcher, terms} -> apply(dispatcher, :__process__, [recipient, settings| (terms || [])])
+      {:dynamic, dispatcher, terms} ->
+        apply(dispatcher, :__process__, [message| (terms || [])])
       {:ok, handle} -> {:ok, handle}
       M.link(process: pid) -> {:ok, pid}
       error -> error

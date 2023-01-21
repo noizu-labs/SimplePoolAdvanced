@@ -17,7 +17,10 @@ defmodule Noizu.AdvancedPool.ClusterManager.Supervisor do
   
   def init({context, options}) do
     init_registry(context, options)
-    [Noizu.AdvancedPool.ClusterManager.Server.spec(context, options)]
+    [
+      {Task.Supervisor, name: Noizu.AdvancedPool.ClusterManager.Task},
+      Noizu.AdvancedPool.ClusterManager.Server.spec(context, options)
+    ]
     |> Supervisor.init(strategy: :one_for_one)
   end
 

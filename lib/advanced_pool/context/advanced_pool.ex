@@ -28,6 +28,7 @@ defmodule Noizu.AdvancedPool do
       @pool_server Module.concat([__MODULE__, Server])
       @pool_worker Module.concat([__MODULE__, Worker])
       @pool_registry Module.concat([__MODULE__, Registry])
+      @pool_task_supervisor Module.concat([__MODULE__, Task])
       
       def __pool__(), do: @pool
       def __pool_supervisor__(), do: @pool_supervisor
@@ -35,7 +36,7 @@ defmodule Noizu.AdvancedPool do
       def __server__(), do: @pool_server
       def __worker__(), do: @pool_worker
       def __registry__(), do: @pool_registry
-      
+      def __task_supervisor__(), do: @pool_task_supervisor
       
       
       def join_cluster(pid, context, options) do

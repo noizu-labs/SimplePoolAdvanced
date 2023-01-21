@@ -22,9 +22,8 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
   #===========================================
   # Config
   #===========================================
-  def __configuration_provider__(), do: Application.get_env(:noizu_advanced_pool, :configuration)
-
-
+  def __configuration_provider__(), do: Noizu.AdvancedPool.ClusterManager.__configuration_provider__()
+  
   #===========================================
   # Server
   #===========================================
