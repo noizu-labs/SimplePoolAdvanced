@@ -58,8 +58,8 @@ defmodule Noizu.AdvancedPool do
         ]
       end
       
-      def pool_spec(context, options \\ nil) do
-        Noizu.AdvancedPool.DefaultSupervisor.pool_spec(__MODULE__, context, options)
+      def spec(context, options \\ nil) do
+        Noizu.AdvancedPool.DefaultSupervisor.spec(__MODULE__, context, options)
       end
       
       def add_worker(context, options, temp_new \\ false) do
@@ -70,7 +70,7 @@ defmodule Noizu.AdvancedPool do
         l = :syn.members(Noizu.AdvancedPool.Support.TestPool, {best_node, :worker_supervisor})
         best_supervisor = cond do
                             temp_new ->
-                              spec = __worker_supervisor__.spec(:os.system_time(:millisecond), __pool__(), context, options)
+                              spec = __worker_supervisor__.spec(:os.system_time(:nanosecond), __pool__(), context, options)
                               {:ok, pid} = Supervisor.start_child({Noizu.AdvancedPool.Support.TestPool, best_node}, spec)
                             :else ->
                               List.first(l) |> elem(0)

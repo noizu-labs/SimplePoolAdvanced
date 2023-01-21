@@ -1,5 +1,6 @@
 defmodule Noizu.AdvancedPool.ClusterManager do
   require Noizu.AdvancedPool.Message
+  require Noizu.AdvancedPool.NodeManager
   alias Noizu.AdvancedPool.Message.Dispatch, as: Router
   def __pool__(), do: Noizu.AdvancedPool.ClusterManager
   def __server__(), do: Noizu.AdvancedPool.ClusterManager.Server
@@ -22,6 +23,13 @@ defmodule Noizu.AdvancedPool.ClusterManager do
 
   def register_pool(pool, pid, status) do
     :syn.join(Noizu.AdvancedPool.ClusterManager, {:service, pool}, pid, status)
+  end
+  
+  def service_status(pool, context) do
+    w = :syn.members(Noizu.AdvancedPool.ClusterManager, {:service, pool})
+        |> Enum.map(&({Noizu.AdvancedPool.NodeManager.pool_status(elem(&1, 1), :node), {elem(&1, 0), elem(&1, 1)}}))
+        |> Map.new()
+    {:ok, w}
   end
   
   

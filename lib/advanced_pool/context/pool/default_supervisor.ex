@@ -18,13 +18,13 @@ defmodule Noizu.AdvancedPool.DefaultSupervisor do
       :else ->
         [
           apply(pool, :__server__, []) |> apply(:server_spec, [context, options]),
-          apply(pool, :__worker_supervisor__, []) |> apply(:spec, [:os.system_time(:millisecond), pool, context, options]),
+          apply(pool, :__worker_supervisor__, []) |> apply(:spec, [:os.system_time(:nanosecond), pool, context, options]),
         ]
     end
     |> Supervisor.init(strategy: :one_for_one)
   end
   
-  def pool_spec(pool, context, options \\ nil) do
+  def spec(pool, context, options \\ nil) do
     id = options[:id] || pool
     supervisor = apply(pool, :config, [])[:otp][:supervisor] || __MODULE__
     start_params = [id, pool, context, options]

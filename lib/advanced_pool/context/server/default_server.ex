@@ -20,7 +20,7 @@ defmodule Noizu.AdvancedPool.Server.DefaultServer do
       id: id,
       type: :worker,
       start: {worker, :start_link, start_params}
-    } |> IO.inspect(label: :server_spec)
+    }
   end
   
   

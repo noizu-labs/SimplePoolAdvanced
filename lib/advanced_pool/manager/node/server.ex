@@ -18,6 +18,11 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
   ]
   
   Record.defrecord(:node_status, node: nil, status: nil, manager_state: nil, health_index: 0.0, started_on: nil, updated_on: nil)
+
+  #===========================================
+  # Config
+  #===========================================
+  def __configuration_provider__(), do: Application.get_env(:noizu_advanced_pool, :configuration)
   
   #===========================================
   # Server
@@ -25,10 +30,21 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
   def start_link(context, options) do
     GenServer.start_link(__MODULE__, {context, options}, name: __MODULE__)
   end
+
+  
   
   def init({context, options}) do
+    configuration = (with {:ok, configuration} <-
+                            __configuration_provider__()
+                            |> Noizu.AdvancedPool.NodeManager.ConfigurationManager.configuration(node()) do
+                       configuration
+                     else
+                       e = {:error, _} -> e
+                       error -> {:error, {:invalid_response, error}}
+                     end)
+    
     init_registry(context, options)
-    {:ok, %Noizu.AdvancedPool.NodeManager.Server{identifier: node()}}
+    {:ok, %Noizu.AdvancedPool.NodeManager.Server{identifier: node(), node_config: configuration}}
   end
   
   def spec(context, options \\ nil) do
@@ -97,9 +113,18 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
   def __supervisor__(), do: Noizu.AdvancedPool.NodeManager.Supervisor
   def __dispatcher__(), do: apply(__pool__(), :__dispatcher__, [])
   def __registry__(), do: apply(__pool__(), :__registry__, [])
+
+  #================================
+  #
+  #================================
+
+
+  Noizu.AdvancedPool.NodeManager.Task
   #================================
   # Methods
   #================================
+  
+  
   def health_report(state, _context) do
     {:reply, state.health_report, state}
   end

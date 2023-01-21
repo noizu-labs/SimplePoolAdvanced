@@ -17,17 +17,33 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
   ]
   
   Record.defrecord(:cluster_status, node: nil, status: nil, manager_state: nil, health_index: 0.0, started_on: nil, updated_on: nil)
-  
+
+
+  #===========================================
+  # Config
+  #===========================================
+  def __configuration_provider__(), do: Application.get_env(:noizu_advanced_pool, :configuration)
+
+
   #===========================================
   # Server
   #===========================================
   def start_link(context, options) do
     GenServer.start_link(__MODULE__, {context, options}, name: __MODULE__)
   end
+
   
   def init({context, options}) do
+    configuration = (with {:ok, configuration} <-
+                            __configuration_provider__()
+                            |> Noizu.AdvancedPool.NodeManager.ConfigurationManager.configuration() do
+                       configuration
+                     else
+                       e = {:error, _} -> e
+                       error -> {:error, {:invalid_response, error}}
+                     end)
     init_registry(context, options)
-    {:ok, %Noizu.AdvancedPool.ClusterManager.Server{}}
+    {:ok, %Noizu.AdvancedPool.ClusterManager.Server{cluster_config: configuration}}
   end
   
   def spec(context, options \\ nil) do

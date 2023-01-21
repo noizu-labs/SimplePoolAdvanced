@@ -12,6 +12,9 @@ import Mix.Config
 
 config :ex_doc, :markdown_processor, ExDoc.Markdown.Hoedown
 
+config :noizu_advanced_pool,
+       configuration: Noizu.AdvancedPool.Support.NodeManager.ConfigurationProvider
+
 
 config :noizu_mnesia_versioning,
        topology_provider: Noizu.SimplePool.Support.TopologyProvider,

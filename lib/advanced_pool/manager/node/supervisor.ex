@@ -17,8 +17,14 @@ defmodule Noizu.AdvancedPool.NodeManager.Supervisor do
   
   def init({context, options}) do
     init_registry(context, options)
-    [Noizu.AdvancedPool.NodeManager.Server.spec(context, options)]
+    [
+      {Task.Supervisor, name: Noizu.AdvancedPool.NodeManager.Task},
+      Noizu.AdvancedPool.NodeManager.Server.spec(context, options)]
     |> Supervisor.init(strategy: :one_for_one)
+  end
+  
+  def add_child(spec) do
+    Supervisor.start_child(__MODULE__, spec)
   end
 
 
