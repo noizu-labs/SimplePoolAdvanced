@@ -150,7 +150,9 @@ defmodule Noizu.AdvancedPool.Message.Dispatch do
   
   def recipient_register(recipient, hint \\ nil)
   def recipient_register(M.ref(module: worker) = recipient, hint) do
-    apply(worker, :__dispatcher__, [recipient, hint])
+    worker
+    |> apply(:__dispatcher__, [])
+    |> apply(:__handle__, [recipient, hint])
   end
   def recipient_register(M.link(node: nil, process: nil, recipient: recipient), hint) do
     recipient_register(recipient, hint)
@@ -161,36 +163,34 @@ defmodule Noizu.AdvancedPool.Message.Dispatch do
   def recipient_register(M.link() = link, _) do
     link
   end
-  def recipient_register(M.pool(recipient: recipient) = pool, hint) do
-    with {:ok, pool} <- recipient_pool(recipient) do
-      pool
-      |> apply(:__dispatcher__, [recipient, hint])
-    end
-  end
-  def recipient_register(M.server(recipient: recipient) = pool, hint) do
+  def recipient_register(M.server(recipient: recipient) = r, hint) do
     with {:ok, pool} <- recipient_pool(recipient) do
       pool
       |> apply(:__server__, [])
-      |> apply(:__dispatcher__, [recipient, hint])
+      |> apply(:__dispatcher__, [])
+      |> apply(:__handle__, [r, hint])
     end
   end
-  def recipient_register(M.monitor(recipient: recipient) = pool, hint) do
+  def recipient_register(M.monitor(recipient: recipient) = r, hint) do
     with {:ok, pool} <- recipient_pool(recipient) do
       pool
       |> apply(:__monitor__, [])
-      |> apply(:__dispatcher__, [recipient, hint])
+      |> apply(:__dispatcher__, [])
+      |> apply(:__handle__, [r, hint])
     end
   end
-  def recipient_register(M.worker_supervisor(recipient: recipient) = pool, hint) do
+  def recipient_register(M.worker_supervisor(recipient: recipient) = r, hint) do
     with {:ok, pool} <- recipient_pool(recipient) do
       pool
       |> apply(:__worker_supervisor__, [])
-      |> apply(:__dispatcher__, [recipient, hint])
+      |> apply(:__dispatcher__, [])
+      |> apply(:__handle__, [r, hint])
     end
   end
-  def recipient_register(M.node_manager(recipient: recipient) = pool, hint) do
+  def recipient_register(M.node_manager(recipient: recipient), hint) do
     Noizu.AdvancedPool.NodeManager
-    |> apply(:__dispatcher__, [recipient, hint])
+    |> apply(:__dispatcher__, [])
+    |> apply(:__handle__, [recipient, hint])
   end
 
   def recipient_pool(M.ref(module: m)) do

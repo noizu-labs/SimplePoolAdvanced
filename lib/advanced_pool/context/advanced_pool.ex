@@ -4,28 +4,15 @@ defmodule Noizu.AdvancedPool do
   """
   
   require Record
-  Record.defrecord(:pool_status, status: :initializing, service: nil, health: nil, node: nil, worker_count: 0, worker_target: nil, updated_on: nil)
-  
+ 
   def default_worker_target(), do: 50_000
   
   def pool_scopes(pool) do
     [pool, apply(pool, :__server__, []), apply(pool, :__worker_supervisor__, []), apply(pool, :__worker__, [])]
   end
   
-  def join_cluster(pool, node, pid, context, options) do
-    config = apply(pool, :config, [])
-    status = options[:pool][:init][:status] || config[:pool][:init][:status] || :offline
-    target = options[:pool][:worker][:target] || config[:pool][:worker][:target] ||  Noizu.AdvancedPool.default_worker_target()
-    time = cond do
-             dt = options[:current_time] -> DateTime.to_unix(dt)
-             :else -> :os.system_time(:second)
-           end
-    attributes = pool_status(status: status, service: pool,  health: :initializing, node: node, worker_count: 0, worker_target: target, updated_on: nil)
-    :syn.add_node_to_scopes(apply(pool, :pool_scopes, []))
-    :syn.join(pool, :nodes, pid, attributes)
-    :syn.register(pool, node, pid, attributes)
-    Noizu.AdvancedPool.NodeManager.register_pool(node, pid, attributes)
-    Noizu.AdvancedPool.ClusterManager.register_pool(pid, attributes)
+  def join_cluster(pool, pid, context, options) do
+    Noizu.AdvancedPool.NodeManager.register_pool(pool, pid, context, options)
   end
   
   
@@ -52,8 +39,8 @@ defmodule Noizu.AdvancedPool do
       
       
       
-      def join_cluster(node, pid, context, options) do
-        Noizu.AdvancedPool.join_cluster(__pool__(), node, pid, context, options)
+      def join_cluster(pid, context, options) do
+        Noizu.AdvancedPool.join_cluster(__pool__(), pid, context, options)
       end
       
       def pool_scopes() do

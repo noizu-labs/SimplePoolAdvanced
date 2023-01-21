@@ -12,7 +12,7 @@ defmodule Noizu.AdvancedPool.Message do
   Record.defrecord(:server, recipient: nil)
   Record.defrecord(:monitor, recipient: nil)
   Record.defrecord(:worker_supervisor, recipient: nil)
-  Record.defrecord(:node, node: nil)
+  Record.defrecord(:target_node, node: nil)
   Record.defrecord(:node_manager, recipient: nil)
   Record.defrecord(:ref, module: nil, identifier: nil) # move to elixir core.
 
@@ -28,5 +28,7 @@ defmodule Noizu.AdvancedPool.Message do
     settings: nil,
     msg: nil,
   )
+
+
 
 end

@@ -9,11 +9,7 @@ defmodule Noizu.AdvancedPool.DefaultSupervisor do
   
   
   def init({_id, pool, context, options}) do
-    apply(pool, :join_cluster, [node(), self(), context, options])
-    
-    
-    
-    
+    apply(pool, :join_cluster, [self(), context, options])
     cond do
       apply(pool, :config, [])[:stand_alone] ->
         [

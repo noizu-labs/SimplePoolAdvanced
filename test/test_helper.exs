@@ -14,6 +14,8 @@ Noizu.AdvancedPool.Support.TestPool.add_worker(context, [], true)
 
 :syn.members(Noizu.AdvancedPool.Support.TestPool, :nodes)
 :syn.members(Noizu.AdvancedPool.Support.TestPool, {node(), :worker_supervisor})
+:pending_cluster_report = Noizu.AdvancedPool.ClusterManager.health_report(context)
+:pending_node_report = Noizu.AdvancedPool.NodeManager.health_report(node(), context)
 
 # Noizu.AdvancedPool.NodeManager.health_report(context)
 # GenServer.call(Noizu.AdvancedPool.Support.TestPool.Server, :Apple)

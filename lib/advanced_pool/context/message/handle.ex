@@ -42,4 +42,15 @@ defmodule Noizu.AdvancedPool.Message.Handle do
       _ -> {:noreply, state}
     end
   end
+  
+  def uncaught_call(msg, _, state) do
+    {:reply, {:uncaught, msg, Noizu.ERP.ref(state)}, state}
+  end
+  def uncaught_cast(_, state) do
+    {:noreply, state}
+  end
+  def uncaught_info(_, state) do
+    {:noreply, state}
+  end
+  
 end
