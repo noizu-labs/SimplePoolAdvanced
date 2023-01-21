@@ -3,6 +3,8 @@ defmodule Noizu.AdvancedPool do
     Manages a standalone server or large cluster of persistent workers.
   """
   
+  
+  
   defmacro __using__(_) do
     quote do
       require Noizu.AdvancedPool.Server
@@ -14,12 +16,18 @@ defmodule Noizu.AdvancedPool do
       @pool_supervisor Module.concat([__MODULE__, PoolSupervisor])
       @pool_worker_supervisor Module.concat([__MODULE__, WorkerSupervisor])
       @pool_server Module.concat([__MODULE__, Server])
+      @pool_registry Module.concat([__MODULE__, Registry])
       
       def __pool__(), do: @pool
       def __pool_supervisor__(), do: @pool_supervisor
       def __worker_supervisor__(), do: @pool_worker_supervisor
       def __server__(), do: @pool_server
-
+      def __registry__(), do: @pool_registry
+      
+      def join_cluster() do
+        :syn.add_node_to_scopes([__MODULE__])
+      end
+      
       def __cast_settings__(), do: Noizu.AdvancedPool.Message.settings(timeout: 5000)
       def __call_settings__(), do: Noizu.AdvancedPool.Message.settings(timeout: 60_000)
       def __dispatcher__(recipient, hint) do

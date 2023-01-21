@@ -1,6 +1,11 @@
 context = Noizu.ElixirCore.CallingContext.admin()
+Application.ensure_all_started(:syn)
 {:ok, _} = Noizu.AdvancedPool.Test.Supervisor.start()
 {:ok, _} = Noizu.AdvancedPool.Test.Supervisor.add_service(Noizu.AdvancedPool.Support.TestPool.pool_spec(context))
+{:ok, _} = Noizu.AdvancedPool.Test.Supervisor.add_service(Noizu.AdvancedPool.ClusterManager.spec(context))
+{:ok, _} = Noizu.AdvancedPool.Test.Supervisor.add_service(Noizu.AdvancedPool.NodeManager.spec(context))
+
+# Noizu.AdvancedPool.NodeManager.health_report(context)
 # GenServer.call(Noizu.AdvancedPool.Support.TestPool.Server, :Apple)
 # Noizu.AdvancedPool.Message.Dispatch.s_call({:ref, Noizu.AdvancedPool.Support.TestPool.Server, 1234}, :hello, context)
 ExUnit.start()
