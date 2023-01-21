@@ -8,7 +8,7 @@
 #
 # This configuration file is loaded before any dependency and
 # is restricted to this project.
-use Mix.Config
+import Mix.Config
 
 config :ex_doc, :markdown_processor, ExDoc.Markdown.Hoedown
 
