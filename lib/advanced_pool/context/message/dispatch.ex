@@ -149,6 +149,19 @@ defmodule Noizu.AdvancedPool.Message.Dispatch do
   def timeout(nil), do: 5_000
   def timeout(M.settings(timeout: v)), do: v
   
+  
+  
+  def recipient_ref(recipient)
+  def recipient_ref(M.ref(module: worker) = recipient), do: {:ok, recipient}
+  def recipient_ref(M.ref(module: worker) = recipient), do: {:ok, recipient}
+  def recipient_ref(M.link(recipient: recipient)) do
+    recipient_ref(recipient)
+  end
+  def recipient_ref(recipient) do
+    {:error, {:unsupported, recipient}}
+  end
+  
+  
   def recipient_register(recipient, hint \\ nil)
   def recipient_register(M.ref(module: worker) = recipient, hint) do
     worker

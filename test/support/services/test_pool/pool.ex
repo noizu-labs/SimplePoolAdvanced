@@ -50,7 +50,9 @@ defmodule Noizu.AdvancedPool.Support.TestPool.Worker do
       identifier: identifier
     }
   end
-
+  def load(%Noizu.AdvancedPool.Worker.State{} = state, context, options \\ nil) do
+    {:ok, %Noizu.AdvancedPool.Worker.State{state| status: :loaded}}
+  end
 
   #-----------------------
   #
