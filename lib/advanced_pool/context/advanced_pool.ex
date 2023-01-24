@@ -4,6 +4,8 @@ defmodule Noizu.AdvancedPool do
   """
   
   require Record
+  require Noizu.AdvancedPool.Message
+  alias Noizu.AdvancedPool.Message, as: M
 
   require Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour
   alias Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour, as: Config
@@ -27,9 +29,27 @@ defmodule Noizu.AdvancedPool do
   def join_cluster(pool, pid, context, options) do
     Noizu.AdvancedPool.NodeManager.register_pool(pool, pid, context, options)
   end
-  
 
-  
+
+  #----------------------------------------
+  #
+  #----------------------------------------
+  @doc """
+    Get direct link to worker.
+  """
+  def get_direct_link!(pool, M.ref() = ref, context, options \\ nil) do
+    worker = apply(pool, :__worker__, [])
+    with {:ok, ref} <- apply(worker, :ref_ok, [ref]) do
+      with {:ok, {pid, attributes}} <- Noizu.AdvancedPool.DispatcherRouter.__lookup_worker_process__(ref) do
+        M.link(node: attributes[:node], process: pid, recipient: ref)
+      else
+        _ ->
+          M.link(node: nil, process: nil, recipient: ref)
+      end
+    else
+      error -> {:error, {:invalid_ref, error}}
+    end
+  end
   
   defmacro __using__(_) do
     quote do
@@ -55,19 +75,18 @@ defmodule Noizu.AdvancedPool do
       def __registry__(), do: @pool_registry
       def __task_supervisor__(), do: @pool_task_supervisor
       def __dispatcher__(), do: Noizu.AdvancedPool.DispatcherRouter
-      
+
+      def __cast_settings__(), do: Noizu.AdvancedPool.Message.settings(timeout: 5000)
+      def __call_settings__(), do: Noizu.AdvancedPool.Message.settings(timeout: 60_000)
+
+
+
       def join_cluster(pid, context, options) do
         Noizu.AdvancedPool.join_cluster(__pool__(), pid, context, options)
       end
       
       def pool_scopes() do
         Noizu.AdvancedPool.pool_scopes(__pool__())
-      end
-      
-      def __cast_settings__(), do: Noizu.AdvancedPool.Message.settings(timeout: 5000)
-      def __call_settings__(), do: Noizu.AdvancedPool.Message.settings(timeout: 60_000)
-      def __dispatcher__(recipient, hint) do
-        {:ok, __MODULE__}
       end
       
       def config() do
@@ -78,6 +97,14 @@ defmodule Noizu.AdvancedPool do
       
       def spec(context, options \\ nil) do
         Noizu.AdvancedPool.DefaultSupervisor.spec(__MODULE__, context, options)
+      end
+      
+      def get_direct_link!(ref, context, options \\ nil) do
+        with {:ok, ref} <- apply(__worker__(), :ref_ok, [ref]) do
+          Noizu.AdvancedPool.get_direct_link!(__pool__(), ref, context, options)
+        end
+        
+        
       end
 
       def bring_online(context) do
@@ -117,7 +144,6 @@ defmodule Noizu.AdvancedPool do
         # Call add child
       end
       
-      
       def handle_call(msg, _from, state) do
         {:reply, {:uncaught, msg, state}, state}
       end
@@ -127,7 +153,35 @@ defmodule Noizu.AdvancedPool do
       def handle_info(msg, state) do
         {:noreply, state}
       end
-    
+
+      defoverridable [
+        __pool__: 0,
+        __pool_supervisor__: 0,
+        __worker_supervisor__: 0,
+        __worker_server__: 0,
+        __server__: 0,
+        __worker__: 0,
+        __registry__: 0,
+        __task_supervisor__: 0,
+        __dispatcher__: 0,
+        __cast_settings__: 0,
+        __call_settings__: 0,
+        join_cluster: 3,
+        pool_scopes: 0,
+        config: 0,
+        spec: 1,
+        spec: 2,
+        get_direct_link!: 2,
+        get_direct_link!: 3,
+        bring_online: 1,
+        add_worker_supervisor: 2,
+        add_worker: 2,
+        add_worker: 3,
+        handle_call: 3,
+        handle_cast: 2,
+        handle_info: 2,
+      ]
+      
     end
   end
 end

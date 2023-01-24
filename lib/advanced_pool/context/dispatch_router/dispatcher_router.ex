@@ -2,6 +2,16 @@ defmodule Noizu.AdvancedPool.DispatcherRouter do
   require Noizu.AdvancedPool.Message
   import Noizu.AdvancedPool.Message
   alias Noizu.AdvancedPool.Message, as: M
+
+
+  def __lookup_worker_process__(ref = M.ref(module: worker, identifier: identifier)) do
+    registry = apply(worker, :__registry__, [])
+    with {pid, info} <- :syn.lookup(registry, {:worker, ref}) do
+      {:ok, {pid, info}}
+    else
+      _ -> {:error, :unregistered}
+    end
+  end
   
   def __process__(message, _ \\ nil)
   def __process__(

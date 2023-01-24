@@ -32,7 +32,7 @@ defmodule Noizu.AdvancedPool.AcceptanceTest do
       Task.yield(task, :infinity)
       {:ok, nodes} = Noizu.AdvancedPool.ClusterManager.service_status(Noizu.AdvancedPool.Support.TestPool, context())
       {pid, status} = nodes[node()]
-      assert (pool_status(status, :health)) == :initializing
+      assert (pool_status(status, :health)) == 1.0
       # pending
     end
     
@@ -70,14 +70,10 @@ defmodule Noizu.AdvancedPool.AcceptanceTest do
   end
   
   describe "Pool" do
-    @tag :spawn
     test "spawn workers" do
       task = Noizu.AdvancedPool.NodeManager.bring_online(node(), context())
       Task.yield(task, :infinity)
 
-      :syn.lookup(Noizu.AdvancedPool.NodeManager, {node(), Noizu.AdvancedPool.Support.TestPool})
-      |> IO.inspect(label: :pool_status)
-      
       r = Noizu.AdvancedPool.Support.TestPool.test(1,  context())
       assert r == 1
       Process.sleep(500)
@@ -88,6 +84,30 @@ defmodule Noizu.AdvancedPool.AcceptanceTest do
       r = Noizu.AdvancedPool.Support.TestPool.test(1,  context())
       assert r == 3
     end
+
+    test "direct link" do
+      task = Noizu.AdvancedPool.NodeManager.bring_online(node(), context())
+      Task.yield(task, :infinity)
+  
+      r = Noizu.AdvancedPool.Support.TestPool.test(5,  context())
+      assert r == 1
+      r = Noizu.AdvancedPool.Support.TestPool.test(5,  context())
+      assert r == 2
+      r = Noizu.AdvancedPool.Support.TestPool.test(6,  context())
+      assert r == 1
+
+      link = Noizu.AdvancedPool.Support.TestPool.get_direct_link!(5, context())
+      
+      r = Noizu.AdvancedPool.Support.TestPool.test(link,  context())
+      assert r == 3
+
+      r = Noizu.AdvancedPool.Support.TestPool.test(5,  context())
+      assert r == 4
+      
+    end
+    
+    
+    
   end
   
 end

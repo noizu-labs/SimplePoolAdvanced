@@ -194,6 +194,9 @@ defmodule Noizu.AdvancedPool.Message.Dispatch do
     |> apply(:__handle__, [recipient, hint])
   end
 
+  def recipient_pool(M.link(recipient: inner)) do
+    recipient_pool(inner)
+  end
   def recipient_pool(M.ref(module: m)) do
     {:ok, apply(m, :__pool__, [])}
   end

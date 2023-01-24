@@ -7,9 +7,12 @@ defmodule Noizu.AdvancedPool.Support.TestPool do
   use Noizu.AdvancedPool
   Noizu.AdvancedPool.Server.default()
   
+  def __worker__(), do: Noizu.AdvancedPool.Support.TestPool.Worker
+  
   def test(identifier, context) do
-    ref = {:ref, Noizu.AdvancedPool.Support.TestPool.Worker, identifier}
-    Noizu.AdvancedPool.Message.Dispatch.s_call!(ref, :test, context)
+    with {:ok, link} <- apply(__worker__(), :recipient, [identifier]) do
+      Noizu.AdvancedPool.Message.Dispatch.s_call!(link, :test, context)
+    end
   end
   
   
@@ -19,13 +22,24 @@ end
 defmodule Noizu.AdvancedPool.Support.TestPool.Worker do
   require Noizu.AdvancedPool.Message
   import Noizu.AdvancedPool.Message
+  alias Noizu.AdvancedPool.Message, as: M
   alias Noizu.AdvancedPool.Message.Handle, as: MessageHandler
+  
   
   defstruct [
     identifier: nil,
     test: 0
   ]
 
+  def recipient(M.link(recipient: M.ref(module: __MODULE__)) = link ), do: {:ok, link}
+  def recipient(ref), do: ref_ok(ref)
+  
+
+  def ref_ok({:ref, __MODULE__, _} = ref), do: {:ok, ref}
+  def ref_ok(ref) when is_integer(ref), do: {:ok, {:ref, __MODULE__, ref}}
+  def ref_ok(%__MODULE__{identifier: id}), do: {:ok, {:ref, __MODULE__, id}}
+  def ref_ok(ref), do: {:error, {:unsupported, ref}}
+  
   def __pool__(), do: Noizu.AdvancedPool.Support.TestPool
   def __dispatcher__(), do: Noizu.AdvancedPool.Support.TestPool.__dispatcher__()
   def __registry__(), do: Noizu.AdvancedPool.Support.TestPool.__registry__()

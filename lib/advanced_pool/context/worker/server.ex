@@ -14,8 +14,10 @@ defmodule Noizu.AdvancedPool.Worker.Server do
   def init({ref = M.ref(module: worker, identifier: _), args, context}) do
     init_worker = apply(worker, :init, [ref, args, context])
     pool = apply(worker, :__pool__, [])
-    registry = apply(pool, :__registry__, [])
-    :syn.register(registry, {:worker, ref}, self(), [])
+    #registry = apply(pool, :__registry__, [])
+    dispatcher = apply(pool, :__dispatcher__, [])
+    apply(dispatcher, :__register__, [pool, ref, self(), [node: node()]])
+    # :syn.register(registry, {:worker, ref}, self(), [node: node()])
     #IO.puts "REGISTER: #{inspect registry} - #{inspect {:worker, ref}}"
     
     state = %Noizu.AdvancedPool.Worker.State{
