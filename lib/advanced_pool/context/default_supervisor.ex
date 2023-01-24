@@ -7,7 +7,6 @@ defmodule Noizu.AdvancedPool.DefaultSupervisor do
   
   def default_worker_target(), do: 50_000
   
-  
   def init({_id, pool, context, options}) do
     apply(pool, :join_cluster, [self(), context, options])
     cond do
@@ -35,6 +34,10 @@ defmodule Noizu.AdvancedPool.DefaultSupervisor do
       type: :supervisor,
       start: {supervisor, :start_link, start_params}
     }
+  end
+  
+  def add_worker_supervisor(pool, node, spec) do
+    Supervisor.start_child({pool, node}, spec)
   end
   
 end

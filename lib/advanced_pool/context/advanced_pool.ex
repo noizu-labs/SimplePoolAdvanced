@@ -4,16 +4,31 @@ defmodule Noizu.AdvancedPool do
   """
   
   require Record
- 
-  def default_worker_target(), do: 50_000
+
+  require Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour
+  alias Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour, as: Config
+  
+  def default_worker_sup_target() do
+    Config.target_window(low: 500, target: 2_500, high: 5_000)
+  end
+  def default_worker_target() do
+    Config.target_window(low: 10_000, target: 50_000, high: 100_000)
+  end
   
   def pool_scopes(pool) do
-    [pool, apply(pool, :__server__, []), apply(pool, :__worker_supervisor__, []), apply(pool, :__worker__, [])]
+    [ pool,
+      apply(pool, :__server__, []),
+      apply(pool, :__worker_supervisor__, []),
+      apply(pool, :__worker__, []),
+      apply(pool, :__registry__, [])
+    ]
   end
   
   def join_cluster(pool, pid, context, options) do
     Noizu.AdvancedPool.NodeManager.register_pool(pool, pid, context, options)
   end
+  
+
   
   
   defmacro __using__(_) do
@@ -21,6 +36,7 @@ defmodule Noizu.AdvancedPool do
       require Noizu.AdvancedPool.Server
       require Noizu.AdvancedPool.WorkerSupervisor
       require Noizu.AdvancedPool.Message
+      require Noizu.AdvancedPool.NodeManager
       
       @pool __MODULE__
       @pool_supervisor Module.concat([__MODULE__, PoolSupervisor])
@@ -33,11 +49,12 @@ defmodule Noizu.AdvancedPool do
       def __pool__(), do: @pool
       def __pool_supervisor__(), do: @pool_supervisor
       def __worker_supervisor__(), do: Noizu.AdvancedPool.WorkerSupervisor
+      def __worker_server__(), do: Noizu.AdvancedPool.Worker.Server
       def __server__(), do: @pool_server
       def __worker__(), do: @pool_worker
       def __registry__(), do: @pool_registry
       def __task_supervisor__(), do: @pool_task_supervisor
-      
+      def __dispatcher__(), do: Noizu.AdvancedPool.DispatcherRouter
       
       def join_cluster(pid, context, options) do
         Noizu.AdvancedPool.join_cluster(__pool__(), pid, context, options)
@@ -61,6 +78,27 @@ defmodule Noizu.AdvancedPool do
       
       def spec(context, options \\ nil) do
         Noizu.AdvancedPool.DefaultSupervisor.spec(__MODULE__, context, options)
+      end
+
+      def bring_online(context) do
+        # Temp Logic.
+        with {pid, status} <- :syn.lookup(Noizu.AdvancedPool.NodeManager, {node(), __pool__()}) do
+          updated_status = Noizu.AdvancedPool.NodeManager.pool_status(status, status: :online, health: 1.0)
+          :syn.register(Noizu.AdvancedPool.NodeManager, {node(), __pool__()}, pid, updated_status)
+          :syn.join(Noizu.AdvancedPool.ClusterManager, {:service, __pool__()}, pid, updated_status)
+          
+        end
+        # |> IO.inspect(label: "bring_online: #{__pool__()}")
+
+
+        
+
+
+
+      end
+      
+      def add_worker_supervisor(node, spec) do
+        Noizu.AdvancedPool.DefaultSupervisor.add_worker_supervisor(__MODULE__, node, spec)
       end
       
       def add_worker(context, options, temp_new \\ false) do

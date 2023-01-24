@@ -19,25 +19,33 @@ defmodule Noizu.AdvancedPool.Message.Handle do
     {:noreply, state}
   end
   
-  def unpack_call(M.msg_envelope(msg: m) = call, from, %{__struct__: s} = state) do
+  # pass in value to avoid inspecting state object.
+  def handler(%{handler: h}), do: h
+  def handler(%{__struct__: s}), do: s
+  
+  
+  def unpack_call(M.msg_envelope(msg: m) = call, from, %{__struct__: _} = state) do
     with :ok <- recipient_check(call, from, state) do
-       apply(s, :handle_call, [m, from, state])
+      handler(state)
+      |> apply(:handle_call, [m, from, state])
     else
       _ -> reroute(call, from, state)
     end
   end
-
-  def unpack_cast(M.msg_envelope(msg: m) = call, %{__struct__: s} = state) do
+  
+  def unpack_cast(M.msg_envelope(msg: m) = call, %{__struct__: _} = state) do
     with :ok <- recipient_check(call, state) do
-      apply(s, :handle_cast, [m, state])
+      handler(state)
+      |> apply(:handle_cast, [m, state])
     else
       _ -> reroute(call, state)
     end
   end
 
-  def unpack_info(M.msg_envelope(msg: m) = call, %{__struct__: s} = state) do
+  def unpack_info(M.msg_envelope(msg: m) = call, %{__struct__: _} = state) do
     with :ok <- recipient_check(call, state) do
-      apply(s, :handle_info, [m, state])
+      handler(state)
+      |> apply(:handle_info, [m, state])
     else
       _ -> {:noreply, state}
     end

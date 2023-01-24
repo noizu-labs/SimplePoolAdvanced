@@ -66,7 +66,28 @@ defmodule Noizu.AdvancedPool.AcceptanceTest do
       assert (pool_status(status, :health)) == :initializing
       # pending
     end
-    
+   
+  end
+  
+  describe "Pool" do
+    @tag :spawn
+    test "spawn workers" do
+      task = Noizu.AdvancedPool.NodeManager.bring_online(node(), context())
+      Task.yield(task, :infinity)
+
+      :syn.lookup(Noizu.AdvancedPool.NodeManager, {node(), Noizu.AdvancedPool.Support.TestPool})
+      |> IO.inspect(label: :pool_status)
+      
+      r = Noizu.AdvancedPool.Support.TestPool.test(1,  context())
+      assert r == 1
+      Process.sleep(500)
+      r = Noizu.AdvancedPool.Support.TestPool.test(1,  context())
+      assert r == 2
+      r = Noizu.AdvancedPool.Support.TestPool.test(2,  context())
+      assert r == 1
+      r = Noizu.AdvancedPool.Support.TestPool.test(1,  context())
+      assert r == 3
+    end
   end
   
 end

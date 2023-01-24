@@ -19,7 +19,9 @@ defmodule Noizu.AdvancedPool.DispatcherRouter do
     
     # regardless for large scales we will likely need to tweak our registration flow here.
     registry = apply(worker, :__registry__, [])
-    with {pid, _} <- :syn.lookup(registry, ref) do
+    with {pid, _} <- :syn.lookup(registry, {:worker, ref})
+                     #|> IO.inspect(label: "#{registry} check #{inspect ref}")
+      do
       {:ok, pid}
     else
       :undefined ->
@@ -41,7 +43,7 @@ defmodule Noizu.AdvancedPool.DispatcherRouter do
   
   def __register__(pool, ref, process, status) do
     registry = apply(pool, :__registry__, [])
-    :syn.register(registry, ref, process, status)
+    :syn.register(registry, {:worker, ref}, process, status)
   end
 
 end

@@ -2,8 +2,27 @@ defmodule Noizu.AdvancedPool.NodeManager do
   alias Noizu.AdvancedPool.Message.Dispatch, as: Router
   require Record
   require Noizu.AdvancedPool.Message
-  Record.defrecord(:pool_status, status: :initializing, service: nil, health: nil, node: nil, worker_count: 0, worker_target: nil, updated_on: nil)
-
+  Record.defrecord(
+    :pool_status,
+    status: :initializing,
+    service: nil,
+    health: nil,
+    node: nil,
+    worker_count: 0,
+    worker_target: nil,
+    updated_on: nil
+  )
+  Record.defrecord(
+    :worker_sup_status,
+    status: :initializing,
+    service: nil,
+    health: nil,
+    node: nil,
+    worker_count: 0,
+    worker_target: nil,
+    updated_on: nil
+  )
+  
   def __configuration_provider__(), do: Application.get_env(:noizu_advanced_pool, :configuration)
   
   def __task_supervisor__(), do: Noizu.AdvancedPool.NodeManager.Task
@@ -49,17 +68,47 @@ defmodule Noizu.AdvancedPool.NodeManager do
       (node == node()) ->
         with cluster = %{} <- configuration(node, context) do
           Task.Supervisor.async_nolink(__task_supervisor__(), fn() ->
+            # init
             Enum.map(
               cluster,
               fn({pool, pool_config}) ->
                 Noizu.AdvancedPool.NodeManager.Supervisor.add_child(apply(pool, :spec, [context]))
               end)
-              # wait for services to come online.
+            # start
+            Enum.map(
+              cluster,
+              fn({pool, _}) ->
+                apply(pool, :bring_online, [context])
+              end)
             
+              # wait for services to come online.
           end)
         end
       :else -> :rpc.call(node, __MODULE__, :bring_node_online, [node, context])
     end
+  end
+  
+  
+  def register_worker_supervisor(pool, pid, context, options) do
+    config = apply(pool, :config, [])
+    status = options[:worker_sup][:init][:status] || config[:worker_sup][:init][:status] || :offline
+    target = options[:worker_sup][:worker][:target] || config[:worker_sup][:worker][:target] ||  Noizu.AdvancedPool.default_worker_sup_target()
+    time = cond do
+             dt = options[:current_time] -> DateTime.to_unix(dt)
+             :else -> :os.system_time(:second)
+           end
+    node = node()
+    status = worker_sup_status(
+      status: status,
+      service: pool,
+      health: :initializing,
+      node: node,
+      worker_count: 0,
+      worker_target: target,
+      updated_on: time
+    )
+    :syn.join(pool, {node(), :worker_sups}, pid, status)
+    :syn.join(Noizu.AdvancedPool.NodeManager, {node, pool, :worker_sups}, pid, status)
   end
   
   
@@ -72,11 +121,20 @@ defmodule Noizu.AdvancedPool.NodeManager do
              :else -> :os.system_time(:second)
            end
     node = node()
-    status = pool_status(status: status, service: pool,  health: :initializing, node: node, worker_count: 0, worker_target: target, updated_on: nil)
+    status = pool_status(
+      status: status,
+      service: pool,
+      health: :initializing,
+      node: node,
+      worker_count: 0,
+      worker_target: target,
+      updated_on: time
+    )
   
     :syn.add_node_to_scopes(apply(pool, :pool_scopes, []))
     :syn.join(pool, :nodes, pid, status)
-    :syn.register(pool, {:node, node()}, pid, status) |> IO.inspect(label: :register)
+    :syn.register(pool, {:node, node()}, pid, status)
+    #|> IO.inspect(label: :register)
     :syn.join(Noizu.AdvancedPool.NodeManager, {node, :services}, pid, status)
     :syn.register(Noizu.AdvancedPool.NodeManager, {node, pool}, pid, status)
     Noizu.AdvancedPool.ClusterManager.register_pool(pool, pid, status)

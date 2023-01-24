@@ -3,7 +3,8 @@ defmodule Noizu.AdvancedPool.Server do
   defmacro default() do
     quote do
       defmodule Server do
-        @pool Module.split(__MODULE__) |> Enum.slice(0..-2) |> Module.concat() |> IO.inspect(label: :server)
+        @pool Module.split(__MODULE__) |> Enum.slice(0..-2) |> Module.concat()
+              #|> IO.inspect(label: :server)
         
         def __pool__(), do: @pool
         def config(), do: apply(__pool__(), :config, [])
