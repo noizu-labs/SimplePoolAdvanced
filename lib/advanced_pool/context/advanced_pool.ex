@@ -56,6 +56,7 @@ defmodule Noizu.AdvancedPool do
       require Noizu.AdvancedPool.Server
       require Noizu.AdvancedPool.WorkerSupervisor
       require Noizu.AdvancedPool.Message
+            alias Noizu.AdvancedPool.Message, as: M
       require Noizu.AdvancedPool.NodeManager
       
       @pool __MODULE__
@@ -154,6 +155,37 @@ defmodule Noizu.AdvancedPool do
         {:noreply, state}
       end
 
+      def s_call!(identifier, message, context) do
+        with {:ok, ref} <- apply(__worker__(), :recipient, [identifier]) do
+          Noizu.AdvancedPool.Message.Dispatch.s_call!(ref, message, context)
+        end
+      end
+      def s_call(identifier, message, context) do
+        with {:ok, ref} <- apply(__worker__(), :recipient, [identifier]) do
+          Noizu.AdvancedPool.Message.Dispatch.s_call!(ref, message, context)
+        end
+      end
+
+      def s_cast!(identifier, message, context) do
+        with {:ok, ref} <- apply(__worker__(), :recipient, [identifier]) do
+          Noizu.AdvancedPool.Message.Dispatch.s_cast!(ref, message, context)
+        end
+      end
+      def s_cast(identifier, message, context) do
+        with {:ok, ref} <- apply(__worker__(), :recipient, [identifier]) do
+          Noizu.AdvancedPool.Message.Dispatch.s_cast(ref, message, context)
+        end
+      end
+      
+      def reload!(ref, context, options), do: s_call!(ref, {:reload!, options}, context)
+      def fetch(ref, type, context), do: s_call!(ref, {:fetch, type}, context)
+      def ping(ref, context), do: s_call(ref, :ping, context)
+      def ping(ref, context, options), do: s_call(ref, {:ping, options}, context)
+      def kill!(ref, context, options), do: s_call(ref, {:kill!, options}, context)
+      def crash!(ref, context, options), do: s_call(ref, {:crash!, options}, context)
+      def hibernate(ref, context, options), do: s_call!(ref, {:hibernate, options}, context)
+      def persist!(ref, context, options), do: s_call!(ref, {:persist!, options}, context)
+
       defoverridable [
         __pool__: 0,
         __pool_supervisor__: 0,
@@ -180,6 +212,15 @@ defmodule Noizu.AdvancedPool do
         handle_call: 3,
         handle_cast: 2,
         handle_info: 2,
+  
+        reload!: 3,
+        fetch: 3,
+        ping: 3,
+        ping: 2,
+        kill!: 3,
+        crash!: 3,
+        hibernate: 3,
+        persist!: 3,
       ]
       
     end
