@@ -101,23 +101,19 @@ defmodule Noizu.AdvancedPool.Worker.Behaviour do
       def handle_call(M.s(call: {:fetch, type}, context: context), _, state) do
         fetch(state, type, context)
       end
-      def handle_call(M.s(call: :ping, context: context), _, state) do
-        ping(state, context)
-      end
-      def handle_call(M.s(call: {:ping, options}, context: context), _, state) do
+      def handle_call(M.s(call: :ping, context: context, options: options), _, state) do
         ping(state, context, options)
       end
-
-      def handle_call(M.s(call: {:kill!, options}, context: context), _, state) do
+      def handle_call(M.s(call: :kill!, context: context, options: options), _, state) do
         kill!(state, context, options)
       end
-      def handle_call(M.s(call: {:crash!, options}, context: context), _, state) do
+      def handle_call(M.s(call: :crash!, context: context, options: options), _, state) do
         crash!(state, context, options)
       end
-      def handle_call(M.s(call: {:hibernate, options}, context: context), _, state) do
+      def handle_call(M.s(call: :hibernate, context: context, options: options), _, state) do
         hibernate(state, context, options)
       end
-      def handle_call(M.s(call: {:persist!, options}, context: context), _, state) do
+      def handle_call(M.s(call: :persist!, context: context, options: options), _, state) do
         persist!(state, context, options)
       end
       def handle_call(msg, _, state) do

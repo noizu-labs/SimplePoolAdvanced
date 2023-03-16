@@ -3,7 +3,7 @@ defmodule Noizu.AdvancedPool.Message.Dispatch do
   alias Noizu.AdvancedPool.Message, as: M
 
 
-  def s_call(ref, call, context, timeout \\ :default) do
+  def s_call(ref, call, context, options \\ nil,timeout \\ :default) do
       with {:ok, pool} <- recipient_pool(ref) do
         identifier = {self(), :os.system_time(:millisecond)}
         settings = apply(pool, :__call_settings__, [])
@@ -16,12 +16,12 @@ defmodule Noizu.AdvancedPool.Message.Dispatch do
           type: :call,
           settings: M.settings(settings, spawn?: false, timeout: timeout),
           recipient: ref,
-          msg: M.s(call: call, context: context)
+          msg: M.s(call: call, context: context, options: options)
         ) |> __dispatch__()
       end
   end
 
-  def s_call!(ref, call, context, timeout \\ :default) do
+  def s_call!(ref, call, context, options \\ nil, timeout \\ :default) do
     with {:ok, pool} <- recipient_pool(ref) do
       identifier = {self(), :os.system_time(:millisecond)}
       settings = apply(pool, :__call_settings__, [])
@@ -34,12 +34,12 @@ defmodule Noizu.AdvancedPool.Message.Dispatch do
         type: :call,
         settings: M.settings(settings, spawn?: true, timeout: timeout),
         recipient: ref,
-        msg: M.s(call: call, context: context)
+        msg: M.s(call: call, context: context, options: options)
       ) |> __dispatch__()
     end
   end
 
-  def s_cast(ref, call, context, timeout \\ :default) do
+  def s_cast(ref, call, context, options \\ nil, timeout \\ :default) do
     with {:ok, pool} <- recipient_pool(ref) do
       identifier = {self(), :os.system_time(:millisecond)}
       settings = apply(pool, :__cast_settings__, [])
@@ -52,13 +52,13 @@ defmodule Noizu.AdvancedPool.Message.Dispatch do
         type: :cast,
         settings: M.settings(settings, spawn?: false, timeout: timeout),
         recipient: ref,
-        msg: M.s(call: call, context: context)
+        msg: M.s(call: call, context: context, options: options)
       ) |> __dispatch__()
     end
   end
 
 
-  def s_cast!(ref, call, context, timeout \\ :default) do
+  def s_cast!(ref, call, context, options \\ nil, timeout \\ :default) do
     with {:ok, pool} <- recipient_pool(ref) do
       identifier = {self(), :os.system_time(:millisecond)}
       settings = apply(pool, :__cast_settings__, [])
@@ -71,7 +71,7 @@ defmodule Noizu.AdvancedPool.Message.Dispatch do
         type: :cast,
         settings: M.settings(settings, spawn?: true, timeout: timeout),
         recipient: ref,
-        msg: M.s(call: call, context: context)
+        msg: M.s(call: call, context: context, options: options)
       ) |> __dispatch__()
     end
   end

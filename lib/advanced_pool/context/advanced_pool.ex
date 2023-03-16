@@ -155,36 +155,36 @@ defmodule Noizu.AdvancedPool do
         {:noreply, state}
       end
 
-      def s_call!(identifier, message, context) do
+      def s_call!(identifier, message, context, options \\ nil) do
         with {:ok, ref} <- apply(__worker__(), :recipient, [identifier]) do
-          Noizu.AdvancedPool.Message.Dispatch.s_call!(ref, message, context)
+          Noizu.AdvancedPool.Message.Dispatch.s_call!(ref, message, context, options)
         end
       end
-      def s_call(identifier, message, context) do
+      def s_call(identifier, message, context, options \\ nil) do
         with {:ok, ref} <- apply(__worker__(), :recipient, [identifier]) do
-          Noizu.AdvancedPool.Message.Dispatch.s_call!(ref, message, context)
+          Noizu.AdvancedPool.Message.Dispatch.s_call!(ref, message, context, options)
         end
       end
 
-      def s_cast!(identifier, message, context) do
+      def s_cast!(identifier, message, context, options \\ nil) do
         with {:ok, ref} <- apply(__worker__(), :recipient, [identifier]) do
-          Noizu.AdvancedPool.Message.Dispatch.s_cast!(ref, message, context)
+          Noizu.AdvancedPool.Message.Dispatch.s_cast!(ref, message, context, options)
         end
       end
-      def s_cast(identifier, message, context) do
+      def s_cast(identifier, message, context, options \\ nil) do
         with {:ok, ref} <- apply(__worker__(), :recipient, [identifier]) do
-          Noizu.AdvancedPool.Message.Dispatch.s_cast(ref, message, context)
+          Noizu.AdvancedPool.Message.Dispatch.s_cast(ref, message, context, options)
         end
       end
       
-      def reload!(ref, context, options), do: s_call!(ref, {:reload!, options}, context)
+      def reload!(ref, context, options), do: s_call!(ref, :reload!, context, options)
       def fetch(ref, type, context), do: s_call!(ref, {:fetch, type}, context)
       def ping(ref, context), do: s_call(ref, :ping, context)
-      def ping(ref, context, options), do: s_call(ref, {:ping, options}, context)
-      def kill!(ref, context, options), do: s_call(ref, {:kill!, options}, context)
-      def crash!(ref, context, options), do: s_call(ref, {:crash!, options}, context)
-      def hibernate(ref, context, options), do: s_call!(ref, {:hibernate, options}, context)
-      def persist!(ref, context, options), do: s_call!(ref, {:persist!, options}, context)
+      def ping(ref, context, options), do: s_call(ref, :ping, context, options)
+      def kill!(ref, context, options), do: s_call(ref, :kill!, context, options)
+      def crash!(ref, context, options), do: s_call(ref, :crash!, context, options)
+      def hibernate(ref, context, options), do: s_call!(ref, :hibernate, context, options)
+      def persist!(ref, context, options), do: s_call!(ref, :persist!, context, options)
 
       defoverridable [
         __pool__: 0,

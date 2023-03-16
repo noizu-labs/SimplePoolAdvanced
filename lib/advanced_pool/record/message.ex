@@ -37,7 +37,7 @@ defmodule Noizu.AdvancedPool.Message do
  
   
   # Msg
-  Record.defrecord(:s, call: nil, context: nil)
+  Record.defrecord(:s, call: nil, context: nil, options: nil)
   Record.defrecord(:msg_envelope,
     identifier: nil,
     type: nil,
