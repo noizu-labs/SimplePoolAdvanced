@@ -197,6 +197,13 @@ defmodule Noizu.AdvancedPool.ClusterManager do
         else
           _ -> best_node(pool, ref, settings, context, options)
         end
+      {:sticky, t} ->
+        with {:ok, {_, pool_status(status: :online, health: health_value)}} <- NodeManager.service_status(pool, node(), context),
+             true <- t <= health_value  do
+          {:ok, node()}
+        else
+          _ -> best_node(pool, ref, settings, context, options)
+        end
       {:best, _} -> best_node(pool, ref, settings, context, options)
     end
   end
