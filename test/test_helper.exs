@@ -1,3 +1,8 @@
+unless node() == :"first@127.0.0.1" do
+  IO.warn("YOU MUST RUN TEST SUITE VIA `./run-test` SCRIPT")
+  exit(1)
+end
+
 context = Noizu.ElixirCore.CallingContext.admin()
 Logger.configure(level: :warn)
 Application.ensure_all_started(:syn)
