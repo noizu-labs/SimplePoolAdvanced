@@ -33,7 +33,7 @@ defmodule Noizu.AdvancedPool.NodeManager.Supervisor do
   #===========================================
   def init_registry(_, _) do
     status = [node: node()]
-    :syn.add_node_to_scopes([__pool__(), __registry__()])
+    :syn.add_node_to_scopes([__cluster_pool__(), __cluster_registry__(), __pool__(), __registry__()])
     :syn.register(__pool__(), {:supervisor, node()}, self(), status)
     :syn.join(__pool__(), :supervisors, self(), status)
   end
@@ -45,6 +45,12 @@ defmodule Noizu.AdvancedPool.NodeManager.Supervisor do
   def __server__(), do: Noizu.AdvancedPool.NodeManager.Server
   def __supervisor__(), do: Noizu.AdvancedPool.NodeManager.Supervisor
   def __registry__(), do: Noizu.AdvancedPool.NodeManager.WorkerRegistry
+
+
+  defdelegate __cluster_pool__(), to: Noizu.AdvancedPool.ClusterManager, as: :__pool__
+  defdelegate __cluster_server__(), to: Noizu.AdvancedPool.ClusterManager, as: :__server__
+  defdelegate __cluster_supervisor__(), to: Noizu.AdvancedPool.ClusterManager, as: :__supervisor__
+  defdelegate __cluster_registry__(), to: Noizu.AdvancedPool.ClusterManager, as: :__registry__
 
 
 end

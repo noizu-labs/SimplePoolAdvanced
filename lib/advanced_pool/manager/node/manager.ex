@@ -46,7 +46,7 @@ defmodule Noizu.AdvancedPool.NodeManager do
     end
   end
   
-  def service_status(pool, node, context) do
+  def service_status(pool, node, _context) do
     with {pid, status} <- :syn.lookup(pool, {:node, node}) do
       {:ok, {pid, status}}
     else
@@ -63,33 +63,50 @@ defmodule Noizu.AdvancedPool.NodeManager do
   def configuration(node, context) do
     Router.s_call({:ref, __server__(), node}, :configuration, context)
   end
+
   def bring_online(node, context) do
+    Task.Supervisor.async_nolink(__task_supervisor__(), fn() ->
+      bring_online__inner(node, context)
+    end)
+  end
+
+  def bring_online__inner(node, context) do
     cond do
-      (node == node()) ->
+      node == node() ->
         with cluster = %{} <- configuration(node, context) do
-          Task.Supervisor.async_nolink(__task_supervisor__(), fn() ->
-            # init
-            Enum.map(
-              cluster,
-              fn({pool, pool_config}) ->
-                Noizu.AdvancedPool.NodeManager.Supervisor.add_child(apply(pool, :spec, [context]))
-              end)
-            # start
-            Enum.map(
-              cluster,
-              fn({pool, _}) ->
-                apply(pool, :bring_online, [context])
-              end)
-            
-              # wait for services to come online.
-          end)
+          # init
+          Enum.map(
+            cluster,
+            fn({pool, _pool_config}) ->
+              Noizu.AdvancedPool.NodeManager.Supervisor.add_child(apply(pool, :spec, [context]))
+            end)
+          # start
+          Enum.map(
+            cluster,
+            fn({pool, _}) ->
+              apply(pool, :bring_online, [context])
+            end)
+
+          # Ensure we have joined all pools - somewhat temp logic
+          cluster_config = Noizu.AdvancedPool.ClusterManager.configuration(context)
+          pools = Enum.map(cluster, fn({pool, _}) -> pool end)
+          (Enum.map(cluster_config, fn({pool, _}) -> pool end) -- pools)
+          |> Enum.map(
+               fn(pool) ->
+                 :syn.add_node_to_scopes([apply(pool, :__pool__, []), apply(pool, :__registry__, [])])
+               end)
+
+          # wait for services to come online.
+
+
         end
-      :else -> :rpc.call(node, __MODULE__, :bring_node_online, [node, context])
+      :else ->
+        :rpc.call(node, __MODULE__, :bring_online__inner, [node, context], :infinity)
     end
   end
-  
-  
-  def register_worker_supervisor(pool, pid, context, options) do
+
+
+  def register_worker_supervisor(pool, pid, _context, options) do
     config = apply(pool, :config, [])
     status = options[:worker_sup][:init][:status] || config[:worker_sup][:init][:status] || :offline
     target = options[:worker_sup][:worker][:target] || config[:worker_sup][:worker][:target] ||  Noizu.AdvancedPool.default_worker_sup_target()
@@ -112,7 +129,7 @@ defmodule Noizu.AdvancedPool.NodeManager do
   end
   
   
-  def register_pool(pool, pid, context, options) do
+  def register_pool(pool, pid, _context, options) do
     config = apply(pool, :config, [])
     status = options[:pool][:init][:status] || config[:pool][:init][:status] || :offline
     target = options[:pool][:worker][:target] || config[:pool][:worker][:target] ||  Noizu.AdvancedPool.default_worker_target()
@@ -130,7 +147,7 @@ defmodule Noizu.AdvancedPool.NodeManager do
       worker_target: target,
       updated_on: time
     )
-  
+    :syn.add_node_to_scopes([__pool__(), __registry__()])
     :syn.add_node_to_scopes(apply(pool, :pool_scopes, []))
     :syn.join(pool, :nodes, pid, status)
     :syn.register(pool, {:node, node()}, pid, status)

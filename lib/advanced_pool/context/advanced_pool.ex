@@ -37,7 +37,7 @@ defmodule Noizu.AdvancedPool do
   @doc """
     Get direct link to worker.
   """
-  def get_direct_link!(pool, M.ref() = ref, context, options \\ nil) do
+  def get_direct_link!(pool, M.ref() = ref, _context, _options \\ nil) do
     worker = apply(pool, :__worker__, [])
     with {:ok, ref} <- apply(worker, :ref_ok, [ref]) do
       with {:ok, {pid, attributes}} <- Noizu.AdvancedPool.DispatcherRouter.__lookup_worker_process__(ref) do
@@ -137,7 +137,7 @@ defmodule Noizu.AdvancedPool do
         l = :syn.members(Noizu.AdvancedPool.Support.TestPool, {best_node, :worker_supervisor})
         best_supervisor = cond do
                             temp_new ->
-                              spec = __worker_supervisor__.spec(:os.system_time(:nanosecond), __pool__(), context, options)
+                              spec = apply(__worker_supervisor__(), :spec, [:os.system_time(:nanosecond), __pool__(), context, options])
                               {:ok, pid} = Supervisor.start_child({Noizu.AdvancedPool.Support.TestPool, best_node}, spec)
                             :else ->
                               List.first(l) |> elem(0)

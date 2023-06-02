@@ -35,7 +35,6 @@ defmodule Noizu.AdvancedPool.Worker.Behaviour do
 
   defmacro __using__(options) do
     pool = options[:pool] || (Module.split(__CALLER__.module) |> Enum.slice(0..-2) |> Module.concat())
-    IO.puts "DEFINING POOL AS = #{inspect pool}"
     quote bind_quoted: [pool: pool] do
       @behaviour Noizu.AdvancedPool.Worker.Behaviour
       #@behaviour Noizu.ERP.Behaviour
@@ -72,7 +71,7 @@ defmodule Noizu.AdvancedPool.Worker.Behaviour do
         {:reply, state, state}
       end
       def fetch(%Noizu.AdvancedPool.Worker.State{} = state, :process, _) do
-        {:reply, {state.identifier, state.node(), self()}, state}
+        {:reply, {state.identifier, node(), self()}, state}
       end
       
       def ping(state, _, _ \\ nil) do

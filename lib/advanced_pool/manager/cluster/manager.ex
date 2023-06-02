@@ -7,8 +7,8 @@ defmodule Noizu.AdvancedPool.ClusterManager do
   
   require Noizu.AdvancedPool.NodeManager
   import Noizu.AdvancedPool.NodeManager, only: [
-    pool_status: 0, pool_status: 1, pool_status: 2,
-    worker_sup_status: 0, worker_sup_status: 1, worker_sup_status: 2
+    pool_status: 1, pool_status: 2,
+    worker_sup_status: 1
   ]
   alias Noizu.AdvancedPool.Message.Dispatch, as: Router
   alias Noizu.AdvancedPool.NodeManager
@@ -40,7 +40,7 @@ defmodule Noizu.AdvancedPool.ClusterManager do
     :syn.join(Noizu.AdvancedPool.ClusterManager, {:service, pool}, pid, status)
   end
   
-  def service_status(pool, context) do
+  def service_status(pool, _context) do
     w = :syn.members(Noizu.AdvancedPool.ClusterManager, {:service, pool})
         |> Enum.map(&({Noizu.AdvancedPool.NodeManager.pool_status(elem(&1, 1), :node), {elem(&1, 0), elem(&1, 1)}}))
         |> Map.new()
@@ -51,11 +51,10 @@ defmodule Noizu.AdvancedPool.ClusterManager do
   def as_task(_, {:with, :native}, _), do: :native
   def as_task(_, {:with, task_supervisor}, _), do: {:ok, task_supervisor}
   def as_task(pool, _, context) do
-    cond do
-      NodeManager.service_status(pool, node(), context)
-      -> {:ok, apply(pool, :__task_supervisor__, [])}
-      :else
-      -> {:ok, __task_supervisor__()}
+    with {:ok, {_,_status}} <- NodeManager.service_status(pool, node(), context) do
+      {:ok, apply(pool, :__task_supervisor__, [])}
+    else
+      _ -> {:ok, __task_supervisor__()}
     end
   end
   
@@ -107,7 +106,7 @@ defmodule Noizu.AdvancedPool.ClusterManager do
     end)
   end
   
-  def pick_supervisor(node, pool, ref, settings, context, options) do
+  def pick_supervisor(node, pool, ref, _settings, context, options) do
     # randomly pick any worker supervisor for this pool that hasn't hit it's high cap yet.
     # if none exist add a new supervisor to pool.
     
@@ -135,7 +134,7 @@ defmodule Noizu.AdvancedPool.ClusterManager do
       :else ->
         # start new supervisor.
         # IO.puts "START NEW SUP"
-        supervisor = apply(pool, :config, [])[:otp][:supervisor] || Noizu.AdvancedPool.DefaultSupervisor
+        #supervisor = apply(pool, :config, [])[:otp][:supervisor] || Noizu.AdvancedPool.DefaultSupervisor
         worker_supervisor = apply(pool, :__worker_supervisor__, [])
         spec = apply(worker_supervisor, :spec, [ref, pool, context, options])
         with {:ok, sup} <- apply(pool, :add_worker_supervisor, [node, spec]) do
@@ -208,9 +207,8 @@ defmodule Noizu.AdvancedPool.ClusterManager do
     end
   end
   
-  def best_node(pool, ref, settings, context, options) do
+  def best_node(pool, _ref, _settings, _context, _options) do
     available = :syn.members(Noizu.AdvancedPool.ClusterManager, {:service, pool})
-                # |> IO.inspect(label: :pool)
                 |> Enum.filter(&(pool_status(elem(&1,1), :status) == :online))
                 |> Enum.map(
                      fn(a) ->

@@ -31,7 +31,7 @@ defmodule Noizu.AdvancedPool.AcceptanceTest do
       task = Noizu.AdvancedPool.NodeManager.bring_online(node(), context())
       Task.yield(task, :infinity)
       {:ok, nodes} = Noizu.AdvancedPool.ClusterManager.service_status(Noizu.AdvancedPool.Support.TestPool, context())
-      {pid, status} = nodes[node()]
+      {_pid, status} = nodes[node()]
       assert (pool_status(status, :health)) == 1.0
       # pending
     end
@@ -62,7 +62,7 @@ defmodule Noizu.AdvancedPool.AcceptanceTest do
     test "status" do
       task = Noizu.AdvancedPool.NodeManager.bring_online(node(), context())
       Task.yield(task, :infinity)
-      {:ok, {pid, status}} = Noizu.AdvancedPool.NodeManager.service_status(Noizu.AdvancedPool.Support.TestPool, node(), context())
+      {:ok, {_pid, status}} = Noizu.AdvancedPool.NodeManager.service_status(Noizu.AdvancedPool.Support.TestPool, node(), context())
       assert (pool_status(status, :health)) == :initializing
       # pending
     end

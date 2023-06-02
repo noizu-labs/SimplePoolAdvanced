@@ -31,8 +31,6 @@ defmodule Noizu.AdvancedPool.ClusterManager.Supervisor do
   def init_registry(_, _) do
     status = [node: node()]
     :syn.add_node_to_scopes([__pool__(), __registry__()])
-    
-    
     :syn.register(__pool__(), :supervisor, self(), status)
   end
 

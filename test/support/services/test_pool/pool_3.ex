@@ -3,18 +3,18 @@
 # Copyright (C) 2023 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule Noizu.AdvancedPool.Support.TestPool do
+defmodule Noizu.AdvancedPool.Support.TestPool3 do
   use Noizu.AdvancedPool
   Noizu.AdvancedPool.Server.default()
   
-  def __worker__(), do: Noizu.AdvancedPool.Support.TestPool.Worker
+  def __worker__(), do: Noizu.AdvancedPool.Support.TestPool3.Worker
   
   def test(identifier, context) do
     s_call!(identifier, :test, context)
   end
 end
 
-defmodule Noizu.AdvancedPool.Support.TestPool.Worker do
+defmodule Noizu.AdvancedPool.Support.TestPool3.Worker do
   require Noizu.AdvancedPool.Message
   import Noizu.AdvancedPool.Message
   alias Noizu.AdvancedPool.Message, as: M
