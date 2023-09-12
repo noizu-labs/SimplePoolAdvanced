@@ -8,7 +8,7 @@ defmodule Noizu.AdvancedPool.Mixfile do
   
   def project do
     [app: :noizu_advanced_pool,
-      version: "3.0.3",
+      version: "3.0.4",
       elixir: "~> 1.9",
       package: package(),
       deps: deps(),
@@ -21,9 +21,9 @@ defmodule Noizu.AdvancedPool.Mixfile do
   
   defp package do
     [
-      maintainers: ["noizu"],
+      maintainers: ["noizu", "lacrossetech"],
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/noizu-labs/AdvancedPool"}
+      links: %{"GitHub" => "https://github.com/lacrossetech-lib/AdvancedPool"}
     ]
   end # end package
   
@@ -38,8 +38,8 @@ defmodule Noizu.AdvancedPool.Mixfile do
   def deps do
     [
       {:ex_doc, "~> 0.16.2", only: [:dev, :test], optional: true}, # Documentation Provider
-      {:markdown, github: "devinus/markdown", only: [:dev], optional: true}, # Markdown processor for ex_doc
-      {:noizu_core, github: "noizu/ElixirCore", tag: "1.0.25", override: true},
+      {:markdown, github: "devinus/markdown", ref: "d065dbc", only: [:dev], optional: true}, # Markdown processor for ex_doc
+      {:noizu_core, github: "lacrossetech-lib/ElixirCore", tag: "1.0.27"},
       {:syn, "~> 3.3"},
       #      {:noizu_advanced_scaffolding, github: "noizu-labs/advanced_elixir_scaffolding", branch: "master", override: true},
       #      {:noizu_mnesia_versioning, github: "noizu/MnesiaVersioning", tag: "0.1.10", override: true},
@@ -54,7 +54,7 @@ defmodule Noizu.AdvancedPool.Mixfile do
   
   defp docs do
     [
-      source_url_pattern: "https://github.com/noizu/SimplePool/blob/master/%{path}#L%{line}",
+      source_url_pattern: "https://github.com/lacrossetech-lib/AdvancedPool/blob/master/%{path}#L%{line}",
       extras: ["README.md"]
     ]
   end # end docs
