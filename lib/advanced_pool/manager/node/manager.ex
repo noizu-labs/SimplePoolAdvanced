@@ -1,4 +1,38 @@
 defmodule Noizu.AdvancedPool.NodeManager do
+  @moduledoc """
+  Manages node lifecycle and orchestration within the AdvancedPool framework. This module
+  is responsible for handling node-specific actions such as configuration management,
+  node activation, cluster participation, supervision, and health monitoring. It maintains
+  the state of nodes and ensures their readiness to process workloads efficiently.
+
+  Features include:
+    - Active node health reporting based on operational context.
+    - Configuration retrieval and caching for both global and node-specific settings.
+    - Node initialization and activation with proper registration in the cluster's registry.
+    - Worker supervisor registration to maintain worker process supervision and stability.
+    - Dynamic node health assessment to facilitate load balancing and worker distribution.
+
+  The NodeManager integrates closely with the ClusterManager to manage the AdvancedPool's
+  distributed nature. Together, they provide a robust system for handling complex workloads
+  across multiple nodes in the pool.
+
+  ## Usage
+
+  To interact with the NodeManager, utilize the following functions:
+
+    - `service_available?/3`: Checks the availability of a specific service on a node.
+    - `service_status/3`: Retrieves the operational status of a service attached to a node.
+    - `health_report/2`: Requests a health report of the node within the specified context.
+    - `configuration/2`: Fetches configuration details for the node.
+    - `bring_online/2`: Activates the node and integrates it with the node manager system.
+    - `register_worker_supervisor/4`: Registers a worker supervisor with the node manager.
+    - `register_pool/4`: Integrates and tracks a pool's registration and status within the node manager.
+
+  This module is central to maintaining the distributed pool's operational integrity, ensuring
+  nodes are healthy, well-configured, and capable of supporting the pool's workload demands.
+  """
+
+
   alias Noizu.AdvancedPool.Message.Dispatch, as: Router
   require Record
   require Noizu.AdvancedPool.Message
@@ -22,9 +56,9 @@ defmodule Noizu.AdvancedPool.NodeManager do
     worker_target: nil,
     updated_on: nil
   )
-  
+
   def __configuration_provider__(), do: Application.get_env(:noizu_advanced_pool, :configuration)
-  
+
   def __task_supervisor__(), do: Noizu.AdvancedPool.NodeManager.Task
   def __pool__(), do: Noizu.AdvancedPool.NodeManager
   def __server__(), do: Noizu.AdvancedPool.NodeManager.Server
@@ -45,7 +79,7 @@ defmodule Noizu.AdvancedPool.NodeManager do
       :else -> false
     end
   end
-  
+
   def service_status(pool, node, _context) do
     with {pid, status} <- :syn.lookup(pool, {:node, node}) do
       {:ok, {pid, status}}
@@ -56,7 +90,7 @@ defmodule Noizu.AdvancedPool.NodeManager do
   catch :exit, e -> {:error, {:exit, e}}
     e -> {:error, e}
   end
-  
+
   def health_report(node, context) do
     Router.s_call({:ref, __server__(), node}, :health_report, context)
   end
@@ -111,9 +145,9 @@ defmodule Noizu.AdvancedPool.NodeManager do
     status = options[:worker_sup][:init][:status] || config[:worker_sup][:init][:status] || :offline
     target = options[:worker_sup][:worker][:target] || config[:worker_sup][:worker][:target] ||  Noizu.AdvancedPool.default_worker_sup_target()
     time = cond do
-             dt = options[:current_time] -> DateTime.to_unix(dt)
-             :else -> :os.system_time(:second)
-           end
+      dt = options[:current_time] -> DateTime.to_unix(dt)
+      :else -> :os.system_time(:second)
+    end
     node = node()
     status = worker_sup_status(
       status: status,
@@ -127,16 +161,16 @@ defmodule Noizu.AdvancedPool.NodeManager do
     :syn.join(pool, {node(), :worker_sups}, pid, status)
     :syn.join(Noizu.AdvancedPool.NodeManager, {node, pool, :worker_sups}, pid, status)
   end
-  
-  
+
+
   def register_pool(pool, pid, _context, options) do
     config = apply(pool, :config, [])
     status = options[:pool][:init][:status] || config[:pool][:init][:status] || :offline
     target = options[:pool][:worker][:target] || config[:pool][:worker][:target] ||  Noizu.AdvancedPool.default_worker_target()
     time = cond do
-             dt = options[:current_time] -> DateTime.to_unix(dt)
-             :else -> :os.system_time(:second)
-           end
+      dt = options[:current_time] -> DateTime.to_unix(dt)
+      :else -> :os.system_time(:second)
+    end
     node = node()
     status = pool_status(
       status: status,
@@ -156,6 +190,6 @@ defmodule Noizu.AdvancedPool.NodeManager do
     :syn.register(Noizu.AdvancedPool.NodeManager, {node, pool}, pid, status)
     Noizu.AdvancedPool.ClusterManager.register_pool(pool, pid, status)
   end
-  
-  
+
+
 end

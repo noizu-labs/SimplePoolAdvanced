@@ -1,4 +1,33 @@
 defmodule Noizu.AdvancedPool.ClusterManager do
+  @moduledoc """
+  Oversees the coordination and management of a distributed set of nodes within the AdvancedPool.
+  Handles cluster-wide configurations and supervises cluster operations, including worker process
+  distribution, node health reports, and configuration retrieval at the cluster level.
+
+  The ClusterManager serves as a higher-level entity that interacts with NodeManagers to orchestrate
+  the activities across multiple nodes, ensuring an efficient and unified environment for varied
+  workloads. It facilitates critical cluster-level operations such as node selection based on health
+  metrics and workload distribution strategies, contributing to the overall scalability and resilience
+  of the system.
+
+  Key responsibilities:
+    - Cluster-wide health assessment through the collection of individual node health reports.
+    - Management of cluster-wide settings to maintain consistent configurations across nodes.
+    - Registration and supervision of pools within the cluster, promoting synchronized operations.
+    - Determination of optimal nodes and worker supervisors for process instantiation, ensuring balanced load distribution.
+    - Coordination of worker start-up at the cluster level, taking into account parameters such as stickiness and capacity thresholds.
+
+  ## Interface
+
+  Modules and functions typically used in interaction with ClusterManager include:
+    - `health_report/1`: Initiates health reporting procedures for the cluster.
+    - `configuration/1`: Provides access to the cluster's configuration parameters.
+    - `register_pool/3`: Registers a new pool to the cluster for management and supervision.
+    - `service_status/2`: Reports on the service status of pools within the cluster.
+    - `start_worker/5`: Handles the start-up of worker processes within the cluster based on specific settings and node targets.
+    - `as_task/3`: Determines the mode of operation for cluster tasks, either natively or through a specified task supervisor.
+  """
+
   require Noizu.AdvancedPool.Message
   import Noizu.AdvancedPool.Message
   require Noizu.AdvancedPool.NodeManager
