@@ -9,7 +9,7 @@ defmodule Noizu.AdvancedPool.ClusterManager.Supervisor do
 
   The `ClusterManager.Supervisor` aligns the management processes under a unified supervision tree, applying a robust supervision strategy that affords reliability and fault tolerance within the context of AdvancedPool's distributed environment.
   """
-  
+
   use Supervisor
   require Noizu.AdvancedPool.Message
   import Noizu.AdvancedPool.Message
