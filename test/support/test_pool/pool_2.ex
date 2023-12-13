@@ -19,7 +19,7 @@ defmodule Noizu.AdvancedPool.Support.TestPool2.Worker do
   import Noizu.AdvancedPool.Message
   alias Noizu.AdvancedPool.Message, as: M
   alias Noizu.AdvancedPool.Message.Handle, as: MessageHandler
-  
+  require Logger
   defstruct [
     identifier: nil,
     test: 0
@@ -69,7 +69,6 @@ defmodule Noizu.AdvancedPool.Support.TestPool2.Worker do
   #
   #-----------------------
   def test(state = %Noizu.AdvancedPool.Worker.State{}, _context, _options \\ nil) do
-    IO.puts "HERE"
     state = state
             |>update_in([Access.key(:worker), Access.key(:test)], &(&1 + 1))
     {:reply, state.worker.test, state}

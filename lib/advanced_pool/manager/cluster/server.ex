@@ -44,7 +44,7 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
   end
 
   def init({context, options}) do
-    Logger.warning("""
+    Logger.info("""
     INIT #{__MODULE__}#{inspect __ENV__.function}
     ***************************************
 
@@ -59,11 +59,11 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
                      end)
     init_registry(context, options)
     {:ok, %Noizu.AdvancedPool.ClusterManager.Server{cluster_config: configuration}}
-    |> IO.inspect(label: "START ADVANCED POOL CLUSTER MANAGER SERVER")
+
   end
 
   def terminate(reason, state) do
-    Logger.warning("""
+    Logger.info("""
     TERMINATE #{__MODULE__}#{inspect __ENV__.function}
     ***************************************
     #{inspect({reason, state})}

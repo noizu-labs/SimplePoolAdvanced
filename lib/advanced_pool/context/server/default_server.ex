@@ -15,7 +15,7 @@ defmodule Noizu.AdvancedPool.Server.DefaultServer do
   def start_link(id, server, context, options) do
     # IO.puts "STARTING: #{inspect server}"
     mod = server.config()[:otp][:server] || __MODULE__
-    Logger.warning("""
+    Logger.info("""
     INIT #{__MODULE__}.#{inspect __ENV__.function}
     ***************************************
     #{inspect({id, server, context, options})}
@@ -24,7 +24,6 @@ defmodule Noizu.AdvancedPool.Server.DefaultServer do
     """)
 
     GenServer.start_link(mod, {id, server, context, options}, name: id)
-    |> IO.inspect(label: "#{server}.server start_link")
   end
 
 
@@ -36,14 +35,14 @@ defmodule Noizu.AdvancedPool.Server.DefaultServer do
   by specifying its initial state and behavior.
   """
   def init({id, pool, context, options}) do
-    Logger.warning("""
+    Logger.info("""
     INIT #{__MODULE__}.#{inspect __ENV__.function}
     ***************************************
     #{inspect({id, pool, context, options})}
 
     """)
     {:ok, :server_initial_state}
-    |> IO.inspect(label: "Default Server Init")
+    #|> IO.inspect(label: "Default Server Init")
   end
 
 
@@ -107,7 +106,7 @@ defmodule Noizu.AdvancedPool.Server.DefaultServer do
   end
 
   def terminate(reason, state) do
-    Logger.warning("""
+    Logger.info("""
     TERMINATE #{__MODULE__}#{inspect __ENV__.function}
     ***************************************
     #{inspect({reason, state})}

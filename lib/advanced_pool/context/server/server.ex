@@ -16,7 +16,7 @@ defmodule Noizu.AdvancedPool.Server do
               #|> IO.inspect(label: :server)
 
         def start_link(options) do
-          Logger.warning("""
+          Logger.info("""
           INIT #{__MODULE__}.#{inspect __ENV__.function}
           ***************************************
 
@@ -26,7 +26,7 @@ defmodule Noizu.AdvancedPool.Server do
         end
 
         def init(context, options) do
-          Logger.warning("""
+          Logger.info("""
           INIT #{__MODULE__}.#{inspect __ENV__.function}
           ***************************************
 
@@ -36,7 +36,7 @@ defmodule Noizu.AdvancedPool.Server do
         end
 
         def terminate(reason, state) do
-          Logger.warning("""
+          Logger.info("""
           TERMINATE #{__MODULE__}#{inspect __ENV__.function}
           ***************************************
           #{inspect({reason, state})}

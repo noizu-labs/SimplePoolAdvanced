@@ -20,7 +20,7 @@ defmodule Noizu.AdvancedPool.Worker.Server do
     pool = apply(m, :__pool__, [])
     mod = pool.config()[:otp][:worker_server] || __MODULE__
 
-    Logger.warning("""
+    Logger.info("""
     INIT #{__MODULE__}.#{inspect __ENV__.function}
     ***************************************
 
@@ -34,7 +34,7 @@ defmodule Noizu.AdvancedPool.Worker.Server do
     # |> IO.inspect(label: "#{pool}.worker.server start_link")
   end
   def terminate(reason, state) do
-    Logger.warning("""
+    Logger.info("""
     TERMINATE #{__MODULE__}#{inspect __ENV__.function}
     ***************************************
     #{inspect({reason, state})}
@@ -67,7 +67,7 @@ defmodule Noizu.AdvancedPool.Worker.Server do
       status_info: nil,
       worker: init_worker,
     }
-    {:ok, state} |> IO.inspect(label: "Worker Server Init")
+    {:ok, state}
   end
 
 

@@ -348,7 +348,7 @@ defmodule Noizu.AdvancedPool do
       @pri0 WRONG CODE
       """
       def add_worker(context, options, temp_new \\ false) do
-        Logger.error("************************************ #{inspect __ENV__.file}")
+        Logger.info("************************************ #{inspect __ENV__.file}")
         # find node with best health metric.
         :syn.members(Noizu.AdvancedPool.Support.TestPool, :nodes)
         best_node = node()

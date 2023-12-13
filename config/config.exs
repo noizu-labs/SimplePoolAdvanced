@@ -15,12 +15,10 @@ config :ex_doc, :markdown_processor, ExDoc.Markdown.Hoedown
 config :noizu_advanced_pool,
        configuration: Noizu.AdvancedPool.Support.NodeManager.ConfigurationProvider
 
-
 config :noizu_mnesia_versioning,
        topology_provider: Noizu.SimplePool.Support.TopologyProvider,
        schema_provider: Noizu.SimplePool.Support.SchemaProvider,
        mnesia_migrate_on_start: false
-
 
 config :logger, :console,
        format: "$time $metadata[$level] $message\n",
@@ -29,3 +27,4 @@ config :logger, :console,
 config :logger,
        truncate: :infinity,
        log_level: :warn
+

@@ -9,9 +9,5 @@ defmodule Noizu.AdvancedPool.IUnitTests.StubTest do
 
   def context(), do: Noizu.ElixirCore.CallingContext.system()
 
-  test "hello world" do
-    IO.puts "HELLO"
-    Process.sleep(5_000)
-  end
 
 end

@@ -34,7 +34,7 @@ defmodule Noizu.AdvancedPool.DefaultSupervisor do
   def start_link(id, pool, context, options) do
     supervisor = apply(pool, :config, [])[:otp][:supervisor] || __MODULE__
 
-    Logger.warning("""
+    Logger.info("""
     INIT #{__MODULE__}#{inspect __ENV__.function}
     ***************************************
     #{inspect({id, pool, context, options})}
@@ -44,7 +44,7 @@ defmodule Noizu.AdvancedPool.DefaultSupervisor do
     """)
 
 
-    Supervisor.start_link(supervisor, {id, pool, context, options}, name: id) |> tap(& Logger.error("#{__MODULE__}#{inspect __ENV__.function} #{inspect &1}"))
+    Supervisor.start_link(supervisor, {id, pool, context, options}, name: id) |> tap(& Logger.info("#{__MODULE__}#{inspect __ENV__.function} #{inspect &1}"))
   end
 
   def terminate(reason, state) do
@@ -77,7 +77,7 @@ defmodule Noizu.AdvancedPool.DefaultSupervisor do
   cohesive structure that ensures the pool's operational integrity.
   """
   def init({_id, pool, context, options}) do
-    Logger.warning("""
+    Logger.info("""
     INIT #{__MODULE__}#{inspect __ENV__.function}
     ***************************************
 
@@ -97,10 +97,9 @@ defmodule Noizu.AdvancedPool.DefaultSupervisor do
         ]
     end
     |> Supervisor.init(strategy: :one_for_one)
-    |> IO.inspect(label: "START ADVANCED POOL SUPERVISOR")
     |> tap(fn(x) ->
 
-      Logger.warning("""
+      Logger.info("""
       INIT #{__MODULE__}#{inspect __ENV__.function}
       ***************************************
       #{inspect x}

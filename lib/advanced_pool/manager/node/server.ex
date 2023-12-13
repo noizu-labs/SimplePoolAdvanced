@@ -50,7 +50,7 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
   # Server
   #===========================================
   def start_link(context, options) do
-    Logger.warning("""
+    Logger.info("""
     INIT #{__MODULE__}#{inspect __ENV__.function}
     ***************************************
 
@@ -60,7 +60,7 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
   end
 
   def terminate(reason, state) do
-    Logger.warning("""
+    Logger.info("""
     TERMINATE #{__MODULE__}#{inspect __ENV__.function}
     ***************************************
     #{inspect({reason, state})}
@@ -80,7 +80,6 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
     
     init_registry(context, options)
     {:ok, %Noizu.AdvancedPool.NodeManager.Server{identifier: node(), node_config: configuration}}
-    |> IO.inspect(label: "START ADVANCED POOL NODE MANAGER SERVER")
   end
   
   def spec(context, options \\ nil) do
