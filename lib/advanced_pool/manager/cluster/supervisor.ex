@@ -1,4 +1,15 @@
 defmodule Noizu.AdvancedPool.ClusterManager.Supervisor do
+  @moduledoc """
+  Provides supervisory capabilities for processes within the ClusterManager scope of the AdvancedPool. This supervisor manages the lifecycle of the cluster's management server and task supervisor, ensuring they are started and remain operational.
+
+  This module encapsulates the supervision strategy for cluster management, which includes:
+    - Starting the ClusterManager server which oversees cluster-level state and operations.
+    - Starting the Task Supervisor responsible for handling asynchronous tasks safely and efficiently.
+    - Implementing the supervisory protocol to maintain resilience and recoverability for core cluster management components.
+
+  The `ClusterManager.Supervisor` aligns the management processes under a unified supervision tree, applying a robust supervision strategy that affords reliability and fault tolerance within the context of AdvancedPool's distributed environment.
+  """
+  
   use Supervisor
   require Noizu.AdvancedPool.Message
   import Noizu.AdvancedPool.Message

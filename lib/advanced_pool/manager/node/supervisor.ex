@@ -1,4 +1,20 @@
 defmodule Noizu.AdvancedPool.NodeManager.Supervisor do
+  @moduledoc """
+  Acts as the main supervisory entity within the NodeManager domain, controlling the initiation and
+  oversight of node management processes. This module is responsible for the supervision of the GenServer
+  that manages node configurations, health checks, and registry updates.
+
+  Key features and responsibilities:
+    - Launching the NodeManager's GenServer and Task Supervisor, thereby starting the node management processes.
+    - Implementing a supervisory structure that ensures resilience and fault tolerance for node management components.
+    - Dynamic addition of child processes to the NodeManager's supervisory tree, allowing flexibility in process management.
+    - Interfacing with the Syn library for process and node registry within scopes and enabling node identification and management in the larger pool structure.
+
+  The NodeManager.Supervisor encapsulates the supervisory logic necessary for AdvancedPool's nodal operations,
+  underpinning the robustness and reliability of the node management system. Through coordination with servers,
+  dispatchers, and registries, this supervisor maintains a clean and responsive state across node-specific services.
+  """
+
   use Supervisor
   require Noizu.AdvancedPool.Message
   import Noizu.AdvancedPool.Message

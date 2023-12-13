@@ -1,4 +1,26 @@
 defmodule Noizu.AdvancedPool.NodeManager.Server do
+  @moduledoc """
+  Represents the GenServer responsible for managing state and core functionalities of node management within
+  the AdvancedPool framework. It performs essential tasks such as processing health reports, handling
+  node-level configurations, and maintaining the node's registry within the pool's ecosystem.
+
+  This server facilitates the health and configuration aspects of the NodeManager module. It is initiated
+  as a GenServer and defines the setup and supervision of related processes. Additionally, it integrates
+  with the Syn library for process registration and clustering of node information across the pool.
+
+  ## Responsibilities
+
+  The NodeManager.Server is tasked with:
+    - Hosting the GenServer processes for node management activities.
+    - Initializing the node's configuration and health reporting state.
+    - Interacting with the configuration provider to handle node settings.
+    - Establishing the initial state of the node registry for tracking and supervision purposes.
+    - Being the communication endpoint for node-related synchronous and asynchronous messages and calls.
+
+  This server works in conjunction with the NodeManager.Supervisor and other components of the AdvancedPool
+  to support distributed functionality and offer fine-grained control over node operations and registrations.
+  """
+
   use GenServer
   require Record
   require Noizu.AdvancedPool.Message

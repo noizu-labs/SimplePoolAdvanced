@@ -1,4 +1,16 @@
 defmodule Noizu.AdvancedPool.ClusterManager.Server do
+  @moduledoc """
+  Hosts the GenServer process for the ClusterManager in the AdvancedPool framework, managing the cluster's state and core functions related to cluster-level configurations and health reporting. This server is the centralized component that handles queries and actions related to the overall health and configuration state of the cluster.
+
+  Serving as a crucial part of cluster-level operations, it is responsible for the following tasks:
+    - Initializing and maintaining the cluster's configurations as provided by the configuration provider.
+    - Interfacing with the Syn library for cluster-wide process registry and management.
+    - Handling health report inquiries and returning the current health status of the cluster.
+    - Processing configuration requests and delivering the cluster's configuration settings.
+
+  Through the interplay of initialization, registry maintenance, and message handling, the ClusterManager.Server provides a robust methodology for managing the state and operability of clusters in a distributed pool environment.
+  """
+
   use GenServer
   require Record
   require Noizu.AdvancedPool.Message
