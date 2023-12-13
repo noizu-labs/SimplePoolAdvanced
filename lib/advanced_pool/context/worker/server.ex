@@ -11,17 +11,36 @@ defmodule Noizu.AdvancedPool.Worker.Server do
   """
 
   use GenServer
+  require Logger
   require Noizu.AdvancedPool.Message
   alias Noizu.AdvancedPool.Message, as: M
   
   def start_link(ref = M.ref(module: m, identifier: id), args, context) do
-    #IO.puts "STARTING: #{inspect m}"
+
     pool = apply(m, :__pool__, [])
     mod = pool.config()[:otp][:worker_server] || __MODULE__
+
+    Logger.warning("""
+    INIT #{__MODULE__}.#{inspect __ENV__.function}
+    ***************************************
+
+      #{inspect {pool, mod}}
+
+    """)
+
+    #IO.puts "STARTING: #{inspect m}"
+
     GenServer.start_link(mod, {ref, args, context})
     # |> IO.inspect(label: "#{pool}.worker.server start_link")
   end
-
+  def terminate(reason, state) do
+    Logger.warning("""
+    TERMINATE #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+    #{inspect({reason, state})}
+    """)
+    :ok
+  end
 
   @doc """
   Initializes the worker's server process with its unique reference, arguments, and context.
@@ -48,7 +67,7 @@ defmodule Noizu.AdvancedPool.Worker.Server do
       status_info: nil,
       worker: init_worker,
     }
-    {:ok, state}
+    {:ok, state} |> IO.inspect(label: "Worker Server Init")
   end
 
 

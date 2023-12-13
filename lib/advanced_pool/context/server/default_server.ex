@@ -11,12 +11,20 @@ defmodule Noizu.AdvancedPool.Server.DefaultServer do
 
   use GenServer
   require Noizu.AdvancedPool.Message
-
+  require Logger
   def start_link(id, server, context, options) do
     # IO.puts "STARTING: #{inspect server}"
     mod = server.config()[:otp][:server] || __MODULE__
+    Logger.warning("""
+    INIT #{__MODULE__}.#{inspect __ENV__.function}
+    ***************************************
+    #{inspect({id, server, context, options})}
+    #{inspect mod}
+
+    """)
+
     GenServer.start_link(mod, {id, server, context, options}, name: id)
-    #|> IO.inspect(label: "#{server}.server start_link")
+    |> IO.inspect(label: "#{server}.server start_link")
   end
 
 
@@ -27,8 +35,15 @@ defmodule Noizu.AdvancedPool.Server.DefaultServer do
   The `init/1` function is fundamental in setting the groundwork for the server's operations within the worker pool
   by specifying its initial state and behavior.
   """
-  def init({_id, _pool, _context, _options}) do
+  def init({id, pool, context, options}) do
+    Logger.warning("""
+    INIT #{__MODULE__}.#{inspect __ENV__.function}
+    ***************************************
+    #{inspect({id, pool, context, options})}
+
+    """)
     {:ok, :server_initial_state}
+    |> IO.inspect(label: "Default Server Init")
   end
 
 
@@ -90,5 +105,14 @@ defmodule Noizu.AdvancedPool.Server.DefaultServer do
   def handle_info(msg, state) do
     {:reply, {:uncaught, msg, state}, state}
   end
-  
+
+  def terminate(reason, state) do
+    Logger.warning("""
+    TERMINATE #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+    #{inspect({reason, state})}
+    """)
+    :ok
+  end
+
 end

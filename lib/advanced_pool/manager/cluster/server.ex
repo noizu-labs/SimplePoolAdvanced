@@ -15,7 +15,7 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
   require Record
   require Noizu.AdvancedPool.Message
   import Noizu.AdvancedPool.Message
-  
+  require Logger
   alias Noizu.AdvancedPool.Message.Handle, as: MessageHandler
   
   #===========================================
@@ -43,8 +43,12 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
     GenServer.start_link(__MODULE__, {context, options}, name: __MODULE__)
   end
 
-  
   def init({context, options}) do
+    Logger.warning("""
+    INIT #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+
+    """)
     configuration = (with {:ok, configuration} <-
                             __configuration_provider__()
                             |> Noizu.AdvancedPool.NodeManager.ConfigurationManager.configuration() do
@@ -55,6 +59,16 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
                      end)
     init_registry(context, options)
     {:ok, %Noizu.AdvancedPool.ClusterManager.Server{cluster_config: configuration}}
+    |> IO.inspect(label: "START ADVANCED POOL CLUSTER MANAGER SERVER")
+  end
+
+  def terminate(reason, state) do
+    Logger.warning("""
+    TERMINATE #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+    #{inspect({reason, state})}
+    """)
+    :ok
   end
   
   def spec(context, options \\ nil) do

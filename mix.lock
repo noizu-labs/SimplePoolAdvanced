@@ -1,6 +1,6 @@
 %{
   "amnesia": {:git, "https://github.com/noizu/amnesia.git", "9266002467face51b956a0c5f27954b145c0fb9d", [ref: "9266002"]},
-  "earmark": {:hex, :earmark, "1.4.34", "d7f89d3bbd7567a0bffc465e0a949f8f8dcbe43909c3acf96f4761a302cea10c", [:mix], [{:earmark_parser, "~> 1.4.29", [hex: :earmark_parser, repo: "hexpm", optional: false]}], "hexpm", "90b106f3dad85b133b10d7d628167c88246123fd1cecb4557d83d21ec9e65504"},
+  "earmark": {:hex, :earmark, "1.4.46", "8c7287bd3137e99d26ae4643e5b7ef2129a260e3dcf41f251750cb4563c8fb81", [:mix], [], "hexpm", "798d86db3d79964e759ddc0c077d5eb254968ed426399fbf5a62de2b5ff8910a"},
   "earmark_parser": {:hex, :earmark_parser, "1.4.29", "149d50dcb3a93d9f3d6f3ecf18c918fb5a2d3c001b5d3305c926cddfbd33355b", [:mix], [], "hexpm", "4902af1b3eb139016aed210888748db8070b8125c2342ce3dcae4f38dcc63503"},
   "elixir_uuid": {:hex, :elixir_uuid, "1.2.1", "dce506597acb7e6b0daeaff52ff6a9043f5919a4c3315abb4143f0b00378c097", [:mix], [], "hexpm", "f7eba2ea6c3555cea09706492716b0d87397b88946e6380898c2889d68585752"},
   "ex_doc": {:hex, :ex_doc, "0.16.4", "4bf6b82d4f0a643b500366ed7134896e8cccdbab4d1a7a35524951b25b1ec9f0", [:mix], [{:earmark, "~> 1.1", [hex: :earmark, repo: "hexpm", optional: false]}], "hexpm", "90e39c592b4952d35eb122b70d656a8b2ffa248d7b0fa428b314ce2176c69861"},

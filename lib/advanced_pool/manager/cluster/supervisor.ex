@@ -11,6 +11,7 @@ defmodule Noizu.AdvancedPool.ClusterManager.Supervisor do
   """
 
   use Supervisor
+  require Logger
   require Noizu.AdvancedPool.Message
   import Noizu.AdvancedPool.Message
   
@@ -23,16 +24,29 @@ defmodule Noizu.AdvancedPool.ClusterManager.Supervisor do
   end
   
   def start_link(context, options) do
+    Logger.warning("""
+    start_link #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+
+
+    """)
     Supervisor.start_link(__MODULE__, {context, options}, name: __MODULE__)
   end
   
   def init({context, options}) do
+    Logger.warning("""
+    INIT #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+
+
+    """)
     init_registry(context, options)
     [
       {Task.Supervisor, name: Noizu.AdvancedPool.ClusterManager.Task},
       Noizu.AdvancedPool.ClusterManager.Server.spec(context, options)
     ]
     |> Supervisor.init(strategy: :one_for_one)
+    |> IO.inspect(label: "START ADVANCED POOL CLUSTER MANAGER SUPERVISOR")
   end
 
 
@@ -53,5 +67,13 @@ defmodule Noizu.AdvancedPool.ClusterManager.Supervisor do
   def __supervisor__(), do: Noizu.AdvancedPool.ClusterManager.Supervisor
   def __registry__(), do: Noizu.AdvancedPool.ClusterManager.WorkerRegistry
 
+  def terminate(reason, state) do
+    Logger.warning("""
+    TERMINATE #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+    #{inspect({reason, state})}
+    """)
+    :ok
+  end
 
 end

@@ -18,7 +18,7 @@ defmodule Noizu.AdvancedPool.NodeManager.Supervisor do
   use Supervisor
   require Noizu.AdvancedPool.Message
   import Noizu.AdvancedPool.Message
-  
+  require Logger
   def spec(context, options \\ nil) do
     %{
       id: __MODULE__,
@@ -28,18 +28,48 @@ defmodule Noizu.AdvancedPool.NodeManager.Supervisor do
   end
   
   def start_link(context, options) do
+    Logger.warning("""
+    INIT #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+
+
+    """)
     Supervisor.start_link(__MODULE__, {context, options}, name: __MODULE__)
   end
   
   def init({context, options}) do
+    Logger.warning("""
+    INIT #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+
+
+    """)
     init_registry(context, options)
     [
       {Task.Supervisor, name: Noizu.AdvancedPool.NodeManager.Task},
-      Noizu.AdvancedPool.NodeManager.Server.spec(context, options)]
-    |> Supervisor.init(strategy: :one_for_one)
+      Noizu.AdvancedPool.NodeManager.Server.spec(context, options)
+    ]
+    |> Supervisor.init(strategy: :one_for_one) |> IO.inspect(label: "START ADVANCED POOL NODE MANAGER SUPERVISOR")
   end
-  
+
+  def terminate(reason, state) do
+    Logger.warning("""
+    TERMINATE #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+    #{inspect({reason, state})}
+    """)
+    :ok
+  end
+
   def add_child(spec) do
+
+    Logger.error("""
+    ADD CHILD #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+    #{inspect spec}
+
+    """)
+
     Supervisor.start_child(__MODULE__, spec)
   end
 

@@ -10,8 +10,39 @@ defmodule Noizu.AdvancedPool.Server do
   defmacro default() do
     quote do
       defmodule Server do
+        require Logger
+        use GenServer
         @pool Module.split(__MODULE__) |> Enum.slice(0..-2) |> Module.concat()
               #|> IO.inspect(label: :server)
+
+        def start_link(options) do
+          Logger.warning("""
+          INIT #{__MODULE__}.#{inspect __ENV__.function}
+          ***************************************
+
+
+          """)
+          {:ok, :well}
+        end
+
+        def init(context, options) do
+          Logger.warning("""
+          INIT #{__MODULE__}.#{inspect __ENV__.function}
+          ***************************************
+
+
+          """)
+          {:ok, nil}
+        end
+
+        def terminate(reason, state) do
+          Logger.warning("""
+          TERMINATE #{__MODULE__}#{inspect __ENV__.function}
+          ***************************************
+          #{inspect({reason, state})}
+          """)
+          :ok
+        end
 
         @doc """
         Returns the pool module that this server is a part of, allowing for introspection or configuration retrieval.
@@ -51,6 +82,7 @@ defmodule Noizu.AdvancedPool.Server do
       end
     end
   end
-   
+
+
    
 end

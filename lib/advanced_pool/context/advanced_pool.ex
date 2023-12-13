@@ -20,7 +20,7 @@ defmodule Noizu.AdvancedPool do
   require Record
   require Noizu.AdvancedPool.Message
   alias Noizu.AdvancedPool.Message, as: M
-
+  require Logger
   require Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour
   alias Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour, as: Config
 
@@ -117,7 +117,7 @@ defmodule Noizu.AdvancedPool do
       require Noizu.AdvancedPool.Message
             alias Noizu.AdvancedPool.Message, as: M
       require Noizu.AdvancedPool.NodeManager
-      
+      require Logger
       @pool __MODULE__
       @pool_supervisor Module.concat([__MODULE__, PoolSupervisor])
       @pool_worker_supervisor Module.concat([__MODULE__, WorkerSupervisor])
@@ -344,8 +344,11 @@ defmodule Noizu.AdvancedPool do
       The purpose of this function is to facilitate the elastic scaling of the pool's workers, ensuring that new
       processes are added in a way that maintains balanced work distribution and sustains the pool's performance
       even as demand fluctuates.
+
+      @pri0 WRONG CODE
       """
       def add_worker(context, options, temp_new \\ false) do
+        Logger.error("************************************ #{inspect __ENV__.file}")
         # find node with best health metric.
         :syn.members(Noizu.AdvancedPool.Support.TestPool, :nodes)
         best_node = node()

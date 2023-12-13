@@ -21,7 +21,7 @@ defmodule Noizu.AdvancedPool.Message.Dispatch do
 
   This module is central to ensuring the communication in the advanced pool remains robust, responsive, and adaptable to various operational scenarios.
   """
-
+  require Logger
   require Noizu.AdvancedPool.Message
   alias Noizu.AdvancedPool.Message, as: M
 

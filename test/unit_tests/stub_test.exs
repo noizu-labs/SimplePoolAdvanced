@@ -11,6 +11,7 @@ defmodule Noizu.AdvancedPool.IUnitTests.StubTest do
 
   test "hello world" do
     IO.puts "HELLO"
+    Process.sleep(5_000)
   end
 
 end

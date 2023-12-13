@@ -12,11 +12,28 @@ defmodule Noizu.AdvancedPool.WorkerSupervisor do
   """
 
   use DynamicSupervisor
- 
+  require Logger
   
   def start_link(pool, context, options) do
-    DynamicSupervisor.start_link(__MODULE__, {pool, context, options})
-    #|> IO.inspect(label: "#{pool}.worker.supervisor start_link")
+    Logger.warning("""
+    INIT #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+
+
+    """)
+    o = DynamicSupervisor.start_link(__MODULE__, {pool, context, options})
+    |> IO.inspect(label: "#{pool}.worker.supervisor start_link")
+
+    Logger.warning("""
+    INIT-> #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+    #{inspect o}
+
+    """)
+
+
+    o
+
   end
 
 
@@ -29,8 +46,17 @@ defmodule Noizu.AdvancedPool.WorkerSupervisor do
   def init({pool, context, options}) do
     Noizu.AdvancedPool.NodeManager.register_worker_supervisor(pool, self(), context, options)
     DynamicSupervisor.init(strategy: :one_for_one)
+    |> IO.inspect(label: "Worker Supervisor Init")
   end
 
+  def terminate(reason, state) do
+    Logger.warning("""
+    TERMINATE #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+    #{inspect({reason, state})}
+    """)
+    :ok
+  end
 
   @doc """
   Generates a child specification for the supervisor, which includes an identifier, supervisor type, and the function
@@ -57,8 +83,15 @@ defmodule Noizu.AdvancedPool.WorkerSupervisor do
   maintained in response to the actual working conditions and requirements encountered at runtime.
   """
   def add_worker(sup, spec) do
+    Logger.warning("""
+    INIT #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+
+
+    """)
+
     DynamicSupervisor.start_child(sup, spec)
-    #|> IO.inspect(label: "worker.supervisor start_child")
+    |> IO.inspect(label: "worker.supervisor start_child")
   end
 
 end

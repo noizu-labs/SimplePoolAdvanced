@@ -22,7 +22,7 @@ defmodule Noizu.AdvancedPool.DispatcherRouter do
   tasks across multiple nodes in a cluster.
   """
 
-
+  require Logger
   require Noizu.AdvancedPool.Message
   import Noizu.AdvancedPool.Message
   alias Noizu.AdvancedPool.Message, as: M

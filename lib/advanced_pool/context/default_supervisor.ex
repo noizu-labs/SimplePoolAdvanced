@@ -16,7 +16,7 @@ defmodule Noizu.AdvancedPool.DefaultSupervisor do
   """
 
   use Supervisor
-
+  require Logger
 
 
   @doc """
@@ -33,9 +33,28 @@ defmodule Noizu.AdvancedPool.DefaultSupervisor do
   """
   def start_link(id, pool, context, options) do
     supervisor = apply(pool, :config, [])[:otp][:supervisor] || __MODULE__
-    Supervisor.start_link(supervisor, {id, pool, context, options}, name: id)
+
+    Logger.warning("""
+    INIT #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+    #{inspect({id, pool, context, options})}
+
+    #{inspect supervisor}
+
+    """)
+
+
+    Supervisor.start_link(supervisor, {id, pool, context, options}, name: id) |> tap(& Logger.error("#{__MODULE__}#{inspect __ENV__.function} #{inspect &1}"))
   end
 
+  def terminate(reason, state) do
+    Logger.error("""
+    TERMINATE #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+    #{inspect({reason, state})}
+    """)
+    :ok
+  end
 
   @doc """
   Sets a default target for the maximum number of worker processes a supervisor should manage.
@@ -58,6 +77,12 @@ defmodule Noizu.AdvancedPool.DefaultSupervisor do
   cohesive structure that ensures the pool's operational integrity.
   """
   def init({_id, pool, context, options}) do
+    Logger.warning("""
+    INIT #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+
+
+    """)
     apply(pool, :join_cluster, [self(), context, options])
     cond do
       apply(pool, :config, [])[:stand_alone] ->
@@ -72,6 +97,18 @@ defmodule Noizu.AdvancedPool.DefaultSupervisor do
         ]
     end
     |> Supervisor.init(strategy: :one_for_one)
+    |> IO.inspect(label: "START ADVANCED POOL SUPERVISOR")
+    |> tap(fn(x) ->
+
+      Logger.warning("""
+      INIT #{__MODULE__}#{inspect __ENV__.function}
+      ***************************************
+      #{inspect x}
+
+      """)
+
+
+    end)
   end
 
 

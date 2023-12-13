@@ -12,7 +12,7 @@ defmodule Noizu.AdvancedPool.Worker.Behaviour do
   Using this behavior module streamlines the development of scalable and maintainable pool workers,
   as it abstracts the common worker behavior patterns and allows developers to focus on worker-specific logic.
   """
-
+  require Logger
   @type worker :: any
   @type info :: atom | term
 
@@ -95,9 +95,24 @@ defmodule Noizu.AdvancedPool.Worker.Behaviour do
       setting up the worker's foundational state.
       """
       def init({:ref, __MODULE__, identifier}, args, context) do
+        Logger.warning("""
+        INIT #{__MODULE__}.#{inspect __ENV__.function}
+        ***************************************
+
+
+        """)
         %__MODULE__{
           identifier: identifier
-        }
+        } |> IO.inspect(label: "INIT WORKER")
+      end
+
+      def terminate(reason, state) do
+        Logger.warning("""
+        TERMINATE #{__MODULE__}#{inspect __ENV__.function}
+        ***************************************
+        #{inspect({reason, state})}
+        """)
+        :ok
       end
 
       @doc """

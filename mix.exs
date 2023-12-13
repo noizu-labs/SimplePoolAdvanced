@@ -31,7 +31,7 @@ defmodule Noizu.AdvancedPool.Mixfile do
     [
       applications: [:logger, :poison],
       #extra_applications: [:semaphore, :fastglobal, :noizu_mnesia_versioning, :noizu_advanced_scaffolding, :noizu_core, :amnesia]
-      extra_applications: [:noizu_core, :syn]
+      extra_applications: [:noizu_core, :syn] ++ (if Mix.env == :test, do: [:amnesia, :elixir_uuid], else: [])
     ]
   end # end application
   
@@ -44,7 +44,7 @@ defmodule Noizu.AdvancedPool.Mixfile do
       #      {:noizu_advanced_scaffolding, github: "noizu-labs/advanced_elixir_scaffolding", branch: "master", override: true},
       #      {:noizu_mnesia_versioning, github: "noizu/MnesiaVersioning", tag: "0.1.10", override: true},
       #      {:plug, "~> 1.11.1", optional: true},
-      {:elixir_uuid, "~> 1.2", only: :test, optional: true},
+      {:elixir_uuid, "~> 1.2", optional: true},
       {:telemetry, "~> 1.1.0", optional: true, override: true},
       {:poison, "~> 3.1.0", override: true},
       #      {:fastglobal, "~> 1.0"}, # https://github.com/discordapp/fastglobal

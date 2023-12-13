@@ -25,7 +25,7 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
   require Record
   require Noizu.AdvancedPool.Message
   import Noizu.AdvancedPool.Message
-  
+  require Logger
   alias Noizu.AdvancedPool.Message.Handle, as: MessageHandler
   
   #===========================================
@@ -50,10 +50,23 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
   # Server
   #===========================================
   def start_link(context, options) do
+    Logger.warning("""
+    INIT #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+
+
+    """)
     GenServer.start_link(__MODULE__, {context, options}, name: __MODULE__)
   end
 
-  
+  def terminate(reason, state) do
+    Logger.warning("""
+    TERMINATE #{__MODULE__}#{inspect __ENV__.function}
+    ***************************************
+    #{inspect({reason, state})}
+    """)
+    :ok
+  end
   
   def init({context, options}) do
     configuration = (with {:ok, configuration} <-
@@ -67,6 +80,7 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
     
     init_registry(context, options)
     {:ok, %Noizu.AdvancedPool.NodeManager.Server{identifier: node(), node_config: configuration}}
+    |> IO.inspect(label: "START ADVANCED POOL NODE MANAGER SERVER")
   end
   
   def spec(context, options \\ nil) do

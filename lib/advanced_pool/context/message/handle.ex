@@ -25,7 +25,7 @@ defmodule Noizu.AdvancedPool.Message.Handle do
 
   The primary objective of this module is to ensure efficient and correct message processing throughout the Noizu AdvancedPool, contributing to the reliability and flexibility of the worker pool system.
   """
-
+  require Logger
   require Noizu.AdvancedPool.Message
   alias Noizu.AdvancedPool.Message, as: M
 
