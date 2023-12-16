@@ -32,30 +32,11 @@ defmodule Noizu.AdvancedPool.NodeManager do
   nodes are healthy, well-configured, and capable of supporting the pool's workload demands.
   """
 
-
   alias Noizu.AdvancedPool.Message.Dispatch, as: Router
-  require Record
+
+
   require Noizu.AdvancedPool.Message
-  Record.defrecord(
-    :pool_status,
-    status: :initializing,
-    service: nil,
-    health: nil,
-    node: nil,
-    worker_count: 0,
-    worker_target: nil,
-    updated_on: nil
-  )
-  Record.defrecord(
-    :worker_sup_status,
-    status: :initializing,
-    service: nil,
-    health: nil,
-    node: nil,
-    worker_count: 0,
-    worker_target: nil,
-    updated_on: nil
-  )
+  import Noizu.AdvancedPool.Message, only: [{:pool_status,1},{:pool_status,2}, {:worker_sup_status,1}, {:worker_sup_status,2}]
 
   def __configuration_provider__(), do: Application.get_env(:noizu_advanced_pool, :configuration)
 
@@ -189,6 +170,32 @@ defmodule Noizu.AdvancedPool.NodeManager do
     :syn.join(Noizu.AdvancedPool.NodeManager, {node, :services}, pid, status)
     :syn.register(Noizu.AdvancedPool.NodeManager, {node, pool}, pid, status)
     Noizu.AdvancedPool.ClusterManager.register_pool(pool, pid, status)
+  end
+
+  def lock_pool(pool, node, context, options) do
+    if node == node() do
+      with {pid, status = pool_status(status: s)} <- :syn.lookup(Noizu.AdvancedPool.NodeManager, {node, pool}) do
+        :syn.register(Noizu.AdvancedPool.NodeManager, {node, pool}, pid, pool_status(status, status: {:locked,s}))
+        :syn.register(Noizu.AdvancedPool.NodeManager, {node, :services}, pid, pool_status(status, status: :locked))
+      end
+    else
+      :rpc.call(node, __MODULE__, :lock_pool, [pool, node, context, options], :infinity)
+    end
+  end
+
+  def release_pool(pool, node, context, options) do
+    if node == node() do
+      with {pid, status = pool_status(status: {:locked,s})} <- :syn.lookup(Noizu.AdvancedPool.NodeManager, {node, pool}) do
+        :syn.update(Noizu.AdvancedPool.NodeManager, {node, pool}, pid, pool_status(status, status: s))
+        :syn.update(Noizu.AdvancedPool.NodeManager, {node, :services}, pid, pool_status(status, status: s))
+      end
+    else
+      :rpc.call(node, __MODULE__, :release_pool, [pool, node, context, options], :infinity)
+    end
+  end
+
+  def lock(node, context, options) do
+    :nyi
   end
 
 

@@ -71,7 +71,7 @@ defmodule Noizu.AdvancedPool.ClusterManager do
   
   def service_status(pool, _context) do
     w = :syn.members(Noizu.AdvancedPool.ClusterManager, {:service, pool})
-        |> Enum.map(&({Noizu.AdvancedPool.NodeManager.pool_status(elem(&1, 1), :node), {elem(&1, 0), elem(&1, 1)}}))
+        |> Enum.map(&({pool_status(elem(&1, 1), :node), {elem(&1, 0), elem(&1, 1)}}))
         |> Map.new()
     {:ok, w}
   end
@@ -116,7 +116,8 @@ defmodule Noizu.AdvancedPool.ClusterManager do
   def default_health_target() do
     target_window(low: 0.75, target: 0.9, high: 1.00)
   end
-  
+
+
   defp ws_low(available) do
     Enum.filter(available, fn({_, worker_sup_status(worker_count: wc, worker_target: target_window(low: check))}) ->
       wc <= check
@@ -269,6 +270,23 @@ defmodule Noizu.AdvancedPool.ClusterManager do
         {:ok, v}
       :else -> {:error, :unavailable}
     end
+  end
+
+  def lock_pool(pool, node, context, options \\ nil) do
+    NodeManager.lock_pool(pool, node, context, options)
+  end
+
+  def release_pool(pool, node, context, options \\ nil) do
+    NodeManager.release_pool(pool, node, context, options)
+  end
+
+
+  def lock_node(node, context, options \\ nil) do
+    NodeManager.lock(node, context, options)
+  end
+
+  def release_node(node, context, options \\ nil) do
+    NodeManager.release(node, context, options)
   end
   
   

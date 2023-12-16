@@ -104,6 +104,36 @@ defmodule Noizu.AdvancedPool.Message do
   @type msg_envelope :: record(:msg_envelope, identifier: any() | nil, type: any() | nil, recipient: any() | nil, settings: settings() | nil, msg: any())
 
 
+  Record.defrecord(
+    :pool_status,
+    status: :initializing,
+    service: nil,
+    health: nil,
+    node: nil,
+    worker_count: 0,
+    worker_target: nil,
+    updated_on: nil
+  )
+  Record.defrecord(
+    :worker_sup_status,
+    status: :initializing,
+    service: nil,
+    health: nil,
+    node: nil,
+    worker_count: 0,
+    worker_target: nil,
+    updated_on: nil
+  )
+
+  Record.defrecord(:cluster_status, node: nil, status: nil, manager_state: nil, health_index: 0.0, started_on: nil, updated_on: nil)
+
+
+  Record.defrecord(:node_status, node: nil, status: nil, manager_state: nil, health_index: 0.0, started_on: nil, updated_on: nil)
+
+  Record.defrecord(:target_window, target: nil, low: nil, high: nil)
+  Record.defrecord(:node_service, state: :online, priority: nil, supervisor_target: nil, worker_target: nil, pool: nil, health_target: nil, node: nil)
+  Record.defrecord(:cluster_service, state: :online, priority: nil, node_target: nil, worker_target: nil,  health_target: nil, pool: nil)
+
   @doc """
   Given an optional settings record, it determines whether the passed message should remain sticky to the node/process that handled it last. Returns `true` if it should, otherwise `false`.
 

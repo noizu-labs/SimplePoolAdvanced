@@ -29,4 +29,18 @@ defmodule Noizu.AdvancedPool.RoutingTest do
     assert host != node()
   end
 
+
+  @tag :routing
+  @tag :v2
+  @tag :wip
+  #@tag capture_log: true
+  test "lock node" do
+    Noizu.AdvancedPool.Support.TestManager.bring_all_online(context())
+    Noizu.AdvancedPool.ClusterManager.lock_pool(Noizu.AdvancedPool.Support.TestPool, node(), context())
+    {_, host, _} = Noizu.AdvancedPool.Support.TestPool.fetch(1321, :process, context()) |> IO.inspect
+    assert host == node()
+    {_, host, _} = Noizu.AdvancedPool.Support.TestPool3.fetch(1321, :process, context())
+    assert host != node()
+  end
+
 end

@@ -36,7 +36,7 @@ defmodule Noizu.AdvancedPool do
   """
   @internal true
   def default_worker_sup_target() do
-    Config.target_window(low: 500, target: 2_500, high: 5_000)
+    M.target_window(low: 500, target: 2_500, high: 5_000)
   end
 
   @doc """
@@ -49,7 +49,7 @@ defmodule Noizu.AdvancedPool do
   """
   @internal true
   def default_worker_target() do
-    Config.target_window(low: 10_000, target: 50_000, high: 100_000)
+    M.target_window(low: 10_000, target: 50_000, high: 100_000)
   end
 
 
@@ -115,7 +115,8 @@ defmodule Noizu.AdvancedPool do
       require Noizu.AdvancedPool.Server
       require Noizu.AdvancedPool.WorkerSupervisor
       require Noizu.AdvancedPool.Message
-            alias Noizu.AdvancedPool.Message, as: M
+      alias Noizu.AdvancedPool.Message, as: M
+      import M
       require Noizu.AdvancedPool.NodeManager
       require Logger
       @pool __MODULE__
@@ -328,40 +329,10 @@ defmodule Noizu.AdvancedPool do
       def bring_online(context) do
         # Temp Logic.
         with {pid, status} <- :syn.lookup(Noizu.AdvancedPool.NodeManager, {node(), __pool__()}) do
-          updated_status = Noizu.AdvancedPool.NodeManager.pool_status(status, status: :online, health: 1.0)
+          updated_status = pool_status(status, status: :online, health: 1.0)
           :syn.register(Noizu.AdvancedPool.NodeManager, {node(), __pool__()}, pid, updated_status)
           :syn.join(Noizu.AdvancedPool.ClusterManager, {:service, __pool__()}, pid, updated_status)
         end
-      end
-
-      @doc """
-      `add_worker/2-3` introduces a new worker to the pool and determines where it should be placed based on the
-      health metrics of available nodes within the cluster. The method optionally allows for the forced creation of a
-      new worker supervisor if the cluster is deemed at capacity. In doing so, it queries the current state of the
-      cluster to identify the most suitable node and corresponding worker supervisor. If the `temp_new` flag is set to `true`,
-      a new supervisor spec is generated, and a child process is started on the most appropriate node.
-        If not, it selects the best existing supervisor to manage the new worker process.
-      The purpose of this function is to facilitate the elastic scaling of the pool's workers, ensuring that new
-      processes are added in a way that maintains balanced work distribution and sustains the pool's performance
-      even as demand fluctuates.
-
-      @pri0 WRONG CODE
-      """
-      def add_worker(context, options, temp_new \\ false) do
-        Logger.info("************************************ #{inspect __ENV__.file}")
-        # find node with best health metric.
-        :syn.members(Noizu.AdvancedPool.Support.TestPool, :nodes)
-        best_node = node()
-        # find worker with best health metric or add additional worker if they are all over cap.
-        l = :syn.members(Noizu.AdvancedPool.Support.TestPool, {best_node, :worker_supervisor})
-        best_supervisor = cond do
-          temp_new ->
-            spec = apply(__worker_supervisor__(), :spec, [:os.system_time(:nanosecond), __pool__(), context, options])
-            {:ok, pid} = Supervisor.start_child({Noizu.AdvancedPool.Support.TestPool, best_node}, spec)
-          :else ->
-            List.first(l) |> elem(0)
-        end
-        # Call add child
       end
 
 
@@ -577,8 +548,6 @@ defmodule Noizu.AdvancedPool do
         get_direct_link!: 3,
         bring_online: 1,
         add_worker_supervisor: 2,
-        add_worker: 2,
-        add_worker: 3,
         handle_call: 3,
         handle_cast: 2,
         handle_info: 2,

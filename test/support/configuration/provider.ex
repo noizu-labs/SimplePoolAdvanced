@@ -2,6 +2,8 @@ defmodule Noizu.AdvancedPool.Support.NodeManager.ConfigurationProvider do
   @behaviour Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour
   require Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour
   import Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour
+  require Noizu.AdvancedPool.Message
+  import Noizu.AdvancedPool.Message
   alias Noizu.AdvancedPool.Support.{TestPool, TestPool2, TestPool3}
 
   def configuration(node) do

@@ -10,7 +10,8 @@ defmodule Noizu.AdvancedPool.AcceptanceTest do
   require Noizu.AdvancedPool.NodeManager
   import Noizu.AdvancedPool.NodeManager
   import Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour
-  
+  require Noizu.AdvancedPool.Message
+  import Noizu.AdvancedPool.Message
   def context(), do: Noizu.ElixirCore.CallingContext.system()
 
   describe "Cluster Manager" do

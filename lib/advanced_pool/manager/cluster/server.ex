@@ -27,9 +27,6 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
     cluster_config: [],
     meta: []
   ]
-  
-  Record.defrecord(:cluster_status, node: nil, status: nil, manager_state: nil, health_index: 0.0, started_on: nil, updated_on: nil)
-
 
   #===========================================
   # Config

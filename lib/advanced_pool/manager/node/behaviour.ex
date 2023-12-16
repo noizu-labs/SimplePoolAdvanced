@@ -26,9 +26,9 @@ defmodule Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour do
   @callback cache(term) :: {:ok, term}
 
   require Record
-  Record.defrecord(:target_window, target: nil, low: nil, high: nil)
-  Record.defrecord(:node_service, state: :online, priority: nil, supervisor_target: nil, worker_target: nil, pool: nil, health_target: nil, node: nil)
-  Record.defrecord(:cluster_service, state: :online, priority: nil, node_target: nil, worker_target: nil,  health_target: nil, pool: nil)
+  #Record.defrecord(:target_window, target: nil, low: nil, high: nil)
+  #Record.defrecord(:node_service, state: :online, priority: nil, supervisor_target: nil, worker_target: nil, pool: nil, health_target: nil, node: nil)
+  #Record.defrecord(:cluster_service, state: :online, priority: nil, node_target: nil, worker_target: nil,  health_target: nil, pool: nil)
 end
 
 defmodule Noizu.AdvancedPool.NodeManager.ConfigurationManager do

@@ -38,8 +38,6 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
     node_config: [],
     meta: []
   ]
-  
-  Record.defrecord(:node_status, node: nil, status: nil, manager_state: nil, health_index: 0.0, started_on: nil, updated_on: nil)
 
   #===========================================
   # Config
