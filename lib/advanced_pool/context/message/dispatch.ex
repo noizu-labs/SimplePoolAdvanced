@@ -226,6 +226,9 @@ defmodule Noizu.AdvancedPool.Message.Dispatch do
          {:dispatch, dispatcher, :waiting, task} ->
            with {:ok, {:ok, handle}} <- Task.yield(task, timeout(settings)) do
              GenServer.call(handle, message, timeout(settings))
+           else
+             {:ok, error} -> error
+             error -> error
            end
          {:ok, handle} -> GenServer.call(handle, message, timeout(settings))
          error -> error

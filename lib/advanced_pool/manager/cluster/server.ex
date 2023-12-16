@@ -136,8 +136,26 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
   #================================
   # Methods
   #================================
-  def health_report(state, _context) do
+  def health_report(state, context) do
+    # TODO if not running
+    state = build_health_report(state, context)
     {:reply, state.health_report, state}
+  end
+
+  def build_health_report(state, context) do
+    with {:ok, config} <- Noizu.AdvancedPool.ClusterManager.config() do
+        cluster = Enum.map(config, fn {pool, pconfig} ->
+          Enum.map(pconfig[:nodes], fn {node, nconfig} ->
+            node
+          end)
+        end) |> List.flatten()
+        cluster = (cluster ++ [node() | Node.list()]) |> Enum.uniq()
+        # Task process and update health report to track process
+        spawn fn ->
+          Enum.map(cluster, &Noizu.AdvancedPool.NodeManager.health_report(&1, context))
+        end
+    end
+    state
   end
 
   def configuration(state, _context) do

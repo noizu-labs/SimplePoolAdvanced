@@ -4,7 +4,7 @@
 #-------------------------------------------------------------------------------
 
 defmodule Noizu.AdvancedPool.AcceptanceTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
   require Logger
   require Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour
   require Noizu.AdvancedPool.NodeManager

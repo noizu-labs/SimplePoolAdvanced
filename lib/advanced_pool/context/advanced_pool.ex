@@ -239,9 +239,9 @@ defmodule Noizu.AdvancedPool do
       tags: overridable, internal
       """
       def config() do
-        [
-
-        ]
+        with {:ok, config} <- Noizu.AdvancedPool.ClusterManager.config() do
+          config[__pool__()] || []
+        end
       end
 
       @doc """
@@ -327,11 +327,11 @@ defmodule Noizu.AdvancedPool do
       tags: overridable
       """
       def bring_online(context) do
-        # Temp Logic.
-        with {pid, status} <- :syn.lookup(Noizu.AdvancedPool.NodeManager, {node(), __pool__()}) do
+        pool = __pool__()
+        with {pid, status} <- :syn.lookup(Noizu.AdvancedPool.NodeManager, {node(), pool}) do
+          IO.puts "BRING ONLINE #{pool}"
           updated_status = pool_status(status, status: :online, health: 1.0)
-          :syn.register(Noizu.AdvancedPool.NodeManager, {node(), __pool__()}, pid, updated_status)
-          :syn.join(Noizu.AdvancedPool.ClusterManager, {:service, __pool__()}, pid, updated_status)
+          Noizu.AdvancedPool.NodeManager.set_service_status(pid, pool, node(), updated_status)
         end
       end
 

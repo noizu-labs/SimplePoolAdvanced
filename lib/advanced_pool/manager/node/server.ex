@@ -158,7 +158,18 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
   #================================
   
   
-  def health_report(state, _context) do
+  def health_report(state, context) do
+    pools = with {:ok, services} <- Noizu.AdvancedPool.NodeManager.config(state.identifier) do
+      Enum.map(services, fn {pool, _} ->
+        pool
+      end)
+    end
+    #Logger.error("[TODO #{inspect state.identifier}] walk over all services on this node: [#{inspect pools}]")
+    #Logger.error("...#{inspect :syn.members(Noizu.AdvancedPool.Support.TestPool, {state.identifier, :worker_sups}) }")
+    #Logger.error("...#{inspect :syn.members(Noizu.AdvancedPool.Support.TestPool2, {state.identifier, :worker_sups}) }")
+    #Logger.error("...#{inspect :syn.members(Noizu.AdvancedPool.Support.TestPool3, {state.identifier, :worker_sups}) }")
+    #Logger.error("...#{inspect :syn.members(Noizu.AdvancedPool.Support.TestPool4, {state.identifier, :worker_sups})  }")
+    # [{#PID<0.250.0>, {:worker_sup_status, :offline, Noizu.AdvancedPool.Support.TestPool4, :initializing, :nap_test_member_e@localhost, 0, {:target_window, 2500, 500, 5000}, 1702749304}}]
     {:reply, state.health_report, state}
   end
 

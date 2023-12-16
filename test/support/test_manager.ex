@@ -77,6 +77,12 @@ defmodule Noizu.AdvancedPool.Support.TestManager do
     end
   end
 
+  def members() do
+    for member <- ~W(a b c d e) do
+      subordinate = :"nap_test_member_#{member}@localhost"
+    end
+  end
+
   def bring_all_online(context) do
     h = Noizu.AdvancedPool.NodeManager.bring_online(node(), context)
     t = Enum.map(~w(a b c d e), fn(member) ->
@@ -116,7 +122,12 @@ defmodule Noizu.AdvancedPool.Support.TestManager do
       end
     end, timeout: :infinity)
 
+
     bring_online = NM.bring_online(node(), context)
+
+    ms = await_members
+    |> Enum.to_list()
+
 
     ns = bring_online
          |> Task.yield(15_000)
@@ -127,8 +138,8 @@ defmodule Noizu.AdvancedPool.Support.TestManager do
                   Task.yield(bring_online)
                 x -> x
               end)
-    ms = await_members
-    |> Enum.to_list()
+
+
     {:ok, [ns | ms]}
   end
 

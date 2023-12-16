@@ -124,6 +124,8 @@ defmodule Noizu.AdvancedPool.DispatcherRouter do
   def __register__(pool, ref, process, status) do
     registry = apply(pool, :__registry__, [])
     :syn.register(registry, {:worker, ref}, process, status)
+    # @TODO increment node's worker count ets table - initializations
+    # on terminate increment node's worker ets table - terminations
   end
 
 end

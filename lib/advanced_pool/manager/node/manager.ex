@@ -49,10 +49,20 @@ defmodule Noizu.AdvancedPool.NodeManager do
   def __cast_settings__(), do: Noizu.AdvancedPool.Message.settings(timeout: 5000)
   def __call_settings__(), do: Noizu.AdvancedPool.Message.settings(timeout: 60_000)
   def spec(context, options \\ nil), do: apply(__supervisor__(), :spec, [context, options])
-  def config() do
-    []
+  def config(node) do
+    with {:ok, config} <- apply(__configuration_provider__(), :cached, [node]) do
+      {:ok, config}
+    end
   end
 
+  def set_service_status(pid, pool, node, status) do
+    :syn.join(pool, :nodes, pid, status)
+    :syn.register(pool, {:node, node}, pid, status)
+    :syn.join(Noizu.AdvancedPool.NodeManager, {node, :services}, pid, status)
+    :syn.register(Noizu.AdvancedPool.NodeManager, {node, pool}, pid, status)
+
+    Noizu.AdvancedPool.ClusterManager.register_pool(pool, pid, status)
+  end
 
   def service_available?(pool, node, context) do
     case service_status(pool, node, context) do
@@ -73,7 +83,7 @@ defmodule Noizu.AdvancedPool.NodeManager do
   end
 
   def health_report(node, context) do
-    Router.s_call({:ref, __server__(), node}, :health_report, context)
+    Router.s_call!({:ref, __server__(), node}, :health_report, context)
   end
   def configuration(node, context) do
     Router.s_call({:ref, __server__(), node}, :configuration, context)
@@ -164,34 +174,9 @@ defmodule Noizu.AdvancedPool.NodeManager do
     )
     :syn.add_node_to_scopes([__pool__(), __registry__()])
     :syn.add_node_to_scopes(apply(pool, :pool_scopes, []))
-    :syn.join(pool, :nodes, pid, status)
-    :syn.register(pool, {:node, node()}, pid, status)
-    #|> IO.inspect(label: :register)
-    :syn.join(Noizu.AdvancedPool.NodeManager, {node, :services}, pid, status)
-    :syn.register(Noizu.AdvancedPool.NodeManager, {node, pool}, pid, status)
-    Noizu.AdvancedPool.ClusterManager.register_pool(pool, pid, status)
-  end
 
-  def lock_pool(pool, node, context, options) do
-    if node == node() do
-      with {pid, status = pool_status(status: s)} <- :syn.lookup(Noizu.AdvancedPool.NodeManager, {node, pool}) do
-        :syn.register(Noizu.AdvancedPool.NodeManager, {node, pool}, pid, pool_status(status, status: {:locked,s}))
-        :syn.register(Noizu.AdvancedPool.NodeManager, {node, :services}, pid, pool_status(status, status: :locked))
-      end
-    else
-      :rpc.call(node, __MODULE__, :lock_pool, [pool, node, context, options], :infinity)
-    end
-  end
 
-  def release_pool(pool, node, context, options) do
-    if node == node() do
-      with {pid, status = pool_status(status: {:locked,s})} <- :syn.lookup(Noizu.AdvancedPool.NodeManager, {node, pool}) do
-        :syn.update(Noizu.AdvancedPool.NodeManager, {node, pool}, pid, pool_status(status, status: s))
-        :syn.update(Noizu.AdvancedPool.NodeManager, {node, :services}, pid, pool_status(status, status: s))
-      end
-    else
-      :rpc.call(node, __MODULE__, :release_pool, [pool, node, context, options], :infinity)
-    end
+    set_service_status(pid, pool, node, status)
   end
 
   def lock(node, context, options) do
