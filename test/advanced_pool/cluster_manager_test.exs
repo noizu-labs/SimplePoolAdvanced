@@ -61,6 +61,7 @@ defmodule Noizu.AdvancedPool.ClusterManagerTest do
   describe "node picker" do
     @describetag cluster_manager: :node_picker
 
+
     test "pick node" do
       # pool, ref, settings, context, options
       {:ok, n} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool, ref(module: Noizu.AdvancedPool.Support.TestPool.Worker, identifier: 555), settings(), context())
@@ -71,20 +72,39 @@ defmodule Noizu.AdvancedPool.ClusterManagerTest do
 
     @tag capture_log: false
     test "pick node - with saturation" do
+      # Note this test is temporary and relied on the fact that health checks do not currently automatically update and the ability to force a health check refresh.
+      # However only minor alterations will be needed once they do automatically refresh. To wait on health_report to complete before proceeding with pick node asserts and sticky threshold updated to correct value.
+
+
       # pool, ref, settings, context, options
-      {:ok, n} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555), settings(sticky?: 1.0), context())
+      {_, host, _} = Noizu.AdvancedPool.Support.TestPool4.fetch(6555 + 0, :process, context())
+      {_, host, _} = Noizu.AdvancedPool.Support.TestPool4.fetch(6555 + 1, :process, context())
+      {_, host, _} = Noizu.AdvancedPool.Support.TestPool4.fetch(6555 + 2, :process, context())
+      Noizu.AdvancedPool.ClusterManager.health_report(context())
+      Process.sleep(500)
+      {:ok, n} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 20), settings(sticky?: 0.3), context())
       assert n == node()
-      {:ok, n} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 1), settings(sticky?: 1.0), context())
-      assert n == node()
-      {:ok, n} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 2), settings(sticky?: 1.0), context())
-      assert n == node()
-      {:ok, n} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 3), settings(sticky?: 1.0), context())
-      assert n == node()
-      {:ok, n} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 4), settings(sticky?: 1.0), context())
-      assert n == node()
-      {:ok, n} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 5), settings(sticky?: 1.0), context())
-      assert n == node()
-      Noizu.AdvancedPool.ClusterManager.health_report(context()) |> IO.inspect()
+      for i <- 3..19 do
+        {_, host, _} = Noizu.AdvancedPool.Support.TestPool4.fetch(6555 + i, :process, context())
+      end
+      Process.sleep(500)
+      Noizu.AdvancedPool.ClusterManager.health_report(context())
+      {:ok, n1} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 22), settings(sticky?: 0.3), context())
+      {:ok, n2} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 23), settings(sticky?: 0.3), context())
+      {:ok, n3} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 24), settings(sticky?: 0.3), context())
+      {:ok, n4} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 25), settings(sticky?: 0.3), context())
+      {:ok, n5} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 26), settings(sticky?: 0.3), context())
+      {:ok, n6} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 27), settings(sticky?: 0.3), context())
+      assert (([n1,n2,n3,n4,n5,n6] |> Enum.uniq()) -- [node()]) |> List.first() == nil
+      Process.sleep(500)
+      {:ok, n1} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 22), settings(sticky?: 0.3), context())
+      {:ok, n2} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 23), settings(sticky?: 0.3), context())
+      {:ok, n3} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 24), settings(sticky?: 0.3), context())
+      {:ok, n4} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 25), settings(sticky?: 0.3), context())
+      {:ok, n5} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 26), settings(sticky?: 0.3), context())
+      {:ok, n6} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 27), settings(sticky?: 0.3), context())
+      assert (([n1,n2,n3,n4,n5,n6] |> Enum.uniq()) -- [node()]) |> List.first() != nil
+
     end
 
   end

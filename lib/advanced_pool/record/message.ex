@@ -134,6 +134,9 @@ defmodule Noizu.AdvancedPool.Message do
   Record.defrecord(:node_service, state: :online, priority: nil, supervisor_target: nil, worker_target: nil, pool: nil, health_target: nil, node: nil)
   Record.defrecord(:cluster_service, state: :online, priority: nil, node_target: nil, worker_target: nil,  health_target: nil, pool: nil)
 
+  # Used in ETS with update_counter, order must not be altered when extending.
+  Record.defrecord(:worker_events, {:service, :_}, [init: 0, terminate: 0, error: 0, warning: 0, refreshed_on: 0, meta: nil])
+
   @doc """
   Given an optional settings record, it determines whether the passed message should remain sticky to the node/process that handled it last. Returns `true` if it should, otherwise `false`.
 
@@ -216,7 +219,7 @@ defmodule Noizu.AdvancedPool.Message do
       true
   """
   def safe(settings(safe: v)), do: v
-  def safe(__), do: nil
+  def safe(_), do: nil
 
   @doc """
   Determines whether the message dispatch should result in the creation of a task (asynchronously). Returns the task identifier if set, otherwise `nil`.

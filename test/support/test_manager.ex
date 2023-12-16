@@ -12,11 +12,17 @@ defmodule Noizu.AdvancedPool.Test.Supervisor do
     :ok
   end
 
+
+
   def start(context) do
     Application.ensure_all_started(:syn)
     Application.ensure_all_started(:logger)
     Application.ensure_all_started(:noizu_advanced_pool)
-    children = []
+
+
+    children = [ Noizu.AdvancedPool.NodeManager.ets_cluster_spec()]
+
+
     opts = [strategy: :one_for_one, name: __MODULE__, strategy: :permanent,  max_restarts: 1_000_000, max_seconds: 1]
     Supervisor.start_link(children,opts)
   end
@@ -26,7 +32,8 @@ defmodule Noizu.AdvancedPool.Test.Supervisor do
     Application.ensure_all_started(:logger)
     Application.ensure_all_started(:noizu_advanced_pool)
     ebs = %{id: :erl_boot_server, start: {:erl_boot_server, :start_link, [[]]}}
-    children = [ebs]
+    ets_cluster = Noizu.AdvancedPool.NodeManager.ets_cluster_spec()
+    children = [ebs, ets_cluster]
     opts = [strategy: :one_for_one, name: __MODULE__, strategy: :permanent,  max_restarts: 1_000_000, max_seconds: 1]
     Supervisor.start_link(children,opts)
   end
@@ -49,8 +56,9 @@ defmodule Noizu.AdvancedPool.Support.TestManager do
     {:ok, _} = Node.start(:nap_test_runner@localhost, :shortnames)
     TS.start_runner(context)
     wipe_error_logger()
-    {:ok, _} = TS.add_service(CM.spec(context))
     {:ok, _} = TS.add_service(NM.spec(context))
+    {:ok, _} = TS.add_service(CM.spec(context))
+
   end
 
   def wipe_error_logger() do

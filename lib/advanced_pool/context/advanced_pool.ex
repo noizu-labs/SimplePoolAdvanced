@@ -329,8 +329,8 @@ defmodule Noizu.AdvancedPool do
       def bring_online(context) do
         pool = __pool__()
         with {pid, status} <- :syn.lookup(Noizu.AdvancedPool.NodeManager, {node(), pool}) do
-          IO.puts "BRING ONLINE #{pool}"
-          updated_status = pool_status(status, status: :online, health: 1.0)
+          #IO.puts "BRING ONLINE #{pool}"
+          updated_status = pool_status(status, status: :online, health: :initializing)
           Noizu.AdvancedPool.NodeManager.set_service_status(pid, pool, node(), updated_status)
         end
       end

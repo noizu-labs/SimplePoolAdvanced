@@ -40,6 +40,13 @@ defmodule Noizu.AdvancedPool.ClusterManager.Supervisor do
 
 
     """)
+    # Setup Worker Event Tracker
+    pool = apply(Noizu.AdvancedPool.ClusterManager, :__pool__, [])
+    with [] <- :ets.lookup(:worker_events, {:service, pool}) do
+      entry = worker_events(refreshed_on: :os.system_time(:millisecond)) |> put_in([Access.elem(0), Access.elem(1)], pool)
+      :ets.insert(:worker_events, entry)
+    end
+
     init_registry(context, options)
     [
       {Task.Supervisor, name: Noizu.AdvancedPool.ClusterManager.Task},

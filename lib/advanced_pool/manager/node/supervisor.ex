@@ -44,12 +44,24 @@ defmodule Noizu.AdvancedPool.NodeManager.Supervisor do
 
 
     """)
-    init_registry(context, options)
+    # Setup Worker Event Tracker
+    pool = apply(Noizu.AdvancedPool.NodeManager, :__pool__, [])
+    with [] <- :ets.lookup(:worker_events, {:service, pool}) do
+      entry = worker_events(refreshed_on: :os.system_time(:millisecond)) |> put_in([Access.elem(0), Access.elem(1)], pool)
+      :ets.insert(:worker_events, entry)
+    end
+
+    defmodule User do
+      require Record
+      Record.defrecord(:user, Customer, name: nil)
+    end
+
     [
       {Task.Supervisor, name: Noizu.AdvancedPool.NodeManager.Task},
       Noizu.AdvancedPool.NodeManager.Server.spec(context, options)
     ]
     |> Supervisor.init(strategy: :one_for_one)
+    |> tap(fn(_) -> init_registry(context, options) end)
   end
 
   def terminate(reason, state) do

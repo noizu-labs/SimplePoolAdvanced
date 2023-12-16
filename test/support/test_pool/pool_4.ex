@@ -6,9 +6,10 @@
 defmodule Noizu.AdvancedPool.Support.TestPool4 do
   use Noizu.AdvancedPool
   Noizu.AdvancedPool.Server.default()
-  
+  require Noizu.AdvancedPool.Message
+
   def __worker__(), do: Noizu.AdvancedPool.Support.TestPool4.Worker
-  
+  def __call_settings__(), do: Noizu.AdvancedPool.Message.settings(sticky?: 0.3, timeout: 60_000)
   def test(identifier, context) do
     s_call!(identifier, :test, context)
   end
@@ -25,7 +26,8 @@ defmodule Noizu.AdvancedPool.Support.TestPool4.Worker do
     test: 0
   ]
   use Noizu.AdvancedPool.Worker.Behaviour
-  
+
+
 
   def ref_ok({:ref, __MODULE__, _} = ref), do: {:ok, ref}
   def ref_ok(ref) when is_integer(ref), do: {:ok, {:ref, __MODULE__, ref}}

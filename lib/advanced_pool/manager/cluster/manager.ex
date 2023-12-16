@@ -300,7 +300,7 @@ defmodule Noizu.AdvancedPool.ClusterManager do
 
 
                        # group health into 20 buckets.
-                       health_percent = ah
+                       health_percent = unless ah == :initializing, do: ah, else: 1.0
                        worker_bonus = cond do
                          awc <= aw_t -> (1 - ((awc - aw_l) / (aw_t - aw_l)))
                          :else -> 0

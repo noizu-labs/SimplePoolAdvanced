@@ -17,7 +17,8 @@ defmodule Noizu.AdvancedPool.DefaultSupervisor do
 
   use Supervisor
   require Logger
-
+  require Noizu.AdvancedPool.Message
+  import Noizu.AdvancedPool.Message
 
   @doc """
   Starts the default supervisor with a unique identifier, utilizing the provided pool module and context to
@@ -83,10 +84,18 @@ defmodule Noizu.AdvancedPool.DefaultSupervisor do
 
 
     """)
+
+    # Setup Worker Event Tracker
+    with [] <- :ets.lookup(:worker_events, {:service, pool}) do
+      entry = worker_events(refreshed_on: :os.system_time(:millisecond)) |> put_in([Access.elem(0), Access.elem(1)], pool)
+      :ets.insert(:worker_events, entry)
+    end
+
     apply(pool, :join_cluster, [self(), context, options])
     cond do
       apply(pool, :config, [])[:stand_alone] ->
         [
+          {Task.Supervisor, name: apply(pool, :__task_supervisor__, [])},
           apply(pool, :__server__, []) |> apply(:server_spec, [context, options])
         ]
       :else ->

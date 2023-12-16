@@ -101,17 +101,20 @@ defmodule Noizu.AdvancedPool.Worker.Behaviour do
 
 
         """)
+        :ets.update_counter(:worker_events, {:service, __pool__()}, {M.worker_events(:init) + 1, 1}, M.worker_events() |> put_in([Access.elem(0), Access.elem(1)], __pool__()))
+
         %__MODULE__{
           identifier: identifier
         }
       end
 
       def terminate(reason, state) do
-        Logger.info("""
+        Logger.warning("""
         TERMINATE #{__MODULE__}#{inspect __ENV__.function}
         ***************************************
         #{inspect({reason, state})}
         """)
+        :ets.update_counter(:worker_events, {:service, __pool__()}, {worker_events(:terminate) + 1, 1}, worker_events() |> put_in([Access.elem(0), Access.elem(1)], __pool__()))
         :ok
       end
 

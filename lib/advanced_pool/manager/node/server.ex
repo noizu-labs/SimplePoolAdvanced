@@ -170,6 +170,24 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
     #Logger.error("...#{inspect :syn.members(Noizu.AdvancedPool.Support.TestPool3, {state.identifier, :worker_sups}) }")
     #Logger.error("...#{inspect :syn.members(Noizu.AdvancedPool.Support.TestPool4, {state.identifier, :worker_sups})  }")
     # [{#PID<0.250.0>, {:worker_sup_status, :offline, Noizu.AdvancedPool.Support.TestPool4, :initializing, :nap_test_member_e@localhost, 0, {:target_window, 2500, 500, 5000}, 1702749304}}]
+    Enum.map(pools,
+      fn(pool) ->
+        with [record] <- :ets.lookup(:worker_events, {:service, pool}) do
+          # todo more complex health value value based on total workers versus worker target
+          c_init = worker_events(record, :init)
+          c_terminate = worker_events(record, :terminate)
+          c = c_init - c_terminate
+          c = if c == 0, do: 1, else: c
+          with {pid, status} <- :syn.lookup(pool, {:node, state.identifier}) do
+            status = pool_status(status, health: 1/(c * 1.0))
+            Noizu.AdvancedPool.NodeManager.set_service_status(pid, pool, state.identifier, status)
+            #IO.puts "UPDATE #{state.identifier}.#{pool} set health = 1 / (#{c_init} - #{c_terminate}) -> #{1 / (c * 1.0)}"
+          end
+        end
+
+    end)
+
+
     {:reply, state.health_report, state}
   end
 

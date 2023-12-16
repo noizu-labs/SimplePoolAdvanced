@@ -55,6 +55,10 @@ defmodule Noizu.AdvancedPool.NodeManager do
     end
   end
 
+  def ets_cluster_spec() do
+    Noizu.AdvancedPool.SupervisorManagedEtsTableCluster.child_spec([:worker_events])
+  end
+
   def set_service_status(pid, pool, node, status) do
     :syn.join(pool, :nodes, pid, status)
     :syn.register(pool, {:node, node}, pid, status)
@@ -133,7 +137,7 @@ defmodule Noizu.AdvancedPool.NodeManager do
 
   def register_worker_supervisor(pool, pid, _context, options) do
     config = apply(pool, :config, [])
-    status = options[:worker_sup][:init][:status] || config[:worker_sup][:init][:status] || :offline
+    status = options[:worker_sup][:init][:status] || config[:worker_sup][:init][:status] || :online
     target = options[:worker_sup][:worker][:target] || config[:worker_sup][:worker][:target] ||  Noizu.AdvancedPool.default_worker_sup_target()
     time = cond do
       dt = options[:current_time] -> DateTime.to_unix(dt)

@@ -123,9 +123,10 @@ defmodule Noizu.AdvancedPool.DispatcherRouter do
   @internal true
   def __register__(pool, ref, process, status) do
     registry = apply(pool, :__registry__, [])
+    # This is too broad, as we will be synchronizing {:worker, ref} on every instance that forwards.
+    # it may be better to use two hops -> hop to service resident node -> hop to target pid.
+    # perf/scale testing required.
     :syn.register(registry, {:worker, ref}, process, status)
-    # @TODO increment node's worker count ets table - initializations
-    # on terminate increment node's worker ets table - terminations
   end
 
 end
