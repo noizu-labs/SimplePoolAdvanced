@@ -8,7 +8,7 @@ defmodule Noizu.AdvancedPool.ClusterManagerTest do
   require Logger
   require Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour
   require Noizu.AdvancedPool.NodeManager
-  import Noizu.AdvancedPool.NodeManager
+  #import Noizu.AdvancedPool.NodeManager
   import Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour
   require Noizu.AdvancedPool.Message
   import Noizu.AdvancedPool.Message
@@ -77,15 +77,15 @@ defmodule Noizu.AdvancedPool.ClusterManagerTest do
 
 
       # pool, ref, settings, context, options
-      {_, host, _} = Noizu.AdvancedPool.Support.TestPool4.fetch(6555 + 0, :process, context())
-      {_, host, _} = Noizu.AdvancedPool.Support.TestPool4.fetch(6555 + 1, :process, context())
-      {_, host, _} = Noizu.AdvancedPool.Support.TestPool4.fetch(6555 + 2, :process, context())
+      {_, _, _} = Noizu.AdvancedPool.Support.TestPool4.fetch(6555 + 0, :process, context())
+      {_, _, _} = Noizu.AdvancedPool.Support.TestPool4.fetch(6555 + 1, :process, context())
+      {_, _, _} = Noizu.AdvancedPool.Support.TestPool4.fetch(6555 + 2, :process, context())
       Noizu.AdvancedPool.ClusterManager.health_report(context())
       Process.sleep(500)
       {:ok, n} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6555 + 20), settings(sticky?: 0.3), context())
       assert n == node()
       for i <- 3..19 do
-        {_, host, _} = Noizu.AdvancedPool.Support.TestPool4.fetch(6555 + i, :process, context())
+        {_, _, _} = Noizu.AdvancedPool.Support.TestPool4.fetch(6555 + i, :process, context())
       end
       Process.sleep(500)
       Noizu.AdvancedPool.ClusterManager.health_report(context())

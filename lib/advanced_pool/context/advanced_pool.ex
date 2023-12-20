@@ -22,7 +22,6 @@ defmodule Noizu.AdvancedPool do
   alias Noizu.AdvancedPool.Message, as: M
   require Logger
   require Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour
-  alias Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour, as: Config
 
   @doc """
   [INTERNAL]
@@ -34,7 +33,7 @@ defmodule Noizu.AdvancedPool do
   scaling according to best practices.
   The values assist in load balancing and resource utilization across the cluster.
   """
-  @internal true
+
   def default_worker_sup_target() do
     M.target_window(low: 500, target: 2_500, high: 5_000)
   end
@@ -47,7 +46,7 @@ defmodule Noizu.AdvancedPool do
   The implementation references `Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour` to provide predefined scaling metrics.
   These metrics are crucial to maintaining optimal performance by preemptively scaling the number of worker processes.
   """
-  @internal true
+
   def default_worker_target() do
     M.target_window(low: 10_000, target: 50_000, high: 100_000)
   end
@@ -61,7 +60,7 @@ defmodule Noizu.AdvancedPool do
   The function provides a consolidated view of identifiers for easy access and management by internally applying
   respective callbacks on the pool module.
   """
-  @internal true
+
   def pool_scopes(pool) do
     [ pool,
       apply(pool, :__server__, []),
@@ -79,7 +78,7 @@ defmodule Noizu.AdvancedPool do
   By invoking `Noizu.AdvancedPool.NodeManager.register_pool/4`, a pool can become a participant in a larger
   networked, gaining benefits such as load distribution and redundancy.
   """
-  @internal true
+
   def join_cluster(pool, pid, context, options) do
     Noizu.AdvancedPool.NodeManager.register_pool(pool, pid, context, options)
   end
@@ -95,7 +94,7 @@ defmodule Noizu.AdvancedPool do
   This function bypasses indirect message dispatch mechanisms and is crucial for scenarios where direct interaction with a worker is required, improving message routing efficiency and performance.
   In case the worker reference cannot be validated or the worker process cannot be found, it raises an error with detailed information.
   """
-  @internal true
+
   def get_direct_link!(pool, M.ref() = ref, _context, _options \\ nil) do
     worker = apply(pool, :__worker__, [])
     with {:ok, ref} <- apply(worker, :ref_ok, [ref]) do
@@ -126,6 +125,7 @@ defmodule Noizu.AdvancedPool do
       @pool_worker Module.concat([__MODULE__, Worker])
       @pool_registry Module.concat([__MODULE__, Registry])
       @pool_task_supervisor Module.concat([__MODULE__, Task])
+      Module.register_attribute(__MODULE__, :internal, [])
 
       #-------------------------------------------
       # Pool reference and configuration
@@ -140,7 +140,7 @@ defmodule Noizu.AdvancedPool do
 
       tags: overridable, internal
       """
-      @internal true
+
       def __pool__(), do: @pool
 
       @doc """
@@ -150,7 +150,7 @@ defmodule Noizu.AdvancedPool do
 
       tags: overridable, internal
       """
-      @internal true
+
       def __pool_supervisor__(), do: @pool_supervisor
 
       @doc """
@@ -160,7 +160,7 @@ defmodule Noizu.AdvancedPool do
 
       tags: overridable, internal
       """
-      @internal true
+
       def __worker_supervisor__(), do: Noizu.AdvancedPool.WorkerSupervisor
 
       @doc """
@@ -170,7 +170,7 @@ defmodule Noizu.AdvancedPool do
 
       tags: overridable, internal
       """
-      @internal true
+
       def __worker_server__(), do: Noizu.AdvancedPool.Worker.Server
 
       @doc """
@@ -180,7 +180,7 @@ defmodule Noizu.AdvancedPool do
 
       tags: overridable, internal
       """
-      @internal true
+
       def __server__(), do: @pool_server
 
       @doc """
@@ -190,7 +190,7 @@ defmodule Noizu.AdvancedPool do
 
       tags: overridable, internal
       """
-      @internal true
+
       def __worker__(), do: @pool_worker
 
       @doc """
@@ -200,7 +200,7 @@ defmodule Noizu.AdvancedPool do
 
       tags: overridable, internal
       """
-      @internal true
+
       def __registry__(), do: @pool_registry
 
       @doc """
@@ -210,7 +210,7 @@ defmodule Noizu.AdvancedPool do
 
       tags: overridable, internal
       """
-      @internal true
+
       def __task_supervisor__(), do: @pool_task_supervisor
 
       @doc """
@@ -221,7 +221,7 @@ defmodule Noizu.AdvancedPool do
 
       tags: overridable, internal
       """
-      @internal true
+
       def __dispatcher__(), do: Noizu.AdvancedPool.DispatcherRouter
 
       #-------------------------------------------
@@ -251,7 +251,7 @@ defmodule Noizu.AdvancedPool do
 
       tags: overridable, internal
       """
-      @internal true
+
       def __cast_settings__(), do: Noizu.AdvancedPool.Message.settings(timeout: 5000)
 
       @doc """
@@ -261,7 +261,7 @@ defmodule Noizu.AdvancedPool do
 
       tags: overridable, internal
       """
-      @internal true
+
       def __call_settings__(), do: Noizu.AdvancedPool.Message.settings(timeout: 60_000)
 
       @doc """

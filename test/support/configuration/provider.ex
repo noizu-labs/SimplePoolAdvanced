@@ -59,4 +59,15 @@ defmodule Noizu.AdvancedPool.Support.NodeManager.ConfigurationProvider do
 
   def cache(node, _), do: configuration(node)
   def cache(_), do: configuration()
+
+  def lock_node(_node), do: {:ok, :ack}
+  def release_node(_node), do: {:ok, :ack}
+  def lock_node_service(_node, _service), do: {:ok, :ack}
+  def release_node_service(_node, _service), do: {:ok, :ack}
+
+  def report_cluster_health(_report), do: {:ok, :ack}
+  def report_node_health(_node, _report), do: {:ok, :ack}
+  def report_node_service_health(_node, _service, _report), do: {:ok, :ack}
+
+
 end

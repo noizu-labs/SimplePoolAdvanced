@@ -21,9 +21,10 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
   #===========================================
   # Struct
   #===========================================
-  @pool Noizu.AdvancedPool.ClusterManager
+  
   defstruct [
-    health_report: :pending_cluster_report,
+    health_report: nil,
+    previous_health_report: nil,
     cluster_config: [],
     meta: []
   ]
@@ -100,9 +101,10 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
   def handle_call(msg_envelope() = call, from, state) do
     MessageHandler.unpack_call(call, from, state)
   end
-  def handle_call(s(call: :health_report, context: context), _, state) do
-    health_report(state, context)
+  def handle_call(s(call: {:health_report, subscriber}, context: context), _, state) do
+    health_report(state, subscriber, context)
   end
+
   def handle_call(s(call: :configuration, context: context), _, state) do
     configuration(state, context)
   end
@@ -113,6 +115,9 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
   #-----------------------
   def handle_cast(msg_envelope() = call, state) do
     MessageHandler.unpack_cast(call, state)
+  end
+  def handle_cast(s(call: {:update_health_report, report}, context: context), state) do
+    update_health_report(state, report, context)
   end
   def handle_cast(call, state), do: MessageHandler.uncaught_cast(call, state)
   
@@ -136,28 +141,98 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
   #================================
   # Methods
   #================================
-  def health_report(state, context) do
-    # TODO if not running
-    state = build_health_report(state, context)
-    {:reply, state.health_report, state}
-  end
 
-  def build_health_report(state, context) do
-    with {:ok, config} <- Noizu.AdvancedPool.ClusterManager.config() do
-        cluster = Enum.map(config, fn {pool, pconfig} ->
-          Enum.map(pconfig[:nodes], fn {node, nconfig} ->
-            node
-          end)
-        end) |> List.flatten()
-        cluster = (cluster ++ [node() | Node.list()]) |> Enum.uniq()
-        # Task process and update health report to track process
-        spawn fn ->
-          Enum.map(cluster, &Noizu.AdvancedPool.NodeManager.health_report(&1, context))
-        end
+  #----------------
+  # health_report/2
+  #----------------
+  def health_report(state, receiver, context) do
+    with true <- !Noizu.AdvancedPool.ClusterManager.HealthReport.processing?(state.health_report) || :processing,
+         {:ok, state} <- request_health_report(state, receiver, context) do
+      {:reply, {:ok, state.previous_health_report || :initializing}, state}
+    else
+      :processing ->
+        update_in(state, [Access.key(:health_report), Access.key(:subscribers)], & [receiver, &1])
+        {:reply, {:ok, state.health_report}, state}
+      error = {:error, _} -> {:reply, error, state}
+      error -> {:reply, {:error, error}, state}
     end
-    state
   end
 
+  #----------------
+  # update_health_report/3
+  #----------------
+  def update_health_report(state, report, _context) do
+    health_report = unless state.health_report do
+      %Noizu.AdvancedPool.ClusterManager.HealthReport{
+        worker: nil,
+        started_at: DateTime.utc_now(),
+        status: :processing,
+      }
+      else
+      state.health_report
+    end
+
+    health_report = %Noizu.AdvancedPool.ClusterManager.HealthReport{health_report|
+      finished_at: DateTime.utc_now(),
+      report: report,
+      status: :ready,
+    }
+
+    # Call Config Manager - # todo verify :ok response
+    apply(__configuration_provider__(), :report_cluster_health, [report])
+
+    state = state
+            |> put_in([Access.key(:health_report)], health_report)
+
+    Enum.map(health_report.subscribers || [], fn(r) ->
+      spawn fn ->
+        send(r, {:health_report, health_report})
+      end
+    end)
+
+    {:noreply, state}
+  end
+
+  #----------------
+  # request_health_report/2
+  #----------------
+  defp request_health_report(state, subscriber, context) do
+    worker = Task.Supervisor.async_nolink(Noizu.AdvancedPool.ClusterManager.Task, __MODULE__, :do_build_health_report, [context])
+    health_report = %Noizu.AdvancedPool.ClusterManager.HealthReport{
+      worker: worker,
+      subscribers: [subscriber],
+      status: :processing,
+      started_at: DateTime.utc_now(),
+    }
+    state = state
+            |> put_in([Access.key(:previous_health_report)], state.health_report)
+            |> put_in([Access.key(:health_report)], health_report)
+    {:ok, state}
+  end
+
+  #----------------
+  # do_build_health_report/1
+  #----------------
+  def do_build_health_report(context) do
+    context = Noizu.ElixirCore.CallingContext.system(context)
+    with {:ok, config} <- Noizu.AdvancedPool.ClusterManager.config() do
+      cluster = Enum.map(config, fn {_pool, pconfig} ->
+        Enum.map(pconfig[:nodes], fn {node, _nconfig} ->
+          node
+        end)
+      end) |> List.flatten()
+      cluster = (cluster ++ [node() | Node.list()]) |> Enum.uniq()
+      # Task process and update health report to track progress
+      report = Enum.map(cluster, &{&1,  Noizu.AdvancedPool.NodeManager.health_report(&1, context)})
+               |> Map.new()
+      Noizu.AdvancedPool.ClusterManager.update_health_report(report, context)
+    end
+    # rescue/else health_report_error ...
+  end
+
+  #----------------
+  # configuration/2
+  #----------------
   def configuration(state, _context) do
     {:reply, state.cluster_config, state}
   end

@@ -25,7 +25,7 @@ defmodule Noizu.AdvancedPool.Server do
           {:ok, :well}
         end
 
-        def init(context, options) do
+        def init(_options) do
           Logger.info("""
           INIT #{__MODULE__}.#{inspect __ENV__.function}
           ***************************************

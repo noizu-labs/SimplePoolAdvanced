@@ -8,18 +8,32 @@ defmodule Noizu.AdvancedPool.AcceptanceTest do
   require Logger
   require Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour
   require Noizu.AdvancedPool.NodeManager
-  import Noizu.AdvancedPool.NodeManager
+  #import Noizu.AdvancedPool.NodeManager
   import Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour
   require Noizu.AdvancedPool.Message
   import Noizu.AdvancedPool.Message
   def context(), do: Noizu.ElixirCore.CallingContext.system()
 
+  @moduletag :acceptance
+
   describe "Cluster Manager" do
     test "health_report" do
-      report = Noizu.AdvancedPool.ClusterManager.health_report(context())
-      assert report == :pending_cluster_report
+      {:ok, report} = Noizu.AdvancedPool.ClusterManager.health_report(context())
+      report = if report == :initializing do
+        receive do
+          {:health_report, report} -> report
+        end
+      else
+        report
+      end
+      assert is_struct(report, Noizu.AdvancedPool.ClusterManager.HealthReport) == true
+      assert report.status == :ready
+
+      {:ok, report} = Noizu.AdvancedPool.ClusterManager.health_report(context())
+      assert is_struct(report, Noizu.AdvancedPool.ClusterManager.HealthReport) == true
+      assert report.status == :ready
     end
-    
+
     test "config" do
       cluster = Noizu.AdvancedPool.ClusterManager.configuration(context())
       tp = cluster[Noizu.AdvancedPool.Support.TestPool][:cluster]

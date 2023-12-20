@@ -36,7 +36,7 @@ defmodule Noizu.AdvancedPool.NodeManager do
 
 
   require Noizu.AdvancedPool.Message
-  import Noizu.AdvancedPool.Message, only: [{:pool_status,1},{:pool_status,2}, {:worker_sup_status,1}, {:worker_sup_status,2}]
+  import Noizu.AdvancedPool.Message, only: [{:pool_status,1}, {:worker_sup_status,1}]
 
   def __configuration_provider__(), do: Application.get_env(:noizu_advanced_pool, :configuration)
 
@@ -183,9 +183,11 @@ defmodule Noizu.AdvancedPool.NodeManager do
     set_service_status(pid, pool, node, status)
   end
 
-  def lock(node, context, options) do
+  def lock(_node, _context, _options) do
     :nyi
   end
-
+  def release(_node, _context, _options) do
+    :nyi
+  end
 
 end

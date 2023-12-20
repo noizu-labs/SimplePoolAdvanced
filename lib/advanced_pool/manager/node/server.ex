@@ -31,7 +31,7 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
   #===========================================
   # Struct
   #===========================================
-  @pool Noizu.AdvancedPool.NodeManager
+  #@pool Noizu.AdvancedPool.NodeManager
   defstruct [
     identifier: nil,
     health_report: :pending_node_report,
@@ -158,7 +158,7 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
   #================================
   
   
-  def health_report(state, context) do
+  def health_report(state, _context) do
     pools = with {:ok, services} <- Noizu.AdvancedPool.NodeManager.config(state.identifier) do
       Enum.map(services, fn {pool, _} ->
         pool
@@ -188,7 +188,7 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
     end)
 
 
-    {:reply, state.health_report, state}
+    {:reply, :pending_node_report, state}
   end
 
   def configuration(state, _context) do

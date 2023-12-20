@@ -42,10 +42,7 @@ defmodule Noizu.AdvancedPool.ClusterManager.Supervisor do
     """)
     # Setup Worker Event Tracker
     pool = apply(Noizu.AdvancedPool.ClusterManager, :__pool__, [])
-    with [] <- :ets.lookup(:worker_events, {:service, pool}) do
-      entry = worker_events(refreshed_on: :os.system_time(:millisecond)) |> put_in([Access.elem(0), Access.elem(1)], pool)
-      :ets.insert(:worker_events, entry)
-    end
+    :ets.update_counter(:worker_events, {:service, pool}, {worker_events(:sup_init) + 1, 1}, worker_events(refreshed_on: :os.system_time(:millisecond)) |> put_in([Access.elem(0), Access.elem(1)], pool))
 
     init_registry(context, options)
     [
@@ -79,6 +76,9 @@ defmodule Noizu.AdvancedPool.ClusterManager.Supervisor do
     ***************************************
     #{inspect({reason, state})}
     """)
+    pool = apply(Noizu.AdvancedPool.ClusterManager, :__pool__, [])
+    :ets.update_counter(:worker_events, {:service, pool}, {worker_events(:sup_terminate) + 1, 1}, worker_events(refreshed_on: :os.system_time(:millisecond)) |> put_in([Access.elem(0), Access.elem(1)], pool))
+
     :ok
   end
 

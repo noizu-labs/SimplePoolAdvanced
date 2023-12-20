@@ -8,7 +8,7 @@
 #
 # This configuration file is loaded before any dependency and
 # is restricted to this project.
-import Mix.Config
+import Config
 
 config :ex_doc, :markdown_processor, ExDoc.Markdown.Hoedown
 
@@ -27,4 +27,3 @@ config :logger, :console,
 config :logger,
        truncate: :infinity,
        log_level: :warn
-

@@ -15,7 +15,7 @@ defmodule Noizu.AdvancedPool.Worker.Server do
   require Noizu.AdvancedPool.Message
   alias Noizu.AdvancedPool.Message, as: M
   
-  def start_link(ref = M.ref(module: m, identifier: id), args, context) do
+  def start_link(ref = M.ref(module: m, identifier: _), args, context) do
 
     pool = apply(m, :__pool__, [])
     mod = pool.config()[:otp][:worker_server] || __MODULE__

@@ -84,10 +84,6 @@ defmodule Noizu.AdvancedPool.Message.Handle do
     end
   end
 
-  def unpack_cast(M.msg_envelope(msg: m) = call, %{__struct__: _} = state) do
-    # ...
-  end
-
   @doc """
   Processes non-call and non-cast messages (info messages) by confirming the worker's identity and state readiness
   before handling the message with the worker's `handle_info` function.

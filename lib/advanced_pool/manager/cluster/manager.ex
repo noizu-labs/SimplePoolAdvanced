@@ -35,10 +35,6 @@ defmodule Noizu.AdvancedPool.ClusterManager do
   import Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour
   
   require Noizu.AdvancedPool.NodeManager
-  import Noizu.AdvancedPool.NodeManager, only: [
-    pool_status: 1, pool_status: 2,
-    worker_sup_status: 1
-  ]
   alias Noizu.AdvancedPool.Message.Dispatch, as: Router
   alias Noizu.AdvancedPool.NodeManager
   alias Noizu.AdvancedPool.NodeManager.ConfigurationManager
@@ -65,7 +61,11 @@ defmodule Noizu.AdvancedPool.ClusterManager do
   """
   @spec health_report(context :: term()) :: {:ok, term()} | {:error, term()}
   def health_report(context) do
-    Router.s_call({:ref, __server__(), :manager}, :health_report, context)
+    Router.s_call!({:ref, __server__(), :manager}, {:health_report, self()}, context)
+  end
+
+  def update_health_report(report, context) do
+    Router.s_cast!({:ref, __server__(), :manager}, {:update_health_report, report}, context)
   end
 
 
@@ -79,7 +79,7 @@ defmodule Noizu.AdvancedPool.ClusterManager do
   @doc """
   pool_worker_supervisors/4 retrieves the worker supervisors for a pool within the cluster from syn registry.
   """
-  def pool_worker_supervisors(pool, node, context, options \\ nil) do
+  def pool_worker_supervisors(pool, node, _context, _options \\ nil) do
     :syn.members(pool, {node, :worker_sups})
   end
 

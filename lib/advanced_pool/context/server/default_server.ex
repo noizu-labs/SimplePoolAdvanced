@@ -74,7 +74,7 @@ defmodule Noizu.AdvancedPool.Server.DefaultServer do
   The existence of this function ensures a fallback for messages that have not met customized conditions, preventing unforeseen
   messages from causing unhandled exceptions within the server process.
   """
-  def handle_call(Noizu.AdvancedPool.Message.msg_envelope(msg: {:s, :hello, context}), _, state) do
+  def handle_call(Noizu.AdvancedPool.Message.msg_envelope(msg: {:s, :hello, _context}), _, state) do
     {:reply, :world, state}
   end
   def handle_call(msg, _from, state) do

@@ -12,9 +12,7 @@ defmodule Noizu.AdvancedPool.Test.Supervisor do
     :ok
   end
 
-
-
-  def start(context) do
+  def start(_context) do
     Application.ensure_all_started(:syn)
     Application.ensure_all_started(:logger)
     Application.ensure_all_started(:noizu_advanced_pool)
@@ -27,7 +25,11 @@ defmodule Noizu.AdvancedPool.Test.Supervisor do
     Supervisor.start_link(children,opts)
   end
 
-  def start_runner(context) do
+  def init(_) do
+    :ok
+  end
+
+  def start_runner(_context) do
     Application.ensure_all_started(:syn)
     Application.ensure_all_started(:logger)
     Application.ensure_all_started(:noizu_advanced_pool)
@@ -87,7 +89,7 @@ defmodule Noizu.AdvancedPool.Support.TestManager do
 
   def members() do
     for member <- ~W(a b c d e) do
-      subordinate = :"nap_test_member_#{member}@localhost"
+      :"nap_test_member_#{member}@localhost"
     end
   end
 
@@ -108,6 +110,7 @@ defmodule Noizu.AdvancedPool.Support.TestManager do
     nap_config_manager = Application.get_env(:noizu_advanced_pool, :configuration)
     for member <- ~W(a b c d e) do
       subordinate = :"nap_test_member_#{member}"
+      # @TODO :slave.start is deprecated use :peer module (REQ OTP 27+)
       {:ok, _} = :slave.start(:localhost, subordinate, settings)
       :ok = :rpc.call(:"#{subordinate}@localhost", :code, :add_paths, [:code.get_path])
       :ok = :rpc.call(:"#{subordinate}@localhost",  Application, :put_env, [:noizu_advanced_pool, :configuration, nap_config_manager])
@@ -119,13 +122,13 @@ defmodule Noizu.AdvancedPool.Support.TestManager do
         subordinate = :"nap_test_member_#{member}@localhost"
       :rpc.cast(subordinate, __MODULE__, :member_start, [self(), context])
       receive do
-        {subordinate, :ready} -> :ok
-        {subordinate, {:error, x}} -> {:error, x}
+        {_subordinate, :ready} -> :ok
+        {_subordinate, {:error, x}} -> {:error, x}
         after 15000 ->
           Logger.warning("#{subordinate} start delay . . .")
           receive do
             {subordinate, :ready} -> {subordinate, :ready}
-            {subordinate, {:error, x}} -> {:error, x}
+            {_subordinate, {:error, x}} -> {:error, x}
           end
       end
     end, timeout: :infinity)

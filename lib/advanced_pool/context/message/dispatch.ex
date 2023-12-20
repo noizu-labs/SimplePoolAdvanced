@@ -153,7 +153,7 @@ defmodule Noizu.AdvancedPool.Message.Dispatch do
   # or using Elixir tasks for asynchronous operations.
   #
   # It delegates to `__dispatch__inner` for the actual message delivery logic, while managing task creation if specified by settings.
-  defp __dispatch__(M.msg_envelope(identifier: identifier, settings: settings) = message) do
+  defp __dispatch__(M.msg_envelope(identifier: _, settings: settings) = message) do
     case as_task(settings) do
       false -> __dispatch__inner(message)
       nil -> __dispatch__inner(message)
@@ -205,7 +205,7 @@ defmodule Noizu.AdvancedPool.Message.Dispatch do
       error -> error
     end
     |> case do
-         {:dispatch, dispatcher, :waiting, task} ->
+         {:dispatch, _dispatcher, :waiting, task} ->
            with {:ok, {:ok, handle}} <- Task.yield(task, timeout(settings)) do
              GenServer.cast(handle, message)
            end
@@ -223,7 +223,7 @@ defmodule Noizu.AdvancedPool.Message.Dispatch do
       error -> error
     end
     |> case do
-         {:dispatch, dispatcher, :waiting, task} ->
+         {:dispatch, _dispatcher, :waiting, task} ->
            with {:ok, {:ok, handle}} <- Task.yield(task, timeout(settings)) do
              GenServer.call(handle, message, timeout(settings))
            else
@@ -254,8 +254,7 @@ defmodule Noizu.AdvancedPool.Message.Dispatch do
 
   """
   def recipient_ref(recipient)
-  def recipient_ref(M.ref(module: worker) = recipient), do: {:ok, recipient}
-  def recipient_ref(M.ref(module: worker) = recipient), do: {:ok, recipient}
+  def recipient_ref(M.ref() = recipient), do: {:ok, recipient}
   def recipient_ref(M.link(recipient: recipient)) do
     recipient_ref(recipient)
   end
@@ -365,7 +364,7 @@ defmodule Noizu.AdvancedPool.Message.Dispatch do
       {:ok, pool}
     end
   end
-  defp recipient_pool(M.node_manager(recipient: recipient)) do
+  defp recipient_pool(M.node_manager(recipient: _recipient)) do
     {:ok, Noizu.AdvancedPool.NodeManager}
   end
 end

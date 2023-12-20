@@ -27,6 +27,8 @@ defmodule Noizu.AdvancedPool.DispatcherRouter do
   import Noizu.AdvancedPool.Message
   alias Noizu.AdvancedPool.Message, as: M
 
+  Module.register_attribute(__MODULE__, :internal, [])
+
   @doc """
   [INTERNAL]
   Initiates the process of starting a worker within the specified pool using the provided reference and settings.
@@ -35,7 +37,7 @@ defmodule Noizu.AdvancedPool.DispatcherRouter do
 
   This function is essential for spinning up new worker processes in the pool in response to system demands, providing dynamic scalability and responsiveness to load.
   """
-  @internal true
+
   def start_worker(pool, ref, settings, context, options) do
     options_b = put_in(options || [], [:return_task], true)
     Noizu.AdvancedPool.ClusterManager.start_worker(pool, ref, settings, context,  options_b)
@@ -49,8 +51,8 @@ defmodule Noizu.AdvancedPool.DispatcherRouter do
 
   This function is part of the internal mechanics that allow rapid resolution of process identifiers, a fundamental aspect of efficient message dispatch within a distributed system.
   """
-  @internal true
-  def __lookup_worker_process__(ref = M.ref(module: worker, identifier: identifier)) do
+
+  def __lookup_worker_process__(ref = M.ref(module: worker, identifier: _)) do
     registry = apply(worker, :__registry__, [])
     with {pid, info} <- :syn.lookup(registry, {:worker, ref}) do
       {:ok, {pid, info}}
@@ -67,14 +69,14 @@ defmodule Noizu.AdvancedPool.DispatcherRouter do
 
   This "__process__" function forms a critical part of the message routing lifecycle, ensuring messages reach their intended destinations or are handled appropriately if they do not.
   """
-  @internal true
+
   def __process__(message, _ \\ nil)
   def __process__(
         M.msg_envelope(
-          recipient: ref = M.ref(module: worker, identifier: identifier),
+          recipient: ref = M.ref(module: worker, identifier: _),
           msg: msg,
           settings: settings
-        ) = message,
+        ) = _message,
         options
       ) do
     
@@ -108,7 +110,7 @@ defmodule Noizu.AdvancedPool.DispatcherRouter do
 
   Used internally by the system to resolve where to direct dynamic dispatch operations, acting as a bootstrap point for message routing resolution.
   """
-  @internal true
+
   def __handle__(_, _), do: {:dynamic, __MODULE__, [[]]}
 
 
@@ -120,7 +122,7 @@ defmodule Noizu.AdvancedPool.DispatcherRouter do
 
   This method is integral to the system's ability to manage and track the multitude of worker processes, ensuring accurate and up-to-date process information within the pool's registry.
   """
-  @internal true
+
   def __register__(pool, ref, process, status) do
     registry = apply(pool, :__registry__, [])
     # This is too broad, as we will be synchronizing {:worker, ref} on every instance that forwards.
