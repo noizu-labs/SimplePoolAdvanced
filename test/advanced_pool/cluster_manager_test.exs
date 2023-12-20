@@ -70,6 +70,26 @@ defmodule Noizu.AdvancedPool.ClusterManagerTest do
       assert n in Noizu.AdvancedPool.Support.TestManager.members()
     end
 
+
+    @tag capture_log: false
+    test "pick node - with high error rate" do
+      # Note this test is temporary and relied on the fact that health checks do not currently automatically update and the ability to force a health check refresh.
+      # However only minor alterations will be needed once they do automatically refresh. To wait on health_report to complete before proceeding with pick node asserts and sticky threshold updated to correct value.
+      pool = Noizu.AdvancedPool.Support.TestPool4
+      :ets.update_counter(:worker_events, {:service, pool}, {worker_events(:error) + 1, 500000}, worker_events(refreshed_on: :os.system_time(:millisecond)) |> put_in([Access.elem(0), Access.elem(1)], pool))
+      Noizu.AdvancedPool.ClusterManager.health_report(context())
+
+      {:ok, n1} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6655 + 22), settings(sticky?: 0.025), context())
+      {:ok, n2} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6655 + 23), settings(sticky?: 0.025), context())
+      {:ok, n3} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6655 + 24), settings(sticky?: 0.025), context())
+      {:ok, n4} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6655 + 25), settings(sticky?: 0.025), context())
+      {:ok, n5} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6655 + 26), settings(sticky?: 0.025), context())
+      {:ok, n6} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6655 + 27), settings(sticky?: 0.025), context())
+      assert (([n1,n2,n3,n4,n5,n6] |> Enum.uniq()) -- [node()]) |> List.first() != nil
+
+
+    end
+
     @tag capture_log: false
     test "pick node - with saturation" do
       # Note this test is temporary and relied on the fact that health checks do not currently automatically update and the ability to force a health check refresh.
