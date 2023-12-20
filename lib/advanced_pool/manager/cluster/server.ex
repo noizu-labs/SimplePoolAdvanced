@@ -224,7 +224,19 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
       end) |> List.flatten()
       cluster = (cluster ++ [node() | Node.list()]) |> Enum.uniq()
       # Task process and update health report to track progress
-      report = Enum.map(cluster, &{&1,  Noizu.AdvancedPool.NodeManager.health_report(&1, context)})
+      report = Enum.map(cluster,
+                 fn(node) ->
+                  with {:ok, report} <- Noizu.AdvancedPool.NodeManager.health_report(node, context) do
+                    {node, report}
+                  end
+                 end)
+
+
+               |> Enum.map(
+                    fn
+                      ({:ok, x}) -> x
+                      (x) -> x
+                    end)
                |> Map.new()
       Noizu.AdvancedPool.ClusterManager.update_health_report(report, context)
     end

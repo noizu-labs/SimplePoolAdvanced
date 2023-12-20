@@ -3,19 +3,19 @@
 # Copyright (C) 2023 Noizu Labs, Inc. All rights reserved.
 #-------------------------------------------------------------------------------
 
-defmodule Noizu.AdvancedPool.Support.TestPool4 do
+defmodule Noizu.AdvancedPool.Support.TestPool6 do
   use Noizu.AdvancedPool
   Noizu.AdvancedPool.Server.default()
   require Noizu.AdvancedPool.Message
 
-  def __worker__(), do: Noizu.AdvancedPool.Support.TestPool4.Worker
+  def __worker__(), do: Noizu.AdvancedPool.Support.TestPool6.Worker
   def __call_settings__(), do: Noizu.AdvancedPool.Message.settings(sticky?: 0.025, timeout: 60_000)
   def test(identifier, context) do
     s_call!(identifier, :test, context)
   end
 end
 
-defmodule Noizu.AdvancedPool.Support.TestPool4.Worker do
+defmodule Noizu.AdvancedPool.Support.TestPool6.Worker do
   require Noizu.AdvancedPool.Message
   import Noizu.AdvancedPool.Message
   alias Noizu.AdvancedPool.Message, as: M

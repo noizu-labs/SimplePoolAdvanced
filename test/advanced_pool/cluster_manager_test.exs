@@ -75,19 +75,52 @@ defmodule Noizu.AdvancedPool.ClusterManagerTest do
     test "pick node - with high error rate" do
       # Note this test is temporary and relied on the fact that health checks do not currently automatically update and the ability to force a health check refresh.
       # However only minor alterations will be needed once they do automatically refresh. To wait on health_report to complete before proceeding with pick node asserts and sticky threshold updated to correct value.
-      pool = Noizu.AdvancedPool.Support.TestPool4
+      pool = Noizu.AdvancedPool.Support.TestPool5
       :ets.update_counter(:worker_events, {:service, pool}, {worker_events(:error) + 1, 500000}, worker_events(refreshed_on: :os.system_time(:millisecond)) |> put_in([Access.elem(0), Access.elem(1)], pool))
-      Noizu.AdvancedPool.ClusterManager.health_report(context())
+      {_, _, _} = Noizu.AdvancedPool.Support.TestPool5.fetch(6755 + 0, :process, context())
+      Noizu.AdvancedPool.ClusterManager.health_report(self(), context())
+      receive do
+        {:health_report, report} -> report
+      end
+      Noizu.AdvancedPool.ClusterManager.health_report(self(), context())
+      receive do
+        {:health_report, report} -> report
+      end
+      {:ok, n1} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool5, ref(module: Noizu.AdvancedPool.Support.TestPool5.Worker, identifier: 6655 + 22), settings(sticky?: 0.025), context())
+      {:ok, n2} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool5, ref(module: Noizu.AdvancedPool.Support.TestPool5.Worker, identifier: 6655 + 23), settings(sticky?: 0.025), context())
+      {:ok, n3} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool5, ref(module: Noizu.AdvancedPool.Support.TestPool5.Worker, identifier: 6655 + 24), settings(sticky?: 0.025), context())
+      {:ok, n4} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool5, ref(module: Noizu.AdvancedPool.Support.TestPool5.Worker, identifier: 6655 + 25), settings(sticky?: 0.025), context())
+      {:ok, n5} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool5, ref(module: Noizu.AdvancedPool.Support.TestPool5.Worker, identifier: 6655 + 26), settings(sticky?: 0.025), context())
+      {:ok, n6} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool5, ref(module: Noizu.AdvancedPool.Support.TestPool5.Worker, identifier: 6655 + 27), settings(sticky?: 0.025), context())
+      assert (([n1,n2,n3,n4,n5,n6]  |> Enum.uniq()) -- [node()]) |> List.first() != nil
 
-      {:ok, n1} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6655 + 22), settings(sticky?: 0.025), context())
-      {:ok, n2} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6655 + 23), settings(sticky?: 0.025), context())
-      {:ok, n3} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6655 + 24), settings(sticky?: 0.025), context())
-      {:ok, n4} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6655 + 25), settings(sticky?: 0.025), context())
-      {:ok, n5} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6655 + 26), settings(sticky?: 0.025), context())
-      {:ok, n6} = Noizu.AdvancedPool.ClusterManager.pick_node(Noizu.AdvancedPool.Support.TestPool4, ref(module: Noizu.AdvancedPool.Support.TestPool4.Worker, identifier: 6655 + 27), settings(sticky?: 0.025), context())
-      assert (([n1,n2,n3,n4,n5,n6] |> Enum.uniq()) -- [node()]) |> List.first() != nil
+
+    end
 
 
+    @tag capture_log: false
+    test "health report" do
+      # Note this test is temporary and relied on the fact that health checks do not currently automatically update and the ability to force a health check refresh.
+      # However only minor alterations will be needed once they do automatically refresh. To wait on health_report to complete before proceeding with pick node asserts and sticky threshold updated to correct value.
+
+
+      # pool, ref, settings, context, options
+      {_, _, _} = Noizu.AdvancedPool.Support.TestPool6.fetch(6755 + 0, :process, context())
+      {_, _, _} = Noizu.AdvancedPool.Support.TestPool6.fetch(6755 + 1, :process, context())
+      {_, _, _} = Noizu.AdvancedPool.Support.TestPool6.fetch(6755 + 2, :process, context())
+      {_, _, _} = Noizu.AdvancedPool.Support.TestPool6.fetch(6755 + 3, :process, context())
+      {_, _, _} = Noizu.AdvancedPool.Support.TestPool6.fetch(6755 + 4, :process, context())
+      {_, _, _} = Noizu.AdvancedPool.Support.TestPool6.fetch(6755 + 5, :process, context())
+      Noizu.AdvancedPool.ClusterManager.health_report(self(), context())
+      receive do
+        {:health_report, report} -> report
+      end
+      #Process.sleep(500)
+      Noizu.AdvancedPool.ClusterManager.health_report(self(), context())
+      report = receive do
+        {:health_report, report} -> report
+      end
+      assert report.report[node()].report[Noizu.AdvancedPool.Support.TestPool6].health == 0.0
     end
 
     @tag capture_log: false
