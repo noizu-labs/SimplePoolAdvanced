@@ -21,7 +21,7 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
   #===========================================
   # Struct
   #===========================================
-  
+
   defstruct [
     health_report: nil,
     previous_health_report: nil,
@@ -151,8 +151,8 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
       {:reply, {:ok, state.previous_health_report || :initializing}, state}
     else
       :processing ->
-        update_in(state, [Access.key(:health_report), Access.key(:subscribers)], & [receiver, &1])
-        {:reply, {:ok, state.health_report}, state}
+        update_in(state, [Access.key(:health_report), Access.key(:subscribers)], & receiver && [receiver| &1] || &1)
+        {:reply, {:ok, state.previous_health_report}, state}
       error = {:error, _} -> {:reply, error, state}
       error -> {:reply, {:error, error}, state}
     end
@@ -173,6 +173,7 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
     end
 
     health_report = %Noizu.AdvancedPool.ClusterManager.HealthReport{health_report|
+      worker: nil,
       finished_at: DateTime.utc_now(),
       report: report,
       status: :ready,
@@ -200,7 +201,7 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
     worker = Task.Supervisor.async_nolink(Noizu.AdvancedPool.ClusterManager.Task, __MODULE__, :do_build_health_report, [context])
     health_report = %Noizu.AdvancedPool.ClusterManager.HealthReport{
       worker: worker,
-      subscribers: [subscriber],
+      subscribers: subscriber && [subscriber] || [],
       status: :processing,
       started_at: DateTime.utc_now(),
     }

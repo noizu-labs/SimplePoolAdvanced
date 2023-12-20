@@ -56,7 +56,7 @@ defmodule Noizu.AdvancedPool.NodeManager do
   end
 
   def ets_cluster_spec() do
-    Noizu.AdvancedPool.SupervisorManagedEtsTableCluster.child_spec([:worker_events])
+    Noizu.AdvancedPool.SupervisorManagedEtsTableCluster.child_spec([:worker_events, :worker_events_accumulator])
   end
 
   def set_service_status(pid, pool, node, status) do
@@ -87,8 +87,15 @@ defmodule Noizu.AdvancedPool.NodeManager do
   end
 
   def health_report(node, context) do
-    Router.s_call!({:ref, __server__(), node}, :health_report, context)
+    Router.s_call!({:ref, __server__(), node}, {:health_report,nil}, context)
   end
+  def health_report(node, subscriber, context) do
+    Router.s_call!({:ref, __server__(), node}, {:health_report,subscriber}, context)
+  end
+  def update_health_report(node, report, context) do
+    Router.s_cast!({:ref, __server__(), node}, {:update_health_report, report}, context)
+  end
+
   def configuration(node, context) do
     Router.s_call({:ref, __server__(), node}, :configuration, context)
   end

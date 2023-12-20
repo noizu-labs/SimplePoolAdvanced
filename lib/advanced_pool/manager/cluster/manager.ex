@@ -60,8 +60,11 @@ defmodule Noizu.AdvancedPool.ClusterManager do
   into a single report that is returned to the caller.
   """
   @spec health_report(context :: term()) :: {:ok, term()} | {:error, term()}
+  def health_report(subscriber, context) do
+    Router.s_call!({:ref, __server__(), :manager}, {:health_report, subscriber}, context)
+  end
   def health_report(context) do
-    Router.s_call!({:ref, __server__(), :manager}, {:health_report, self()}, context)
+    Router.s_call!({:ref, __server__(), :manager}, {:health_report, nil}, context)
   end
 
   def update_health_report(report, context) do
@@ -272,14 +275,14 @@ defmodule Noizu.AdvancedPool.ClusterManager do
     case pick_threshold(pool, settings, context, options) do
       {:pick, t} ->
         with {:ok, {_, pool_status(status: :online, health: health_value)}} <- NodeManager.service_status(pool, node(), context),
-             true <- t <= health_value  do
+             true <- t >= health_value  do
           {:ok, node()}
         else
           _ -> best_node(pool, ref, settings, context, options)
         end
       {:sticky, t} ->
         with {:ok, {_, pool_status(status: :online, health: health_value)}} <- NodeManager.service_status(pool, node(), context),
-             true <- t <= health_value  do
+             true <- t >= health_value  do
           {:ok, node()}
         else
           _ -> best_node(pool, ref, settings, context, options)
@@ -296,11 +299,15 @@ defmodule Noizu.AdvancedPool.ClusterManager do
                 |> Enum.filter(&(pool_status(elem(&1,1), :status) == :online))
                 |> Enum.map(
                      fn(a) ->
-                       pool_status(health: ah, worker_count: awc, worker_target: target_window(target: aw_t, low: aw_l, high: aw_h)) = elem(a, 1)
+                       pool_status(
+                         health: ah,
+                         worker_count: awc,
+                         worker_target: target_window(target: aw_t, low: aw_l, high: aw_h)
+                       ) = elem(a, 1)
 
 
                        # group health into 20 buckets.
-                       health_percent = unless ah == :initializing, do: ah, else: 1.0
+                       health_percent = unless ah == :initializing, do: ah, else: 0.0
                        worker_bonus = cond do
                          awc <= aw_t -> (1 - ((awc - aw_l) / (aw_t - aw_l)))
                          :else -> 0

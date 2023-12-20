@@ -18,7 +18,7 @@ defmodule Noizu.AdvancedPool.AcceptanceTest do
 
   describe "Cluster Manager" do
     test "health_report" do
-      {:ok, report} = Noizu.AdvancedPool.ClusterManager.health_report(context())
+      {:ok, report} = Noizu.AdvancedPool.ClusterManager.health_report(self(), context())
       report = if report == :initializing do
         receive do
           {:health_report, report} -> report
@@ -55,9 +55,17 @@ defmodule Noizu.AdvancedPool.AcceptanceTest do
 
   describe "Node Manager" do
     test "health_report" do
-      report = Noizu.AdvancedPool.NodeManager.health_report(node(), context())
-      assert report == :pending_node_report
-      # pending
+      {:ok, report} = Noizu.AdvancedPool.NodeManager.health_report(node(), self(), context())
+      report = if report == :initializing do
+        receive do
+          {:node_health_report, {_, report}} -> report
+        end
+      else
+        report
+      end
+      assert is_struct(report, Noizu.AdvancedPool.NodeManager.HealthReport)
+
+
     end
   
     test "config" do

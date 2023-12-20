@@ -130,12 +130,14 @@ defmodule Noizu.AdvancedPool.Message do
 
   Record.defrecord(:node_status, node: nil, status: nil, manager_state: nil, health_index: 0.0, started_on: nil, updated_on: nil)
 
+  Record.defrecord(:health_check, worker: 0.0, worker_sup: 0.0, error_rate: 0.0, warning_rate: 0.0)
+
   Record.defrecord(:target_window, target: nil, low: nil, high: nil)
   Record.defrecord(:node_service, state: :online, priority: nil, supervisor_target: nil, worker_target: nil, pool: nil, health_target: nil, node: nil)
   Record.defrecord(:cluster_service, state: :online, priority: nil, node_target: nil, worker_target: nil,  health_target: nil, pool: nil)
 
   # Used in ETS with update_counter, order must not be altered when extending.
-  Record.defrecord(:worker_events, {:service, :_}, [init: 0, terminate: 0, sup_init: 0, sup_terminate: 0, error: 0, warning: 0, refreshed_on: 0, meta: nil])
+  Record.defrecord(:worker_events, {:service, :_}, [init: 0, terminate: 0, sup_init: 0, sup_terminate: 0, error: 0, warning: 0, started_on: 0, refreshed_on: 0, meta: nil])
 
   @doc """
   Given an optional settings record, it determines whether the passed message should remain sticky to the node/process that handled it last. Returns `true` if it should, otherwise `false`.

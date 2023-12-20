@@ -23,7 +23,7 @@ defmodule Noizu.AdvancedPool.Support.TestPool4.Worker do
   require Logger
   defstruct [
     identifier: nil,
-    test: 0
+    test: 0.0
   ]
   use Noizu.AdvancedPool.Worker.Behaviour
 
