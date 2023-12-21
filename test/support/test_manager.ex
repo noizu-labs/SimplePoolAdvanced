@@ -22,7 +22,21 @@ defmodule Noizu.AdvancedPool.Test.Supervisor do
 
 
     opts = [strategy: :one_for_one, name: __MODULE__, strategy: :permanent,  max_restarts: 1_000_000, max_seconds: 1]
-    Supervisor.start_link(children,opts)
+
+
+    p = self()
+    spawn fn ->
+      o = Supervisor.start_link(children,opts)
+      send(p, {:start, o})
+      receive do
+        :shutdown -> :ok
+      end
+    end
+    receive do
+      {:start, o} -> o
+    end
+
+
   end
 
   def init(_) do
@@ -37,7 +51,17 @@ defmodule Noizu.AdvancedPool.Test.Supervisor do
     ets_cluster = Noizu.AdvancedPool.NodeManager.ets_cluster_spec()
     children = [ebs, ets_cluster]
     opts = [strategy: :one_for_one, name: __MODULE__, strategy: :permanent,  max_restarts: 1_000_000, max_seconds: 1]
-    Supervisor.start_link(children,opts)
+    p = self()
+    spawn fn ->
+      o = Supervisor.start_link(children,opts)
+      send(p, {:start, o})
+      receive do
+        :shutdown -> :ok
+      end
+    end
+    receive do
+      {:start, o} -> o
+    end
   end
 
   def add_service(spec) do

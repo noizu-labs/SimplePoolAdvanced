@@ -9,7 +9,7 @@ defmodule Noizu.AdvancedPool.Support.TestPool5 do
   require Noizu.AdvancedPool.Message
 
   def __worker__(), do: Noizu.AdvancedPool.Support.TestPool5.Worker
-  def __call_settings__(), do: Noizu.AdvancedPool.Message.settings(sticky?: 0.025, timeout: 60_000)
+  def __call_settings__(), do: Noizu.AdvancedPool.Message.settings(sticky?: 1.1, timeout: 60_000)
   def test(identifier, context) do
     s_call!(identifier, :test, context)
   end

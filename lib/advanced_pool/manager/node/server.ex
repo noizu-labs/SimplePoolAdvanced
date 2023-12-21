@@ -27,7 +27,7 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
   import Noizu.AdvancedPool.Message
   require Logger
   alias Noizu.AdvancedPool.Message.Handle, as: MessageHandler
-  
+
   #===========================================
   # Struct
   #===========================================
@@ -44,7 +44,7 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
   # Config
   #===========================================
   def __configuration_provider__(), do: Noizu.AdvancedPool.NodeManager.__configuration_provider__()
-  
+
   #===========================================
   # Server
   #===========================================
@@ -66,7 +66,7 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
     """)
     :ok
   end
-  
+
   def init({context, options}) do
     configuration = (with {:ok, configuration} <-
                             __configuration_provider__()
@@ -76,11 +76,11 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
                        e = {:error, _} -> e
                        error -> {:error, {:invalid_response, error}}
                      end)
-    
+
     init_registry(context, options)
     {:ok, %Noizu.AdvancedPool.NodeManager.Server{identifier: node(), node_config: configuration}}
   end
-  
+
   def spec(context, options \\ nil) do
     %{
       id: __MODULE__,
@@ -88,7 +88,7 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
       start: {__MODULE__, :start_link, [context, options]}
     }
   end
-  
+
   #===========================================
   # Registry
   #===========================================
@@ -103,25 +103,25 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
     :syn.join(__pool__(), :node_managers, pid, status)
     apply(__dispatcher__(), :__register__, [__pool__(), {:ref, __MODULE__, node()}, pid, status])
   end
-  
+
   #================================
   # Routing
   #================================
-  
+
   #-----------------------
   #
   #-----------------------
   def handle_call(msg_envelope() = call, from, state) do
     MessageHandler.unpack_call(call, from, state)
   end
-  def handle_call(s(call: {:health_report, subscriber}, context: context), _, state) do
-    health_report(state, subscriber, context)
+  def handle_call(s(call: {:health_report, subscriber}, context: context, options: options), _, state) do
+    health_report(state, subscriber, context, options)
   end
   def handle_call(s(call: :configuration, context: context), _, state) do
     configuration(state, context)
   end
   def handle_call(call, from, state), do: MessageHandler.uncaught_call(call, from, state)
-  
+
   #-----------------------
   #
   #-----------------------
@@ -132,7 +132,7 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
     update_health_report(state, report, context)
   end
   def handle_cast(call, state), do: MessageHandler.uncaught_cast(call, state)
-  
+
   #-----------------------
   #
   #-----------------------
@@ -160,7 +160,7 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
   #================================
   # Methods
   #================================
-  
+
 
   def health_report(state, subscriber, context, options \\ nil) do
     with true <- !Noizu.AdvancedPool.NodeManager.HealthReport.processing?(state.health_report) || :processing,
@@ -239,173 +239,300 @@ defmodule Noizu.AdvancedPool.NodeManager.Server do
     context = Noizu.ElixirCore.CallingContext.system(context)
     with {:ok, config} <- Noizu.AdvancedPool.NodeManager.config(node)  do
       r = Enum.map(config,
-        fn
-          ({service_pool, node_service(state: expected_state, priority: priority, supervisor_target: sup_target, worker_target: worker_target, pool: service_pool, health_target: health_target, node: ^node)}) ->
-            accumulator = with [record] <- :ets.lookup(:worker_events_accumulator, {:service, service_pool}) do
-              record
-            else
-              _ ->
-                ts = :os.system_time(:millisecond)
-                worker_events(started_on: ts, refreshed_on: ts) |> put_in([Access.elem(0), Access.elem(1)], service_pool)
+            fn
+              ({service_pool, node_service(state: expected_state, priority: priority, supervisor_target: sup_target, worker_target: worker_target, pool: service_pool, health_target: health_target, node: ^node)}) ->
+                accumulator = with [record] <- :ets.lookup(:worker_events_accumulator, {:service, service_pool}) do
+                  record
+                else
+                  _ ->
+                    ts = :os.system_time(:millisecond)
+                    worker_events(started_on: ts, refreshed_on: ts) |> put_in([Access.elem(0), Access.elem(1)], service_pool)
+                end
+
+                age = :os.system_time(:millisecond) - worker_events(accumulator, :started_on)
+
+                cond do
+                  options[:rebuild] || age > (15 * 60 * 1000) ->
+                    x = try do
+                      s = Noizu.AdvancedPool.ClusterManager.pool_worker_supervisors(service_pool, node, context, options)
+                      {:ok, s}
+                    rescue e -> {:error, e}
+                    end
+
+
+                    with {:ok, worker_supervisors} <- x do
+                      supervisor_children = Task.async_stream(
+                                              worker_supervisors,
+                                              fn({sup, _}) ->
+                                                start = :os.system_time(:millisecond)
+                                                c = try do
+                                                  Supervisor.count_children(sup)
+                                                rescue
+                                                  e -> e
+                                                end
+                                                stop = :os.system_time(:millisecond)
+                                                {sup, %{latency: stop - start, children: c}}
+                                              end, timeout: 60_000
+                                            ) |> Enum.map(
+                                                   fn
+                                                     ({:ok, {pid, tally}}) -> {pid, tally}
+                                                     _ -> nil
+                                                   end)
+                                            |> Enum.reject(&is_nil/1)
+                      x = Enum.map(supervisor_children,
+                            fn
+                              ({_,%{children: %{active: c}}}) when is_integer(c) -> c
+                              _ -> nil
+                            end) |> Enum.reject(&is_nil/1)
+                      total_workers = Enum.sum(x)
+                      healthy_supervisors = length(x)
+                      total_supervisors = length(worker_supervisors)
+
+                      a_started_on = worker_events(accumulator, :started_on)
+                      a_refreshed_on = worker_events(accumulator, :refreshed_on)
+                      a_errors = worker_events(accumulator, :error)
+                      a_warnings = worker_events(accumulator, :warning)
+                      a_init = worker_events(accumulator, :init)
+                      a_terminate = worker_events(accumulator, :terminate)
+
+                      # Calculate Health
+                      # worker_health = (((target - actual) - low) / (high - low))
+                      w_actual = total_workers
+                      target_window(target: w_target, low: w_low, high: w_high) = worker_target
+                      worker_health = (((w_actual-w_target)) / (w_high - w_low))
+
+                      # IO.inspect({worker_health, d_init, d_terminate,  w_actual, w_target - w_actual, w_low, w_high - w_low})
+                      # Calculate Health (supervisors)
+                      s_actual = total_supervisors
+                      target_window(target: s_target, low: s_low, high: s_high) = sup_target
+                      sup_health = (((s_actual-s_target) - s_low) / (s_high - s_low))
+
+                      period = max(a_refreshed_on  - a_started_on, 1)
+                      errors_per_second_per_worker = (a_errors) * (period/(1_000 * max(w_actual, 1)))
+                      warnings_per_second_per_worker = (a_warnings) * (period/(1_000 * max(w_actual, 1)))
+
+                      ts = :os.system_time(:millisecond)
+                      try do
+
+                        :ets.insert(:worker_events, worker_events(refreshed_on: ts) |> put_in([Access.elem(0), Access.elem(1)], service_pool))
+
+                        # Update accumulator ets record
+                        updated_accumulator = worker_events(
+                                                started_on: ts,
+                                                refreshed_on: ts,
+                                                error: 0.0,
+                                                warning: 0.0,
+                                                init: w_actual,
+                                                terminate: 0,
+                                                sup_init: s_actual,
+                                                sup_terminate: 0
+                                              ) |> put_in([Access.elem(0), Access.elem(1)], service_pool)
+                        :ets.insert(:worker_events_accumulator, updated_accumulator)
+                      rescue
+                        e -> Logger.error("#{__MODULE__}:#{__ENV__.line} #{Exception.format(:error, e, __STACKTRACE__)}")
+                      end
+
+                      # Workers at target is treated as 0 errors per worker per second
+                      # Workers at capacity is treated as 0.05 errors per worker per second,
+                      # Workers at double capacity is treated as 0.4 errors per worker per second,
+                      # Workers at quad capacity are treated as 3.2 errors per worker per second, increasing exponentially^3
+                      wh = cond do
+                        worker_health <= 0 -> 0.0
+                        :else -> (worker_health * worker_health * worker_health) * 0.05
+                      end
+                      sh = cond do
+                        sup_health <= 0 -> 0.0
+                        :else -> (sup_health * sup_health * sup_health) * 0.025
+                      end
+                      # warnings are treated as 0.1 * errors/ms per worker.
+                      health = Enum.max([wh, sh, errors_per_second_per_worker, warnings_per_second_per_worker * 0.1, 0.00000001])
+                      health = -:math.log10(health)
+
+                      # Report
+                      try do
+                        with {pid, status} <- :syn.lookup(service_pool, {:node, node}) do
+                          status = pool_status(status, worker_count: w_actual, health: health)
+                          Noizu.AdvancedPool.NodeManager.set_service_status(pid, service_pool, node, status)
+                        end
+                      rescue
+                        e -> Logger.error("#{__MODULE__}:#{__ENV__.line} #{Exception.format(:error, e, __STACKTRACE__)}")
+                      end
+
+                      # Generate pool report section
+                      report = %{
+                        health: health,
+                        workers: %{
+                          total: w_actual,
+                          health: worker_health,
+                          target: w_target,
+                          low: w_low,
+                          high: w_high,
+                        },
+                        worker_supervisors: %{
+                          total: s_actual,
+                          health: sup_health,
+                          target: s_target,
+                          low: s_low,
+                          high: s_high,
+                          extended: Map.new(supervisor_children)
+                        },
+                        errors_per_second_per_worker: errors_per_second_per_worker,
+                        warnings_per_second_per_worker: warnings_per_second_per_worker,
+                      }
+                      {service_pool, report}
+                    else
+                      e -> {service_pool, {:error, e}}
+                    end
+                  :else ->
+
+                    with [delta] <- :ets.lookup(:worker_events, {:service, service_pool}) do
+                      ts = :os.system_time(:millisecond)
+                      :ets.insert(:worker_events, worker_events(refreshed_on: ts) |> put_in([Access.elem(0), Access.elem(1)], service_pool))
+
+                      a_started_on = worker_events(accumulator, :started_on)
+                      a_errors = worker_events(accumulator, :error)
+                      a_warnings = worker_events(accumulator, :warning)
+                      a_init = worker_events(accumulator, :init)
+                      a_terminate = worker_events(accumulator, :terminate)
+                      a_sup_init = worker_events(accumulator, :sup_init)
+                      a_sup_terminate = worker_events(accumulator, :sup_terminate)
+
+                      d_started_on = worker_events(delta, :started_on)
+                      d_errors = worker_events(delta, :error)
+                      d_warnings = worker_events(delta, :warning)
+                      d_init = worker_events(delta, :init)
+                      d_terminate = worker_events(delta, :terminate)
+                      d_sup_init = worker_events(delta, :sup_init)
+                      d_sup_terminate = worker_events(delta, :sup_terminate)
+
+                      # Update accumulator ets record
+                      updated_accumulator = worker_events(accumulator,
+                                              refreshed_on: ts,
+                                              error: a_errors + d_errors,
+                                              warning: a_warnings + d_warnings,
+                                              init: a_init + d_init,
+                                              terminate: a_terminate + d_terminate,
+                                              sup_init: a_sup_init + d_sup_init,
+                                              sup_terminate: a_sup_terminate + d_sup_terminate
+                                            ) |> put_in([Access.elem(0), Access.elem(1)], service_pool)
+                      :ets.insert(:worker_events_accumulator, updated_accumulator)
+
+
+                      # Calculate Health
+                      # worker_health = (((target - actual) - low) / (high - low))
+                      w_actual = (a_init + d_init) - (a_terminate + d_terminate)
+                      target_window(target: w_target, low: w_low, high: w_high) = worker_target
+                      worker_health = (((w_actual-w_target)) / (w_high - w_low))
+
+                      #IO.inspect({worker_health, d_init, d_terminate,  w_actual, w_target - w_actual, w_low, w_high - w_low})
+                      # Calculate Health (supervisors)
+                      s_actual = (a_sup_init + d_sup_init) - (a_sup_terminate + d_sup_terminate)
+                      target_window(target: s_target, low: s_low, high: s_high) = sup_target
+                      sup_health = (((s_actual-s_target)) / (s_high - s_low))
+
+
+                      period = ts - a_started_on
+                      errors_per_second_per_worker = (a_errors + d_errors) * (period/(1_000 * max(w_actual, 1)))
+                      warnings_per_second_per_worker = (a_warnings + d_warnings) * (period/(1_000 * max(w_actual, 1)))
+
+                      # Workers at target is treated as 0 errors per worker per second
+                      # Workers at capacity is treated as 0.05 errors per worker per second,
+                      # Workers at double capacity is treated as 0.4 errors per worker per second,
+                      # Workers at quad capacity are treated as 3.2 errors per worker per second, increasing exponentially^3
+                      wh = cond do
+                        worker_health <= 0 -> 0.0
+                        :else -> (worker_health * worker_health * worker_health) * 0.05
+                      end
+                      sh = cond do
+                        sup_health <= 0 -> 0.0
+                        :else -> (sup_health * sup_health * sup_health) * 0.025
+                      end
+                      # warnings are treated as 0.1 * errors/ms per worker.
+                      health = Enum.max([wh, sh, errors_per_second_per_worker, warnings_per_second_per_worker * 0.1, 0.00000001])
+                      health = -:math.log10(health)
+
+                      # Report
+                      with {pid, status} <- :syn.lookup(service_pool, {:node, node}) do
+                        status = pool_status(status, worker_count: w_actual, health: health)
+                        Noizu.AdvancedPool.NodeManager.set_service_status(pid, service_pool, node, status)
+                      end
+
+                      # Generate pool report section
+                      report = %{
+                        health: health,
+                        workers: %{
+                          total: w_actual,
+                          health: worker_health,
+                          target: w_target,
+                          low: w_low,
+                          high: w_high,
+                        },
+                        worker_supervisors: %{
+                          total: s_actual,
+                          health: sup_health,
+                          target: s_target,
+                          low: s_low,
+                          high: s_high,
+                        },
+                        errors_per_second_per_worker: errors_per_second_per_worker,
+                        warnings_per_second_per_worker: warnings_per_second_per_worker,
+                      }
+                      {service_pool, report}
+                    else
+                      _ -> {service_pool, {:error, :delta_missing}}
+                    end
+                end
             end
-
-            age = :os.system_time(:millisecond) - worker_events(accumulator, :started_on)
-
-            cond do
-              options[:rebuild] || age > (15 * 60 * 1000) ->
-                # Get Worker Supervisors.
-                # Get WS.count_children
-
-
-
-                ts = :os.system_time(:millisecond)
-                zero_out = worker_events(started_on: ts, refreshed_on: ts) |> put_in([Access.elem(0), Access.elem(1)], service_pool)
-                :ets.insert(:worker_events, worker_events(refreshed_on: ts) |> put_in([Access.elem(0), Access.elem(1)], service_pool))
-
-
-                {service_pool, :rebuild}
-            :else ->
-
-              with [delta] <- :ets.lookup(:worker_events, {:service, service_pool}) do
-                ts = :os.system_time(:millisecond)
-                :ets.insert(:worker_events, worker_events(refreshed_on: ts) |> put_in([Access.elem(0), Access.elem(1)], service_pool))
-
-                a_started_on = worker_events(accumulator, :started_on)
-                a_errors = worker_events(accumulator, :error)
-                a_warnings = worker_events(accumulator, :warning)
-                a_init = worker_events(accumulator, :init)
-                a_terminate = worker_events(accumulator, :terminate)
-                a_sup_init = worker_events(accumulator, :sup_init)
-                a_sup_terminate = worker_events(accumulator, :sup_terminate)
-
-                d_started_on = worker_events(delta, :started_on)
-                d_errors = worker_events(delta, :error)
-                d_warnings = worker_events(delta, :warning)
-                d_init = worker_events(delta, :init)
-                d_terminate = worker_events(delta, :terminate)
-                d_sup_init = worker_events(delta, :sup_init)
-                d_sup_terminate = worker_events(delta, :sup_terminate)
-
-                # Update accumulator ets record
-                updated_accumulator = worker_events(accumulator,
-                  refreshed_on: ts,
-                  error: a_errors + d_errors,
-                  warning: a_warnings + d_warnings,
-                  init: a_init + d_init,
-                  terminate: a_terminate + d_terminate,
-                  sup_init: a_sup_init + d_sup_init,
-                  sup_terminate: a_sup_terminate + d_sup_terminate
-                ) |> put_in([Access.elem(0), Access.elem(1)], service_pool)
-                :ets.insert(:worker_events_accumulator, updated_accumulator)
-
-
-                # Calculate Health
-                # worker_health = (((target - actual) - low) / (high - low))
-                w_actual = (a_init + d_init) - (a_terminate + d_terminate)
-                target_window(target: w_target, low: w_low, high: w_high) = worker_target
-                worker_health = (((w_actual-w_target)) / (w_high - w_low))
-
-                #IO.inspect({worker_health, d_init, d_terminate,  w_actual, w_target - w_actual, w_low, w_high - w_low})
-                # Calculate Health (supervisors)
-                s_actual = (a_sup_init + d_sup_init) - (a_sup_terminate + d_sup_terminate)
-                target_window(target: s_target, low: s_low, high: s_high) = sup_target
-                sup_health = (((s_target-s_actual) - s_low) / (s_high - s_low))
-
-
-                period = ts - a_started_on
-                errors_per_second_per_worker = (a_errors + d_errors) * (period/(1_000 * max(w_actual, 1)))
-                warnings_per_second_per_worker = (a_warnings + d_warnings) * (period/(1_000 * max(w_actual, 1)))
-
-                # Workers at target is treated as 0 errors per worker per second
-                # Workers at capacity is treated as 0.05 errors per worker per second,
-                # Workers at double capacity is treated as 0.4 errors per worker per second,
-                # Workers at quad capacity are treated as 3.2 errors per worker per second, increasing exponentially^3
-                wh = cond do
-                  worker_health <= 0 -> 0.0
-                  :else -> (worker_health * worker_health * worker_health) * 0.05
-                end
-                sh = cond do
-                  sup_health <= 0 -> 0.0
-                  :else -> (sup_health * sup_health * sup_health) * 0.025
-                end
-                # warnings are treated as 0.1 * errors/ms per worker.
-                health = Enum.max([wh, sh, errors_per_second_per_worker, warnings_per_second_per_worker * 0.1])
-
-                # Report
-                with {pid, status} <- :syn.lookup(service_pool, {:node, node}) do
-                  status = pool_status(status, worker_count: w_actual, health: health)
-                  Noizu.AdvancedPool.NodeManager.set_service_status(pid, service_pool, node, status)
-                end
-
-                # Generate pool report section
-                report = %{
-                  health: health,
-                  workers: %{
-                    total: w_actual,
-                    health: worker_health,
-                    target: w_target,
-                    low: w_low,
-                    high: w_high,
-                  },
-                  worker_supervisors: %{
-                    total: s_actual,
-                    health: sup_health,
-                    target: s_target,
-                    low: s_low,
-                    high: s_high,
-                  },
-                  errors_per_second_per_worker: errors_per_second_per_worker,
-                  warnings_per_second_per_worker: warnings_per_second_per_worker,
-                }
-                {service_pool, report}
-              end
-            end
-        end
-      ) |> Map.new()
+          ) |> Map.new()
 
       Noizu.AdvancedPool.NodeManager.update_health_report(node, r, context)
-
+    else
+      e ->
+        Noizu.AdvancedPool.NodeManager.update_health_report(node, {:error, e}, context)
     end
-
     # rescue/else health_report_error ...
+  rescue
+    e ->
+      Logger.error("#{__MODULE__}:#{__ENV__.line} #{Exception.format(:error, e, __STACKTRACE__)}")
+      Noizu.AdvancedPool.NodeManager.update_health_report(node, {:error, e}, context)
   end
 
-#
-#  def health_report(state, subscriber, _context) do
-#    pools = with {:ok, services} <- Noizu.AdvancedPool.NodeManager.config(state.identifier) do
-#      Enum.map(services, fn {pool, _} ->
-#        pool
-#      end)
-#    end
-#    #Logger.error("[TODO #{inspect state.identifier}] walk over all services on this node: [#{inspect pools}]")
-#    #Logger.error("...#{inspect :syn.members(Noizu.AdvancedPool.Support.TestPool, {state.identifier, :worker_sups}) }")
-#    #Logger.error("...#{inspect :syn.members(Noizu.AdvancedPool.Support.TestPool2, {state.identifier, :worker_sups}) }")
-#    #Logger.error("...#{inspect :syn.members(Noizu.AdvancedPool.Support.TestPool3, {state.identifier, :worker_sups}) }")
-#    #Logger.error("...#{inspect :syn.members(Noizu.AdvancedPool.Support.TestPool4, {state.identifier, :worker_sups})  }")
-#    # [{#PID<0.250.0>, {:worker_sup_status, :offline, Noizu.AdvancedPool.Support.TestPool4, :initializing, :nap_test_member_e@localhost, 0, {:target_window, 2500, 500, 5000}, 1702749304}}]
-#    Enum.map(pools,
-#      fn(pool) ->
-#        with [record] <- :ets.lookup(:worker_events, {:service, pool}) do
-#          # todo more complex health value value based on total workers versus worker target
-#          c_init = worker_events(record, :init)
-#          c_terminate = worker_events(record, :terminate)
-#          c = c_init - c_terminate
-#          c = if c == 0, do: 1, else: c
-#          with {pid, status} <- :syn.lookup(pool, {:node, state.identifier}) do
-#            status = pool_status(status, health: 1/(c * 1.0))
-#            Noizu.AdvancedPool.NodeManager.set_service_status(pid, pool, state.identifier, status)
-#            #IO.puts "UPDATE #{state.identifier}.#{pool} set health = 1 / (#{c_init} - #{c_terminate}) -> #{1 / (c * 1.0)}"
-#          end
-#        end
-#
-#    end)
-#
-#
-#    {:reply, :pending_node_report, state}
-#  end
+  #
+  #  def health_report(state, subscriber, _context) do
+  #    pools = with {:ok, services} <- Noizu.AdvancedPool.NodeManager.config(state.identifier) do
+  #      Enum.map(services, fn {pool, _} ->
+  #        pool
+  #      end)
+  #    end
+  #    #Logger.error("[TODO #{inspect state.identifier}] walk over all services on this node: [#{inspect pools}]")
+  #    #Logger.error("...#{inspect :syn.members(Noizu.AdvancedPool.Support.TestPool, {state.identifier, :worker_sups}) }")
+  #    #Logger.error("...#{inspect :syn.members(Noizu.AdvancedPool.Support.TestPool2, {state.identifier, :worker_sups}) }")
+  #    #Logger.error("...#{inspect :syn.members(Noizu.AdvancedPool.Support.TestPool3, {state.identifier, :worker_sups}) }")
+  #    #Logger.error("...#{inspect :syn.members(Noizu.AdvancedPool.Support.TestPool4, {state.identifier, :worker_sups})  }")
+  #    # [{#PID<0.250.0>, {:worker_sup_status, :offline, Noizu.AdvancedPool.Support.TestPool4, :initializing, :nap_test_member_e@localhost, 0, {:target_window, 2500, 500, 5000}, 1702749304}}]
+  #    Enum.map(pools,
+  #      fn(pool) ->
+  #        with [record] <- :ets.lookup(:worker_events, {:service, pool}) do
+  #          # todo more complex health value value based on total workers versus worker target
+  #          c_init = worker_events(record, :init)
+  #          c_terminate = worker_events(record, :terminate)
+  #          c = c_init - c_terminate
+  #          c = if c == 0, do: 1, else: c
+  #          with {pid, status} <- :syn.lookup(pool, {:node, state.identifier}) do
+  #            status = pool_status(status, health: 1/(c * 1.0))
+  #            Noizu.AdvancedPool.NodeManager.set_service_status(pid, pool, state.identifier, status)
+  #            #IO.puts "UPDATE #{state.identifier}.#{pool} set health = 1 / (#{c_init} - #{c_terminate}) -> #{1 / (c * 1.0)}"
+  #          end
+  #        end
+  #
+  #    end)
+  #
+  #
+  #    {:reply, :pending_node_report, state}
+  #  end
 
   def configuration(state, _context) do
     {:reply, state.node_config, state}
   end
-  
+
 end

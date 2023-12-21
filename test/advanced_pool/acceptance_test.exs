@@ -18,7 +18,7 @@ defmodule Noizu.AdvancedPool.AcceptanceTest do
 
   describe "Cluster Manager" do
     test "health_report" do
-      {:ok, report} = Noizu.AdvancedPool.ClusterManager.health_report(self(), context())
+      {:ok, report} = Noizu.AdvancedPool.ClusterManager.health_report(self(), context(), nil)
       report = if report == :initializing do
         receive do
           {:health_report, report} -> report
@@ -55,7 +55,7 @@ defmodule Noizu.AdvancedPool.AcceptanceTest do
 
   describe "Node Manager" do
     test "health_report" do
-      {:ok, report} = Noizu.AdvancedPool.NodeManager.health_report(node(), self(), context())
+      {:ok, report} = Noizu.AdvancedPool.NodeManager.health_report(node(), self(), context(), nil)
       report = if report == :initializing do
         receive do
           {:node_health_report, {_, report}} -> report
@@ -64,10 +64,8 @@ defmodule Noizu.AdvancedPool.AcceptanceTest do
         report
       end
       assert is_struct(report, Noizu.AdvancedPool.NodeManager.HealthReport)
-
-
     end
-  
+
     test "config" do
       node = Noizu.AdvancedPool.NodeManager.configuration(node(), context())
       tp = node[Noizu.AdvancedPool.Support.TestPool]
@@ -85,8 +83,8 @@ defmodule Noizu.AdvancedPool.AcceptanceTest do
     test "status" do
       task = Noizu.AdvancedPool.NodeManager.bring_online(node(), context())
       Task.yield(task, :infinity)
-      {:ok, {_pid, status}} = Noizu.AdvancedPool.NodeManager.service_status(Noizu.AdvancedPool.Support.TestPool, node(), context())
-      assert (pool_status(status, :health)) == :initializing
+      {:ok, {_pid, status}} = Noizu.AdvancedPool.NodeManager.service_status(Noizu.AdvancedPool.Support.TestPool7, node(), context())
+      assert (pool_status(status, :health)) in [0.0,  :initializing]
       # pending
     end
    

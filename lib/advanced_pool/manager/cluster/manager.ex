@@ -60,12 +60,37 @@ defmodule Noizu.AdvancedPool.ClusterManager do
   into a single report that is returned to the caller.
   """
   @spec health_report(context :: term()) :: {:ok, term()} | {:error, term()}
-  def health_report(subscriber, context) do
-    Router.s_call!({:ref, __server__(), :manager}, {:health_report, subscriber}, context)
+
+
+  def report(context, options \\ nil) do
+    {:ok, report} = Noizu.AdvancedPool.ClusterManager.health_report(Noizu.ElixirCore.CallingContext.admin(), rebuild: true)
+    Noizu.AdvancedPool.ClusterManager.HealthReport.Formatter.format(report, options)
+    |> IO.puts
   end
+
   def health_report(context) do
-    Router.s_call!({:ref, __server__(), :manager}, {:health_report, nil}, context)
+    health_report(nil, context, nil)
   end
+
+  def health_report(context, options) do
+    health_report(nil, context, options)
+  end
+
+  def health_report(subscriber, context, options) do
+    if options[:rebuild] do
+      Router.s_call!({:ref, __server__(), :manager}, {:health_report, self()}, context, options, :infinity)
+      receive do
+        x = {:health_report, report} ->
+          if subscriber do
+            send(subscriber, x)
+          end
+          {:ok, report}
+      end
+    else
+      Router.s_call!({:ref, __server__(), :manager}, {:health_report, subscriber}, context, options)
+    end
+  end
+
 
   def update_health_report(report, context) do
     Router.s_cast!({:ref, __server__(), :manager}, {:update_health_report, report}, context)
@@ -275,14 +300,14 @@ defmodule Noizu.AdvancedPool.ClusterManager do
     case pick_threshold(pool, settings, context, options) do
       {:pick, t} ->
         with {:ok, {_, pool_status(status: :online, health: health_value)}} <- NodeManager.service_status(pool, node(), context),
-             true <- t >= health_value  do
+             true <- t <= health_value  do
           {:ok, node()}
         else
           _ -> best_node(pool, ref, settings, context, options)
         end
       {:sticky, t} ->
         with {:ok, {_, pool_status(status: :online, health: health_value)}} <- NodeManager.service_status(pool, node(), context),
-             true <- t >= health_value  do
+             true <- t <= health_value  do
           {:ok, node()}
         else
           _ -> best_node(pool, ref, settings, context, options)

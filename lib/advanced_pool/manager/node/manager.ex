@@ -86,12 +86,33 @@ defmodule Noizu.AdvancedPool.NodeManager do
     e -> {:error, e}
   end
 
+
+
   def health_report(node, context) do
-    Router.s_call!({:ref, __server__(), node}, {:health_report,nil}, context)
+    health_report(node, nil, context, nil)
   end
-  def health_report(node, subscriber, context) do
-    Router.s_call!({:ref, __server__(), node}, {:health_report,subscriber}, context)
+
+  def health_report(node, context, options) do
+    health_report(node, nil, context, options)
   end
+
+  def health_report(node, subscriber, context, options) do
+    if options[:rebuild] do
+      Router.s_call!({:ref, __server__(), node}, {:health_report,self()}, context, options)
+      receive do
+        x = {:node_health_report, {_, report}} ->
+          if subscriber do
+            send(subscriber, x)
+          end
+          {:ok, report}
+      end
+    else
+      Router.s_call!({:ref, __server__(), node}, {:health_report,subscriber}, context, options)
+    end
+  end
+
+
+
   def update_health_report(node, report, context) do
     Router.s_cast!({:ref, __server__(), node}, {:update_health_report, report}, context)
   end

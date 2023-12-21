@@ -4,12 +4,12 @@ defmodule Noizu.AdvancedPool.Support.NodeManager.ConfigurationProvider do
   import Noizu.AdvancedPool.NodeManager.ConfigurationManagerBehaviour
   require Noizu.AdvancedPool.Message
   import Noizu.AdvancedPool.Message
-  alias Noizu.AdvancedPool.Support.{TestPool, TestPool2, TestPool3, TestPool4, TestPool5, TestPool6}
+  alias Noizu.AdvancedPool.Support.{TestPool, TestPool2, TestPool3, TestPool4, TestPool5, TestPool6, TestPool7}
 
   def configuration(node) do
     case node do
-      :nap_test_runner@localhost -> [TestPool, TestPool2, TestPool4, TestPool5, TestPool6]
-      _ -> [TestPool2, TestPool3, TestPool4, TestPool5, TestPool6]
+      :nap_test_runner@localhost -> [TestPool, TestPool2, TestPool4, TestPool5, TestPool6, TestPool7]
+      _ -> [TestPool2, TestPool3, TestPool4, TestPool5, TestPool6, TestPool7]
     end
     |> Enum.map(fn(service) ->
       test_pool_config = node_service(
@@ -41,7 +41,7 @@ defmodule Noizu.AdvancedPool.Support.NodeManager.ConfigurationProvider do
     cluster_node_settings = test_cluster
                             |> Enum.map(& {&1, configuration(&1)})
                             |> Enum.into(%{}, fn({k,{:ok, v}}) -> {k,v} end)
-    [TestPool, TestPool2, TestPool3, TestPool4, TestPool5, TestPool6]
+    [TestPool, TestPool2, TestPool3, TestPool4, TestPool5, TestPool6, TestPool7]
     |> Enum.into(%{},
          fn(service) ->
            service_node_configuration =
