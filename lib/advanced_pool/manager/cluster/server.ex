@@ -23,9 +23,11 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
   #===========================================
 
   defstruct [
+    identifier: nil,
     health_report: nil,
     previous_health_report: nil,
     cluster_config: [],
+    book_keeping: %{},
     meta: []
   ]
 
@@ -56,9 +58,29 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
                        error -> {:error, {:invalid_response, error}}
                      end)
     init_registry(context, options)
-    {:ok, %Noizu.AdvancedPool.ClusterManager.Server{cluster_config: configuration}}
-
+    IO.puts "H!!!!!!!!!!!!!!!!!!!!!!"
+    state = %Noizu.AdvancedPool.ClusterManager.Server{identifier: :manager, cluster_config: configuration}
+            |> queue_heart_beat(context)
+    {:ok, state}
   end
+
+  def queue_heart_beat(state, context, options \\ nil, fuse \\ 15_000) do
+    # Start HeartBeat
+    identifier = {self(), :os.system_time(:millisecond)}
+    settings = apply(__pool__(), :__cast_settings__, [])
+    timeout = 15_000
+    msg = msg_envelope(
+      identifier: state.identifier,
+      type: :cast,
+      settings: settings(settings, spawn?: true, timeout: timeout),
+      recipient: state.identifier,
+      msg: s(call: :heart_beat, context: context, options: options)
+    )
+    timer = Process.send_after(self(), msg, fuse)
+    put_in(state, [Access.key(:book_keeping, %{}), :heart_beat], timer)
+  end
+
+
 
   def terminate(reason, state) do
     Logger.info("""
@@ -127,7 +149,12 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
   def handle_info(msg_envelope() = call, state) do
     MessageHandler.unpack_info(call, state)
   end
+  def handle_info(s(call: :heart_beat, context: context), state) do
+    heart_beat(state, context)
+  end
   def handle_info(call, state), do: MessageHandler.uncaught_info(call, state)
+
+
 
 
   #================================
@@ -141,6 +168,15 @@ defmodule Noizu.AdvancedPool.ClusterManager.Server do
   #================================
   # Methods
   #================================
+
+  def heart_beat(state, _context) do
+    context = Noizu.ElixirCore.CallingContext.system()
+    spawn fn ->
+      Noizu.AdvancedPool.ClusterManager.health_report(context)
+    end
+    state = queue_heart_beat(state, context)
+    {:noreply, state}
+  end
 
   #----------------
   # health_report/2
